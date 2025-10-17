@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth.route");
 const clientRoutes = require("./routes/client.route");
 const dashboardRoutes = require("./routes/dashboard.route");
+const monthlyCampRoutes = require("./routes/monthlyCamps.route")
 
 const path = require('path');
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/client",clientRoutes);
 app.use("/dashboard",dashboardRoutes);
+app.use("/monthlyCamps",monthlyCampRoutes);
 
 const PORT = process.env.PORT || 8035;
 
