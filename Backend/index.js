@@ -1,14 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-const authRoutes = require("./routes/auth");
-const campRoutes = require("./routes/camp");
-const basicRoutes = require("./routes/basic")
-const dashRoutes= require("./routes/dashboard")
-const reportRoutes = require("./routes/reports")
-const docRoutes = require("./routes/doctor")
-const adminDashboardRoutes = require("./routes/adminDashboard")
-const monthlyCampRoutes = require("./routes/monthlyCamps")
+const authRoutes = require("./routes/auth.route");
+clientRoutes = require("./routes/client.route")
+
 const path = require('path');
 
 
@@ -25,27 +19,7 @@ app.use((req, res, next) => {
 
 //Auth Routes
 app.use("/auth", authRoutes);
-
-//Camp Routes
-app.use("/camp",campRoutes)
-
-//Basic Routes
-app.use("/basic",basicRoutes)
-
-// Dashboard Routes
-app.use("/dashboard",dashRoutes)
-
-// Report Routes
-app.use("/reports",reportRoutes)
-
-// Doctor Routes
-app.use("/doc",docRoutes)
-
-// Admin Routes
-app.use("/admin",adminDashboardRoutes)
-
-// Monthly Camp Routes
-app.use("/monthlyCamps",monthlyCampRoutes)
+app.use("/client",clientRoutes);
 
 const PORT = process.env.PORT || 8035;
 
