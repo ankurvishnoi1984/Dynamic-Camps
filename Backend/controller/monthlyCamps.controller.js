@@ -128,3 +128,118 @@ exports.createCampConfig = (req, res) => {
     });
   }
 };
+
+
+exports.getActiveCamps = (req, res) => {
+  const { deptId } = req.body;
+  const query = `select camp_id,camp_name,camp_type_id,created_by,created_date,start_date,end_date,
+  is_doctor_required,is_prescription_required from monthly_camp_mst where dept_id = ? and status = 'Y'`;
+  try {
+    db.query(query,[deptId], (err, result) => {
+      if (err) {
+        logger.error(`Error in /controller/monthlyCamps/getActiveCamps: ${err.message}`);
+        res.status(500).json({
+          errorCode: 0,
+          errorDetail: err.message,
+          responseData: {},
+          // status: "ERROR",
+          details: "An internal server error occurred",
+          // getMessageInfo: "An internal server error occurred"
+        });
+      }
+      else if (result.length === 0) {
+        res.status(200).json({ message: "Camp list not found", errorCode: 1 });
+      }
+      else {
+        res.status(200).json({ message: "Camps listed successfully", errorCode: 1, data: result });
+      }
+    })
+  } catch (error) {
+    logger.error(error.message);
+    res.send(error)
+  }
+}
+exports.getCampFieldDetails = (req, res) => {
+  const { campId,deptId } = req.body;
+
+  if (!campId) {
+    return res.status(400).json({
+      errorCode: 0,
+      message: "campId is required",
+    });
+  }
+
+  // Step 1: Get camp_type_id + required flags from monthly_camp_mst
+  const getCampTypeQuery = `
+    SELECT camp_type_id, is_doctor_required, is_prescription_required
+    FROM monthly_camp_mst 
+    WHERE camp_id = ? AND dept_id = ? AND status = 'Y'
+  `;
+
+  try {
+    db.query(getCampTypeQuery, [campId,deptId], (err, campResult) => {
+      if (err) {
+        logger.error(`Error in getCampFieldDetails (camp lookup): ${err.message}`);
+        return res.status(500).json({
+          errorCode: 0,
+          errorDetail: err.message,
+          message: "Failed to fetch camp type",
+        });
+      }
+
+      if (campResult.length === 0) {
+        return res.status(404).json({
+          errorCode: 0,
+          message: "No active camp found for given campId",
+        });
+      }
+
+      const { camp_type_id: campTypeId, is_doctor_required, is_prescription_required } = campResult[0];
+
+      // Step 2: Fetch fields based on camp_type_id
+      const fieldQuery = `
+        SELECT field_id, label, field_type, is_required, options_json, order_index
+        FROM camp_type_fields 
+        WHERE camp_type_id = ? AND dept_id = ? AND status = 'Y'
+        ORDER BY order_index ASC
+      `;
+
+      db.query(fieldQuery, [campTypeId,deptId], (err, fieldResult) => {
+        if (err) {
+          logger.error(`Error in getCampFieldDetails (field lookup): ${err.message}`);
+          return res.status(500).json({
+            errorCode: 0,
+            errorDetail: err.message,
+            message: "Failed to fetch camp fields",
+          });
+        }
+
+        if (fieldResult.length === 0) {
+          return res.status(200).json({
+            errorCode: 0,
+            message: "No fields found for the given camp type",
+            campTypeId,
+            is_doctor_required,
+            is_prescription_required,
+          });
+        }
+
+        res.status(200).json({
+          errorCode: 1,
+          message: "Camp field details fetched successfully",
+          campTypeId,
+          is_doctor_required,
+          is_prescription_required,
+          data: fieldResult,
+        });
+      });
+    });
+  } catch (error) {
+    logger.error(`Unhandled error in getCampFieldDetails: ${error.message}`);
+    res.status(500).json({
+      errorCode: 0,
+      message: "Unexpected server error",
+      errorDetail: error.message,
+    });
+  }
+};
