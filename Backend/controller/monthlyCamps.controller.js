@@ -1,6 +1,9 @@
 const db = require("../config/db")
 const logger = require('../utils/logger')
 
+const BASE_URL = process.env.BASE_URL 
+
+
 exports.createCampType = (req, res) => {
   const { campTypeName, userId,deptId } = req.body;
   const status = "Y";
@@ -650,4 +653,289 @@ exports.getActiveCampsNavList = (req, res) => {
       message: "An internal server error occurred",
     });
   }
+};
+
+exports.getCampSubmissionsFull = (req, res) => {
+  const { campId, userId,deptId } = req.body;
+  const BASE_URL1 = `${BASE_URL}/uploads/`
+
+  if (!campId || !userId) {
+    return res.status(400).json({
+      errorCode: 0,
+      message: "campId and userId are required",
+    });
+  }
+
+  const query = `
+    SELECT 
+      cs.submission_id,
+      cs.camp_id,
+      cs.user_id,
+      cs.submitted_at,
+      cs.status,
+      cs.doctor_id,
+      d.doctor_name,
+      d.garnet_code,
+      d.speciality
+    FROM camp_submissions cs
+    LEFT JOIN doctor_mst d ON cs.doctor_id = d.doctor_id
+    WHERE cs.camp_id = ? AND cs.user_id = ? AND cs.dept_id = ?
+    ORDER BY cs.submitted_at DESC
+  `;
+
+  db.query(query, [campId, userId,deptId], (err, submissions) => {
+    if (err) {
+      return res.status(500).json({
+        errorCode: 0,
+        message: "Error fetching submissions",
+        errorDetail: err.message,
+      });
+    }
+
+    if (!submissions.length) {
+      return res.status(200).json({
+        errorCode: 1,
+        message: "No submissions found",
+        data: [],
+      });
+    }
+
+    const submissionIds = submissions.map((s) => s.submission_id);
+
+    const fieldQuery = `
+      SELECT 
+        csv.submission_id,
+        f.label AS field_label,
+        f.field_type,
+        csv.value
+      FROM camp_submission_values csv
+      JOIN camp_type_fields f ON csv.field_id = f.field_id
+      WHERE csv.submission_id IN (?) AND dept_id = ?
+    `;
+
+    db.query(fieldQuery, [submissionIds,deptId], (err2, fieldValues) => {
+      if (err2) {
+        return res.status(500).json({
+          errorCode: 0,
+          message: "Error fetching submission field values",
+          errorDetail: err2.message,
+        });
+      }
+
+      const presQuery = `
+        SELECT 
+          p.submission_id,
+          p.crimgid,
+          p.brand_id,
+          b.brand_name,
+          p.imgpath,
+          p.prescription_count,
+          p.created_date
+        FROM monthly_camp_prescription_mst p
+        LEFT JOIN brand_mst b ON p.brand_id = b.brand_id
+        WHERE p.submission_id IN (?) AND dept_id = ?
+      `;
+
+      db.query(presQuery, [submissionIds,deptId], (err3, presData) => {
+        if (err3) {
+          return res.status(500).json({
+            errorCode: 0,
+            message: "Error fetching prescription data",
+            errorDetail: err3.message,
+          });
+        }
+
+        // const BASE_URL = "http://localhost:8035/uploads/"; // adjust as needed
+
+        // ✅ Group prescriptions by brand_id for each submission
+        const groupedPres = presData.reduce((acc, p) => {
+          const key = `${p.submission_id}_${p.brand_id}`;
+          if (!acc[key]) {
+            acc[key] = {
+              submission_id: p.submission_id,
+              brand_id: p.brand_id,
+              brand_name: p.brand_name,
+              prescription_count: p.prescription_count,
+              created_date: p.created_date,
+              imgpaths: [],
+            };
+          }
+          if (p.imgpath) {
+            acc[key].imgpaths.push(BASE_URL1 + p.imgpath);
+          }
+          return acc;
+        }, {});
+
+        // ✅ Combine everything into nested structure
+        const fullData = submissions.map((sub) => ({
+          ...sub,
+          field_values: fieldValues.filter(
+            (fv) => fv.submission_id === sub.submission_id
+          ),
+          prescriptions: Object.values(groupedPres).filter(
+            (p) => p.submission_id === sub.submission_id
+          ),
+        }));
+
+        return res.status(200).json({
+          errorCode: 1,
+          message: "Camp submissions with details fetched successfully",
+          data: fullData,
+        });
+      });
+    });
+  });
+};
+
+exports.monthlyCampsAdminReports = (req, res) => {
+  const { campId, empcode, searchKeyword = "",deptId } = req.body;
+
+  if (!campId) {
+    return res.status(400).json({
+      errorCode: 0,
+      message: "campId required",
+    });
+  }
+
+  if (!empcode) {
+    return res.status(400).json({
+      errorCode: 0,
+      message: "empcode required",
+    });
+  }
+
+  // --- Main query with recursive hierarchy based on empcode ---
+  const baseQuery = `
+    WITH RECURSIVE hierarchy AS (
+      SELECT user_id, name, empcode, reporting, 0 AS level
+      FROM user_mst
+      WHERE empcode = ? AND status = 'Y'
+
+      UNION ALL
+
+      SELECT u.user_id, u.name, u.empcode, u.reporting, h.level + 1
+      FROM user_mst u
+      INNER JOIN hierarchy h ON u.reporting = h.empcode
+      WHERE u.status = 'Y'
+    )
+    SELECT 
+      cs.submission_id,
+      cs.camp_id,
+      cs.user_id,
+      cs.submitted_at,
+      cs.status,
+      cs.doctor_id,
+      d.doctor_name,
+      d.garnet_code,
+      d.speciality
+    FROM camp_submissions cs
+    LEFT JOIN doctor_mst d ON cs.doctor_id = d.doctor_id
+    WHERE cs.camp_id = ?
+      AND cs.user_id IN (SELECT user_id FROM hierarchy)
+      AND cs.dept_id = ?
+      ${searchKeyword && searchKeyword.trim() !== "" ? "AND d.doctor_name LIKE ?" : ""}
+    ORDER BY cs.submitted_at DESC
+  `;
+
+  const queryParams = [empcode, campId,deptId];
+  if (searchKeyword && searchKeyword.trim() !== "") {
+    queryParams.push(`%${searchKeyword.trim()}%`);
+  }
+
+  db.query(baseQuery, queryParams, (err, submissions) => {
+    if (err) {
+      return res.status(500).json({
+        errorCode: 0,
+        message: "Error fetching submissions",
+        errorDetail: err.message,
+      });
+    }
+
+    if (!submissions.length) {
+      return res.status(200).json({
+        errorCode: 1,
+        message: "No submissions found",
+        data: [],
+      });
+    }
+
+    const submissionIds = submissions.map((s) => s.submission_id);
+
+    // --- Fetch field values ---
+    const fieldQuery = `
+      SELECT 
+        csv.submission_id,
+        f.label AS field_label,
+        f.field_type,
+        csv.value
+      FROM camp_submission_values csv
+      JOIN camp_type_fields f ON csv.field_id = f.field_id
+      WHERE csv.submission_id IN (?) AND csv.dept_id = ?
+    `;
+
+    db.query(fieldQuery, [submissionIds,deptId], (err2, fieldValues) => {
+      if (err2) {
+        return res.status(500).json({
+          errorCode: 0,
+          message: "Error fetching submission field values",
+          errorDetail: err2.message,
+        });
+      }
+
+      // --- Fetch prescription summary (no images for now) ---
+      const presQuery = `
+        SELECT 
+          p.submission_id,
+          p.brand_id,
+          b.brand_name,
+          p.prescription_count,
+          p.created_date
+        FROM monthly_camp_prescription_mst p
+        LEFT JOIN brand_mst b ON p.brand_id = b.brand_id
+        WHERE p.submission_id IN (?) AND p.dept_id = ?
+      `;
+
+      db.query(presQuery, [submissionIds,deptId], (err3, presData) => {
+        if (err3) {
+          return res.status(500).json({
+            errorCode: 0,
+            message: "Error fetching prescription data",
+            errorDetail: err3.message,
+          });
+        }
+
+        // --- Group prescriptions ---
+        const groupedPres = presData.reduce((acc, p) => {
+          const key = `${p.submission_id}_${p.brand_id}`;
+          if (!acc[key]) {
+            acc[key] = {
+              submission_id: p.submission_id,
+              brand_id: p.brand_id,
+              brand_name: p.brand_name,
+              prescription_count: p.prescription_count,
+              created_date: p.created_date,
+            };
+          }
+          return acc;
+        }, {});
+
+        // --- Combine submissions, field values, prescriptions ---
+        const fullData = submissions.map((sub) => ({
+          ...sub,
+          field_values: fieldValues.filter(
+            (fv) => fv.submission_id === sub.submission_id
+          ),
+          prescriptions: Object.values(groupedPres).filter(
+            (p) => p.submission_id === sub.submission_id
+          ),
+        }));
+
+        return res.status(200).json({
+          errorCode: 1,
+          message: "Camp submissions with details fetched successfully",
+          data: fullData,
+        });
+      });
+    });
+  });
 };
