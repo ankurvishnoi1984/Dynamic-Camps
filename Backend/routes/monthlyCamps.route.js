@@ -1,5 +1,5 @@
 const express = require("express");
-const { createCampType, createCampConfig, getActiveCamps, getCampFieldDetails, createMonthlyCamp, submitFormAnswers, getCampTypeDetailsAdmin, getCampTypeList, getActiveCampsNavList, getMonthlyCampsList, getCampSubmissionsFull, monthlyCampsAdminReports } = require("../controller/monthlyCamps.controller");
+const { createCampType, createCampConfig, getActiveCamps, getCampFieldDetails, createMonthlyCamp, submitFormAnswers, getCampTypeDetailsAdmin, getCampTypeList, getActiveCampsNavList, getMonthlyCampsList, getCampSubmissionsFull, monthlyCampsAdminReports, updateCampType } = require("../controller/monthlyCamps.controller");
 const router = express.Router();
 
 router.post("/createCampType",createCampType)
@@ -14,6 +14,7 @@ router.post("/getMonthlyCampsList",getMonthlyCampsList)
 router.post("/getActiveCampsNavList",getActiveCampsNavList)
 router.post("/getCampSubmissionsFull",getCampSubmissionsFull)
 router.post("/monthlyCampsAdminReports",monthlyCampsAdminReports)
+router.post("/updateCampType",updateCampType)
 
 
 module.exports= router;

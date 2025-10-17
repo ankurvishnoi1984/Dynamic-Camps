@@ -939,3 +939,166 @@ exports.monthlyCampsAdminReports = (req, res) => {
     });
   });
 };
+
+exports.updateCampType = (req, res) => {
+  const { camp_type_id, camp_type_name, fields,deptId } = req.body;
+  const modified_by = req.body.userId || 0;
+
+  if (!camp_type_id || !camp_type_name) {
+    return res.status(400).json({ errorCode: 0, message: "Missing required fields" });
+  }
+
+  db.getConnection((err, connection) => {
+    if (err) {
+      console.error("Connection error:", err);
+      return res.status(500).json({ errorCode: 0, message: "DB connection failed" });
+    }
+
+    connection.beginTransaction((err) => {
+      if (err) {
+        connection.release();
+        console.error("Transaction start error:", err);
+        return res.status(500).json({ errorCode: 0, message: "Transaction failed" });
+      }
+
+      // 1️⃣ Update camp_type_mst
+      const updateTypeSql = `
+        UPDATE camp_type_mst
+        SET camp_type_name = ?, modified_date = NOW(), modified_by = ?
+        WHERE camp_type_id = ? AND dept_id = ?
+      `;
+
+      connection.query(updateTypeSql, [camp_type_name, modified_by, camp_type_id,deptId], (err) => {
+        if (err) {
+          console.error("Error updating camp type:", err);
+          return connection.rollback(() => {
+            connection.release();
+            res.status(500).json({ errorCode: 0, message: "Failed to update camp type" });
+          });
+        }
+
+        // 2️⃣ Get existing fields
+        const getFieldsSql = `SELECT field_id FROM camp_type_fields WHERE camp_type_id = ? AND dept_id = ? AND status = 'Y'`;
+        connection.query(getFieldsSql, [camp_type_id,deptId], (err, existingRows) => {
+          if (err) {
+            console.error("Error fetching existing fields:", err);
+            return connection.rollback(() => {
+              connection.release();
+              res.status(500).json({ errorCode: 0, message: "Failed to fetch fields" });
+            });
+          }
+
+          const existingIds = existingRows.map((r) => r.field_id);
+          const currentIds = fields.filter((f) => f.field_id).map((f) => f.field_id);
+          const toDeactivate = existingIds.filter((id) => !currentIds.includes(id));
+
+          // 3️⃣ Deactivate removed fields
+          if (toDeactivate.length > 0) {
+            const deactivateSql = `
+              UPDATE camp_type_fields SET status = 'N'
+              WHERE field_id IN (?) AND camp_type_id = ? AND dept_id = ?
+            `;
+            connection.query(deactivateSql, [toDeactivate, camp_type_id,deptId], (err) => {
+              if (err) {
+                console.error("Error deactivating fields:", err);
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(500).json({ errorCode: 0, message: "Failed to deactivate old fields" });
+                });
+              }
+              proceedToSaveFields();
+            });
+          } else {
+            proceedToSaveFields();
+          }
+
+          // 4️⃣ Insert or update active fields
+          function proceedToSaveFields() {
+            if (!fields || fields.length === 0) {
+              return connection.commit((err) => {
+                connection.release();
+                if (err) return res.status(500).json({ errorCode: 0, message: "Commit failed" });
+                res.json({ errorCode: 1, message: "Camp type updated successfully" });
+              });
+            }
+
+            const upsertTasks = fields.map((field) => {
+              return (cb) => {
+                if (field.field_id) {
+                  // Update existing field
+                  const updateFieldSql = `
+                    UPDATE camp_type_fields
+                    SET label = ?, field_type = ?, is_required = ?, options_json = ?, order_index = ?, status = 'Y'
+                    WHERE field_id = ? AND camp_type_id = ? AND dept_id = ?
+                  `;
+                  connection.query(
+                    updateFieldSql,
+                    [
+                      field.label,
+                      field.field_type,
+                      field.is_required,
+                      field.options_json = (field.field_type === "dropdown" && field.options_json
+                        ? JSON.stringify(field.options_json.split(",").map((opt) => opt.trim()))
+                        : JSON.stringify([])),
+                      field.order_index,
+                      field.field_id,
+                      camp_type_id,
+                      deptId
+                    ],
+                    cb
+                  );
+                } else {
+                  // Insert new field
+                  const insertFieldSql = `
+                    INSERT INTO camp_type_fields
+                    (camp_type_id, label, field_type, is_required, options_json, order_index,dept_id, status)
+                    VALUES (?, ?, ?, ?, ?, ?,?, 'Y')
+                  `;
+                  connection.query(
+                    insertFieldSql,
+                    [
+                      camp_type_id,
+                      field.label,
+                      field.field_type,
+                      field.is_required,
+                      field.options_json = (field.field_type === "dropdown" && field.options_json
+                        ? JSON.stringify(field.options_json.split(",").map((opt) => opt.trim()))
+                        : JSON.stringify([])),
+                      field.order_index,
+                      deptId
+                    ],
+                    cb
+                  );
+                }
+              };
+            });
+
+            // Run all field queries sequentially
+            runSeries(upsertTasks, (err) => {
+              if (err) {
+                console.error("Error updating/inserting fields:", err);
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(500).json({ errorCode: 0, message: "Failed to save fields" });
+                });
+              }
+
+              connection.commit((err) => {
+                if (err) {
+                  console.error("Commit error:", err);
+                  return connection.rollback(() => {
+                    connection.release();
+                    res.status(500).json({ errorCode: 0, message: "Commit failed" });
+                  });
+                }
+
+                connection.release();
+                res.json({ errorCode: 1, message: "Camp type updated successfully" });
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+};
