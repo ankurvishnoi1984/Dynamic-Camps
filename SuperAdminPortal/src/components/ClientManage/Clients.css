@@ -1,0 +1,133 @@
+.reposerch{
+    width: 300px;
+}
+.selecCamp{
+    width: 150px;
+    margin-top: 32px;
+}
+.textdiv{
+
+    display: flex;
+    justify-content: space-between;
+    padding:0px 10px;
+  
+}
+@media screen and (max-width: 767px) {
+    .selecCamp{
+        width: 100%;
+        
+    }
+    .resdiv{
+        display: flex;
+        width: 0px;
+    }
+    .textdiv{
+        align-items: center;
+    }
+    
+  }
+
+
+  /* Custom modal background */
+.custom-modal {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1050;
+}
+
+/* Smooth scale-in animation */
+.animate-modal {
+  animation: popIn 0.3s ease-in-out;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Field card styling */
+.field-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Improved modal scroll behavior */
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Hide scrollbar (for a cleaner look) */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
+}
+.close:hover {
+    color: #0cd0ff;
+    text-decoration: none;
+}
+.custom-file-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-file-input-wrapper input[type="file"] {
+  width: 100%;
+  height: 50px;
+  opacity: 0; /* hide the native input */
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+.custom-file-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  height: 50px;
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 50px; /* rounded-pill style */
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-file-label:hover {
+  background-color: #e9ecef;
+}
+
+.custom-file-label::after {
+  content: "Browse";
+  background-color: #0d6efd;
+  color: white;
+  padding: 0.25rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,70 @@
+.addusermodel{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .close-but{
+    color: #fff;
+    background: none;
+    border: none;
+    font-weight: bolder;
+    font-size: x-large;
+  }
+
+  .graphdiv1{
+    width: 48%;
+    height: 360px;
+    margin-top: 20px;
+  }
+  .graphdiv2{
+    width: 48%;
+    height: 378px;
+  }
+  .graphflex{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px 0px;
+  }
+  .camp-p{
+    text-align: center;
+    font-size: 13px;
+    position: absolute;
+    margin-left: 288px;
+    margin-top: -10px;
+    font-family: 'Nunito';
+  }
+
+@media screen and (max-width: 767px) {
+  .addusermodel{
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    height: auto;
+  }
+  .graphflex{
+    display: inline-block;
+
+  }
+  .graphdiv1{
+    width: 100%;
+    height: 360px;
+    margin-top: 30px;
+  }
+  .graphdiv2{
+    width: 100%;
+    height: 360px;
+    margin-top: 30px;
+  }
+  .camp-p{
+    margin-left: 130px;
+  }
+}
