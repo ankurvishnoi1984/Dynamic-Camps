@@ -1251,3 +1251,95 @@ exports.getMonthlyCampsPrescriptionImages = (req, res) => {
     });
   });
 };
+
+exports.saveBrandImages = (req, res) => {
+  try {
+    const { campId, userId, submissionId,deptId } = req.body;
+    // parse brandsMeta JSON from FormData
+    const brandsMeta = JSON.parse(req.body.brandsMeta || "[]");
+    const files = req.files || [];
+
+    if (!campId || !userId) {
+      return res
+        .status(400)
+        .json({ errorCode: 0, message: "campId and userId are required" });
+    }
+
+    if (!Array.isArray(brandsMeta) || brandsMeta.length === 0) {
+      return res.json({ errorCode: 1, message: "No brand images to save" });
+    }
+
+    const rows = [];
+
+    // Loop through each brandMeta
+    brandsMeta.forEach((meta) => {
+      // ✅ Find all files for this brand (supports multiple)
+      const matchingFiles = files.filter(
+        (f) =>
+          f.fieldname.startsWith(`files_${meta.brandId}`) ||
+          f.fieldname.startsWith(`brandImages_${meta.brandId}`)
+      );
+
+
+      if (matchingFiles.length > 0) {
+        matchingFiles.forEach((f) => {
+          rows.push([
+            campId, // crid
+            meta.brandId,
+            f.filename, // imgpath (multer saves filename)
+            meta.prescriptionCount || 0,
+            "Y",
+            userId,
+            new Date(), // created_date
+            submissionId,
+            deptId
+          ]);
+        });
+      } else {
+        // ✅ If no files uploaded, still allow row insert with NULL image
+        rows.push([
+          campId,
+          meta.brandId,
+          null,
+          meta.prescriptionCount || 0,
+          "Y",
+          userId,
+          new Date(),
+          submissionId,
+          deptId
+        ]);
+      }
+    });
+
+    if (rows.length === 0) {
+      return res.json({ errorCode: 1, message: "No valid images to save" });
+    }
+
+    // ✅ Insert all rows at once
+    const insertSQL = `
+          INSERT INTO monthly_camp_prescription_mst 
+            (crid, brand_id, imgpath, prescription_count, status, created_by, created_date,submission_id,dept_id) 
+          VALUES ?
+        `;
+
+    db.query(insertSQL, [rows], (err, result) => {
+      if (err) {
+        console.error("Error inserting brand images:", err);
+        return res
+          .status(500)
+          .json({ errorCode: 0, message: "Error saving brand images" });
+      }
+
+      return res.json({
+        errorCode: 1,
+        message: "Brand images saved successfully",
+        insertedCount: result.affectedRows,
+      });
+    });
+  } catch (err) {
+    console.error("saveBrandImages error:", err);
+    return res
+      .status(500)
+      .json({ errorCode: 0, message: "Server error saving brand images" });
+  }
+};
