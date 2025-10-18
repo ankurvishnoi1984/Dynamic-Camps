@@ -1102,3 +1102,152 @@ exports.updateCampType = (req, res) => {
     });
   });
 };
+
+exports.updateMonthlyCamp = (req, res) => {
+  const {
+    campId,
+    campName,
+    campTypeId,
+    startDate,
+    endDate,
+    isDoctorRequired,
+    isPrescriptionRequired,
+    userId,
+    deptId
+  } = req.body;
+
+  if (!campId)
+    return res.status(400).json({ errorCode: 0, message: "Camp ID required" });
+
+  const query = `
+    UPDATE monthly_camp_mst
+    SET 
+      camp_name = ?,
+      camp_type_id = ?,
+      start_date = ?,
+      end_date = ?,
+      is_doctor_required = ?,
+      is_prescription_required = ?,
+      modified_date = NOW(),
+      modified_by = ?
+    WHERE camp_id = ?
+    AND dept_id = ?;
+  `;
+
+  db.query(
+    query,
+    [
+      campName,
+      campTypeId,
+      startDate,
+      endDate,
+      isDoctorRequired,
+      isPrescriptionRequired,
+      userId,
+      campId,
+      deptId,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ errorCode: 0, message: "DB error updating camp" });
+      }
+      res.json({ errorCode:1,success: true, message: "Camp updated successfully" });
+    }
+  );
+};
+
+exports.manageCampStatus = (req,res)=>{
+  const {campId,status='Y',userId,deptId} = req.body;
+   if (!campId)
+    return res.status(400).json({ errorCode: 0, message: "Camp ID required" });
+
+  const query = `
+   UPDATE monthly_camp_mst
+    SET 
+      is_active = ?,
+      modified_date = NOW(),
+      modified_by = ?
+    WHERE camp_id = ?
+    AND dept_id = ?;`
+
+     db.query(
+    query,
+    [
+     status,
+     userId,
+     campId,
+     deptId
+    ],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ errorCode: 0, message: "DB error updating camp" });
+      }
+      res.json({ errorCode: 1,success: true, message: "Camp status updated successfully" });
+    }
+  );
+
+
+}
+
+exports.getMonthlyCampsPrescriptionImages = (req, res) => {
+  const userId = req.query.userId || null;
+  const deptId = Number(req.query.deptId);
+  const params = [userId,deptId];
+
+    if (!deptId) {
+    return res.status(400).json({
+      success: false,
+      message: 'deptId is required',
+      errorCode :0,
+    });
+  }
+
+  db.query('CALL GetMonthlyCampPrescriptionHierarchy(?,?)', params, (err, results) => {
+    if (err) {
+      console.error('Error fetching prescription images:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error while fetching prescription images',
+        error: err.message
+      });
+    }
+
+    const rows = results[0] || [];
+    const transformedMap = {}; // key: campId_doctor_emp
+
+    rows.forEach(row => {
+      // Create a unique key for camp + doctor + employee
+      const key = `${row.campId}_${row.doctorFolder}_${row.empFolder}`;
+
+      if (!transformedMap[key]) {
+        transformedMap[key] = {
+          campId: row.campId,
+          doctorName: row.doctorFolder.split('_')[0],  // doctor name
+          doctorCode: row.doctorFolder.split('_')[1],  // doctor garnet code
+          employeeName: row.empFolder.split('_')[0],
+          employeeCode: row.empFolder.split('_')[1],
+          campName: row.campName,
+          campDate: row.submitted_at,
+          posters: []
+        };
+      }
+
+      // Push image into posters array
+      transformedMap[key].posters.push({ posterUrl: row.imageFile, brandName: row.brandName });
+    });
+
+    const transformedResult = Object.values(transformedMap);
+
+    return res.status(200).json({
+      success: true,
+      transformedResult,
+      poslength: transformedResult.length
+    });
+  });
+};

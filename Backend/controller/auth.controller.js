@@ -4,11 +4,11 @@ const logger = require('../utils/logger')
 
 
 exports.loginWithEmpCode = async (req, res) => {
-  const { email, password } = req.body;
+  const { empcode, password } = req.body;
   const query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=?';
 
   try {
-    db.query(query, [email], (err, result) => {
+    db.query(query, [empcode], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/auth/login: ${err.message}`);
         return res.status(500).json({
@@ -22,11 +22,11 @@ exports.loginWithEmpCode = async (req, res) => {
       } else if (result.length === 0) {
         return res.status(401).json({
           errorCode: "0",
-          errorDetail: "Invalid Email or Password",
+          errorDetail: "Invalid User or Password",
           responseData: {},
           status: "ERROR",
           details: "UNAUTHORIZED",
-          getMessageInfo: "Invalid Email or Password"
+          getMessageInfo: "Invalid User or Password"
         });
       } else {
         const user = result[0];
@@ -66,11 +66,11 @@ exports.loginWithEmpCode = async (req, res) => {
         } else {
           return res.status(401).json({
             errorCode: "UNAUTHORIZED",
-            errorDetail: "Invalid Email or Password",
+            errorDetail: "Invalid User or Password",
             responseData: {},
             status: "ERROR",
-            details: "Invalid Email or Password",
-            getMessageInfo: "Invalid Email or Password"
+            details: "Invalid User or Password",
+            getMessageInfo: "Invalid User or Password"
           });
         }
       }
