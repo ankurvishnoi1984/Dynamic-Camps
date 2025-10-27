@@ -1,0 +1,423 @@
+const db = require("../config/db");
+const logger = require("../utils/logger");
+const moment = require('moment');
+
+exports.getAllEmployee = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+    const searchName = req.query.searchName || '';
+    const empcodeFilter = req.query.empcode || ''; // empcode from request
+    const deptId = req.query.dept_id || ''; // new department filter
+
+    // If dept_id is provided, restrict data to that department only
+    const deptCondition = deptId ? `AND dept_id = ${db.escape(deptId)}` : '';
+
+    // Recursive CTE to get empcode and all subordinates
+    const baseCTE = `
+    WITH RECURSIVE employee_hierarchy AS (
+       SELECT 
+        user_id, 
+        empcode, 
+        name, 
+        designation, 
+        role, 
+        doj,
+        zone,
+        region,
+        area,
+        hq,
+        reporting,
+        mobile,
+        email,
+        status,
+        dept_id
+      FROM user_mst
+      WHERE status = 'Y'
+        ${empcodeFilter ? `AND empcode = ${db.escape(empcodeFilter)}` : ''}
+        ${deptCondition}
+
+      UNION ALL
+
+      SELECT 
+        u.user_id, 
+        u.empcode, 
+        u.name, 
+        u.designation, 
+        u.role, 
+        u.doj,
+        u.zone,
+        u.region,
+        u.area,
+        u.hq,
+        u.reporting,
+        u.mobile,
+        u.email,
+        u.status,
+        u.dept_id
+      FROM user_mst u
+      INNER JOIN employee_hierarchy eh 
+        ON u.reporting = eh.empcode
+      WHERE u.status = 'Y'
+        ${deptCondition}
+    )
+  `;
+
+    const dataQuery = `
+    ${baseCTE}
+    SELECT *
+    FROM employee_hierarchy
+    WHERE name LIKE ${db.escape('%' + searchName + '%')}
+    LIMIT ${limit} OFFSET ${offset};
+  `;
+
+    const countQuery = `
+    ${baseCTE}
+    SELECT COUNT(*) AS totalCount
+    FROM employee_hierarchy
+    WHERE name LIKE ${db.escape('%' + searchName + '%')};
+  `;
+
+    try {
+        const users = await new Promise((resolve, reject) => {
+            db.query(dataQuery, (err, result) => {
+                if (err) {
+                    logger.error(err.message);
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+
+        const totalRowCountResult = await new Promise((resolve, reject) => {
+            db.query(countQuery, (err, result) => {
+                if (err) {
+                    logger.error(err.message);
+                    reject(err);
+                } else {
+                    resolve(result[0]);
+                }
+            });
+        });
+
+        res.status(200).json({
+            success: true,
+            users,
+            totalCount: totalRowCountResult.totalCount,
+            filters: {
+                dept_id: deptId || null,
+                empcode: empcodeFilter || null,
+                search: searchName || null
+            }
+        });
+    } catch (error) {
+        logger.error(error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching employee data',
+            error: error.message
+        });
+    }
+};
+
+exports.addEmployee = async (req, res) => {
+    const { name, empcode, state, hq, pincode, reporting, password, role, deptId } =
+        req.body;
+
+    console.log(req.body)
+    const query =
+        "insert into user_mst(name,empcode,state,hq,pincode,reporting,password,role,dept_id) values(?,?,?,?,?,?,?,?,?)";
+    try {
+        db.query(
+            query,
+            [name, empcode, state, hq, pincode, reporting, password, role, deptId],
+            (err, result) => {
+                if (err) {
+                    logger.error(err.message);
+                    res.status(500).json({
+                        errorCode: "0",
+                        errorDetail: err.message,
+                        responseData: {},
+                        status: "ERROR",
+                        details: "An internal server error occurred",
+                        getMessageInfo: "An internal server error occurred",
+                    });
+                } else {
+                    logger.info("Employee Added Successfully");
+
+                    res
+                        .status(200)
+                        .json({ message: "Employee Added Successfully", errorCode: "1" });
+                }
+            }
+        );
+    } catch (error) {
+        logger.error(error.message);
+
+        res.send(error);
+    }
+};
+
+exports.updateEmp = (req, res) => {
+    const {
+        user_id,
+        name,
+        empcode,
+        state,
+        hq,
+        reporting,
+        password,
+        designation,
+        joiningDate,
+        zone,
+        region,
+        usernamehq,
+        mobile,
+        email,
+        dob,
+        modified_by,
+    } = req.body;
+
+    if (!user_id || !name || !empcode || !usernamehq || !designation) {
+        return res
+            .status(400)
+            .json({ errorCode: "0", message: "Missing required fields" });
+    }
+
+    // 🧭 Role mapping based on designation
+    const roleMapping = {
+        "MARKETING EXECUTIVE": 5,
+        "AREA BUSINESS MANAGER": 4,
+        "SENIOR AREA BUSINESS MANAGER": 4,
+        "REGIONAL MANAGER": 3,
+        "SENIOR REGIONAL MANAGER": 3,
+        "DIVISIONAL SALES MANAGER": 2,
+        "ZONAL SALES MANAGER": 2,
+        "SALES MANAGER": 2,
+        "ASSOCIATE GENERAL MANAGER - SALES": 1,
+        "NATIONAL SALES MANAGER": 1,
+    };
+
+    const role = roleMapping[designation] || 5; // default lowest role if not found
+
+    // 🧩 Step 1️⃣ — Check if username is already taken by another employee
+    const checkUsernameQuery =
+        "SELECT user_id FROM user_mst WHERE usernamehq = ? AND user_id != ? AND status = 'Y'";
+    db.query(checkUsernameQuery, [usernamehq, user_id], (err, result) => {
+        if (err) {
+            logger.error(err.message);
+            return res.status(500).json({ errorCode: "0", message: err.message });
+        }
+
+        if (result.length > 0) {
+            return res.status(400).json({
+                errorCode: "0",
+                message: "Username already exists. Please choose another.",
+            });
+        }
+
+        // 🧩 Step 2️⃣ — Perform the update
+        const updateQuery = `
+      UPDATE user_mst 
+      SET 
+        name = ?, 
+        empcode = ?, 
+        designation = ?, 
+        role = ?, 
+        doj = ?, 
+        zone = ?, 
+        region = ?, 
+        hq = ?, 
+        reporting = ?, 
+        mobile = ?, 
+        email = ?, 
+        usernamehq = ?, 
+        password = ?, 
+        dob = ?, 
+        state = ?, 
+        updated_by = ?, 
+        modified_date = NOW()
+      WHERE user_id = ?
+    `;
+
+        const updateValues = [
+            name,
+            empcode,
+            designation,
+            role,
+            joiningDate,
+            zone,
+            region,
+            hq,
+            reporting,
+            mobile,
+            email,
+            usernamehq,
+            password,
+            dob,
+            state,
+            modified_by,
+            user_id,
+        ];
+
+        db.query(updateQuery, updateValues, (err, result2) => {
+            if (err) {
+                logger.error(err.message);
+                return res.status(500).json({ errorCode: "0", message: err.message });
+            }
+
+            if (result2.affectedRows === 0) {
+                return res
+                    .status(404)
+                    .json({ errorCode: "0", message: "Employee not found" });
+            }
+
+            return res
+                .status(200)
+                .json({ errorCode: "1", message: "Employee updated successfully" });
+        });
+    });
+};
+
+exports.deleteEmployee = async (req, res) => {
+    const userId = req.params.id;
+
+    const query = 'update user_mst set status = "N" where user_id =?'
+    try {
+        db.query(query, [userId], (err, result) => {
+            if (err) {
+                logger.error(err.message);
+
+                res.status(500).json({
+                    errorCode: "0",
+                    errorDetail: err.message,
+                    responseData: {},
+                    status: "ERROR",
+                    details: "An internal server error occurred",
+                    getMessageInfo: "An internal server error occurred"
+                });
+            }
+            else {
+                logger.info('Employee Delete Successfully');
+
+                res.status(200).json({ message: "Employee Deleted Successfully", errorCode: "1" })
+            }
+        });
+    } catch (error) {
+        logger.error(error.message);
+
+        res.send(error)
+    }
+};
+exports.getEmployeeWithId = async (req, res) => {
+    const userId = req.params.id;
+
+    const query = 'select * from user_mst where user_id = ? AND status = "Y"'
+    try {
+        db.query(query, [userId], (err, result) => {
+            if (err) {
+                logger.error(err.message);
+
+                res.status(500).json({
+                    errorCode: 0,
+                    errorDetail: err.message,
+                    responseData: {},
+                    status: "ERROR",
+                    details: "An internal server error occurred",
+                    getMessageInfo: "An internal server error occurred"
+                });
+            }
+            else {
+                logger.info('Fetch Employee Successfully');
+
+                res.status(200).json({ user: result, errorCode: 1 })
+            }
+        });
+    } catch (error) {
+        logger.error(error.message);
+
+        res.send(error)
+    }
+};
+
+exports.getSeniorEmpcodesByDesignation = async (req, res) => {
+  const { designation, deptId } = req.body;
+
+  if (!designation) {
+    return res.status(400).json({ message: "designation is required" });
+  }
+
+  // Optional department condition
+  const deptCondition = deptId ? `AND u.dept_id = ${db.escape(deptId)}` : "";
+
+  const query = `
+    WITH RECURSIVE senior_hierarchy AS (
+      -- Base: employees with given designation (and dept if provided)
+      SELECT 
+        u.user_id,
+        u.empcode,
+        u.name,
+        u.reporting,
+        u.dept_id
+      FROM user_mst u
+      WHERE u.status = 'Y' 
+        AND u.designation = ?
+        ${deptCondition}
+
+      UNION ALL
+
+      -- Recursive: find their seniors (and seniors of seniors)
+      SELECT 
+        s.user_id,
+        s.empcode,
+        s.name,
+        s.reporting,
+        s.dept_id
+      FROM user_mst s
+      INNER JOIN senior_hierarchy sh 
+        ON sh.reporting = s.empcode
+      WHERE s.status = 'Y'
+        ${deptCondition}
+    )
+    -- Return only seniors (exclude base employees)
+    SELECT DISTINCT empcode, name
+    FROM senior_hierarchy
+    WHERE empcode NOT IN (
+      SELECT empcode FROM user_mst WHERE designation = ? ${deptCondition}
+    )
+    ORDER BY name;
+  `;
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      db.query(query, [designation, designation], (err, rows) => {
+        if (err) {
+          logger.error(`Error in getSeniorEmpcodesByDesignation: ${err.message}`);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+
+    const seniors = result.map((r) => ({
+      empcode: r.empcode,
+      name: r.name,
+    }));
+
+    res.status(200).json({
+      success: true,
+      filters: { designation, deptId: deptId || null },
+      totalSeniors: seniors.length,
+      seniors,
+    });
+  } catch (error) {
+    logger.error(`Error in getSeniorEmpcodesByDesignation: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching senior empcodes",
+      error: error.message,
+    });
+  }
+};
