@@ -16,7 +16,7 @@ const Login = () => {
     e.preventDefault();
     console.log(username, password,BASEURL2)
     try {
-      const res = await axios.post(`${BASEURL2}/auth/login`, { usernamehq: username, password });
+      const res = await axios.post(`${BASEURL2}/auth/login`, { empcode: username, password });
       const empcode = res.data.responseData.empId;
       const userId = res.data.responseData.user_id;
       const sessionId = res?.data?.responseData?.sessionID;
