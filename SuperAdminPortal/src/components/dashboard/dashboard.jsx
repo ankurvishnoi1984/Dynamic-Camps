@@ -140,9 +140,8 @@ function Dashboard() {
     const getRecentClients = async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`${BASEURL2}/dashboard/getRecentClientDetails`)
+      const res = await axios.post(`${BASEURL2}/dashboard/getRecentClientDetails`)
       setRecentClients(res.data.data)
-      console.log("res.data.data", res.data)
     } catch (error) {
       console.log(error)
     }
@@ -168,7 +167,7 @@ function Dashboard() {
   const getTotalCountDetails = async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`${BASEURL2}/dashboard/totalCountDetails`)
+      const res = await axios.post(`${BASEURL2}/dashboard/totalCountDetails`)
       setTotals(res.data.data)
       console.log("res.data.data", res.data)
     } catch (error) {
@@ -186,7 +185,7 @@ function Dashboard() {
     getRecentClients();
     getRecentCamps();
     getTotalCountDetails();
-  }, [filters])
+  }, [])
 
   const handleOpenModal = (action, crid) => {
 
@@ -478,55 +477,6 @@ function Dashboard() {
 
   return (
     <div className="container-fluid">
-
-       {/* <div className="d-sm-flex align-items-start justify-content-end mb-4">
-
-      <div className="dropdown ml-2">
-      
-          <select
-            className="form-control selectStyle selecCamp"
-            name="campType"
-            id="campType"
-            value={filters.campType}
-            onChange={handleChange}
-          >
-            <option value="">Select Camp</option>
-            {myCampType && myCampType.map((e) => (
-              <option key={e.basic_id} value={e.description}>
-                {e.description}
-              </option>
-            ))}
-          </select>
-
-        </div>
-    
-        <div className="form-group ml-2">
-          <label htmlFor="fromDate">From Date:</label>
-          <input
-            type="date"
-            className="form-control"
-            id="fromDate"
-            name="fromDate"   // ✅ added
-            placeholder="Select From Date"
-            value={filters.fromDate}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-group ml-2">
-          <label htmlFor="toDate">To Date:</label>
-          <input
-            type="date"
-            className="form-control"
-            id="toDate"
-            name="toDate"    // ✅ added
-            placeholder="Select To Date"
-            value={filters.toDate}
-            onChange={handleChange}
-          />
-        </div>
-
-    </div> */}
       <div className="row ">
         <div className="col-xl-3 col-md-4 mx-auto mb-4">
           <div className="card border-left-primary shadow h-100 py-2">
@@ -536,7 +486,7 @@ function Dashboard() {
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
                     Total Clients
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalCampCount}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalClients}</div>
                 </div>
                 <div className="col-auto">
                   <i className="fas fa-user fa-2x text-gray-300"></i>
@@ -556,7 +506,7 @@ function Dashboard() {
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
                     Total Departments
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalPrescriptionCount}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalDepartments}</div>
                 </div>
                 <div className="col-auto">
                   <i className="fas fa-users  fa-2x text-gray-300"></i>
@@ -576,7 +526,7 @@ function Dashboard() {
                   </div>
                   <div className="row no-gutters align-items-center">
                     <div className="col-auto">
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalDoctorCount}</div>
+                      <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalEmployees}</div>
                     </div>
                   </div>
                 </div>
@@ -596,7 +546,7 @@ function Dashboard() {
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
                    Total Camps
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalPrescriptionCount}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalCamps}</div>
                 </div>
                 <div className="col-auto">
                   <i className="fas fa-hospital-alt fa-2x text-gray-300"></i>
@@ -663,18 +613,13 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {[
-                { name: "Apollo Hospitals", dept: "Cardiology", contact: "Dr. Ramesh Iyer", date: "2025-10-15" },
-                { name: "Fortis Healthcare", dept: "General Medicine", contact: "Dr. Nisha Gupta", date: "2025-10-14" },
-                { name: "Sunshine Diagnostics", dept: "Pathology", contact: "Dr. Kunal Shah", date: "2025-10-12" },
-                { name: "CarePlus Clinic", dept: "Pediatrics", contact: "Dr. Sneha Patil", date: "2025-10-10" },
-                { name: "Medicare Wellness", dept: "Physiotherapy", contact: "Dr. Aniket Joshi", date: "2025-10-09" },
-              ].map((client, i) => (
+              {console.log("totals",totals)}
+              {recentClients.map((client, i) => (
                 <tr key={i}>
-                  <td>{client.name}</td>
-                  <td>{client.dept}</td>
-                  <td>{client.contact}</td>
-                  <td>{client.date}</td>
+                  <td>{client.client_name}</td>
+                  <td>{client.dept_name}</td>
+                  <td>{client.coordinator_name}</td>
+                  <td>{new Date(client.created_date).toLocaleDateString("en-GB")}</td>
                 </tr>
               ))}
             </tbody>
