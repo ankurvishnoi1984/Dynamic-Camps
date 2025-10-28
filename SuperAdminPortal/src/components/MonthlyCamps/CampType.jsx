@@ -15,7 +15,11 @@ const CampType = () => {
   const [showModal, setShowModal] = useState(false);
   const userId = sessionStorage.getItem("userId");
   const [showEditModal,setEditModal] = useState(false)
-  const [editData, setEditData] = useState(null);
+  const [editData, setEditData] = useState(null);  
+  const [clientList,setClientList] = useState([]);
+  const [clientId,setClientId] = useState("");
+  const [deptList,setDeptList]= useState([]);
+  const [deptId,setDeptId]=useState("");
 
   const [campTypeName, setCampTypeName] = useState("");
   const [fields, setFields] = useState([
@@ -43,6 +47,39 @@ const CampType = () => {
     try {
       const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampDetailsAdmin`)
       setMyCampDetails(res.data.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  }
+    const getClientList = async () => {
+    setLoading(true)
+
+    try {
+      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+      const clients = res.data.data;
+      setClientList(res.data.data)
+        // Auto-select first client and load its departments
+    if (clients && clients.length > 0) {
+      const firstClientId = clients[0].client_id;
+      setClientId(firstClientId);
+      await getDepartmentList(firstClientId);
+    }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const getDepartmentList = async (clientId) => {
+    setLoading(true)
+    try {
+      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
+        {clientId}
+      )
+      setDeptList(res.data.data)
     } catch (error) {
       console.log(error)
     } finally {
@@ -154,6 +191,7 @@ const CampType = () => {
 
   useEffect(()=>{
     getMonthlyCampDetails();
+    getClientList();
   },[])
 
   return loading ? (
@@ -161,6 +199,41 @@ const CampType = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
+          <div className="d-sm-flex align-items-start justify-content-end mb-4">
+            <div className="dropdown ml-2">
+            <select
+              className="form-control selectStyle selecCamp"
+              name="clientId"
+              id="clientId"
+              value={clientId}
+              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
+            >
+              {clientList && clientList.map((e) => (
+                <option key={e.client_id} value={e.client_id}>
+                  {e.client_name}
+                </option>
+              ))}
+            </select>
+
+          </div>
+
+          <div className="dropdown ml-2">
+            <select
+              className="form-control selectStyle selecCamp"
+              name="deptId"
+              id="deptId"
+              value={deptId}
+              onChange={(e)=>setDeptId(e.target.value)}
+            >
+              {deptList && deptList.map((e) => (
+                <option key={e.dept_id} value={e.dept_id}>
+                  {e.dept_name}
+                </option>
+              ))}
+            </select>
+
+          </div>
+          </div>
         <div className="card-header text-right py-3">
           <button
             className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"

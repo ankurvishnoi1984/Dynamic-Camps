@@ -64,7 +64,7 @@ exports.addNewDepartment = (req, res) => {
 };
 
 exports.getDepartmentDetails = (req, res) => {
-  const { clientId } = req.query;
+  const { clientId } = req.body;
 
   // Optional filter: you can restrict by client if needed
   let query = `
