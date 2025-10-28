@@ -15,13 +15,8 @@ const Clients = () => {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const userId = sessionStorage.getItem("userId");
-    const [doctorFieldRequired, setDoctorRequired] = useState("")
-    const [prescriptionFieldRequired, setPrescRequired] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
     const [clientName, setClientName] = useState(null);
       const [clientLogo, setClientLogo] = useState(null);
-        const [websiteUrl, setWebsiteUrl] = useState(null);
           const [spokePersonName, setSpokePersonName] = useState(null);
               const [spokePersonContact, setSpokePersonContact] = useState(null);
     const [showEditModal, setEditModal] = useState(false);
@@ -29,6 +24,8 @@ const Clients = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [newStatus, setNewStatus] = useState("Y");
+
+  const [clientDetails,setClientDetails]= useState([]);
 
   const handleStatusUpdate = (camp)=>{
         setSelectedCamp(camp);
@@ -90,6 +87,19 @@ const Clients = () => {
         }
     }
 
+        const getClientDetails = async () => {
+        setLoading(true)
+
+        try {
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getMonthlyCampsList`)
+            setClientDetails(res.data.data)
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const getCampTypeList = async () => {
         setLoading(true)
 
@@ -132,58 +142,52 @@ const Clients = () => {
         setFields(updated);
     };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const payload = {
-    campName,
-    campTypeId,
-    userId,
-    starDate:startDate, // 🟢 fixed typo ("starDate" → "startDate")
-    endDate,
-    clientId: CLIENTID,
-    deptId: DEPTID,
-    isDrRequired: doctorFieldRequired,
-    isPrescRequired: prescriptionFieldRequired,
-  };
+  // Validation (optional)
+  if (!clientName || !clientLogo || !spokePersonName || !spokePersonContact) {
+    toast.error("Please fill all required fields");
+    return;
+  }
 
   try {
-    const response = await axios.post(
-      `${BASEURL2}/monthlyCamps/createMonthlyCamp`,
-      payload
-    );
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("clientName", clientName);
+    formData.append("coName", spokePersonName);
+    formData.append("coContact", spokePersonContact);
+    formData.append("userId", userId); // assuming you have it from session/context
+    formData.append("logo", clientLogo); // attach the image
 
-    const data = response.data;
+    // API call
+    const response = await fetch(`${BASEURL2}/client/addNewClient`, {
+      method: "POST",
+      body: formData,
+    });
 
-    if (data && data.errorCode === 1) {
-      // ✅ success
-      alert("Monthly camp created successfully!");
-      getMonthlyCampDetails()
-      setShowModal(false); // ✅ close modal
-      // optional: clear form
-      setCampName("");
-      setCampTypeId("");
-      setDoctorRequired("");
-      setPrescRequired("");
-      setStartDate("");
-      setEndDate("");
+    const data = await response.json();
+
+    if (data.errorCode === 1) {
+      toast.success("Client created successfully!");
+      setShowModal(false);
+      // Optionally refresh client list
+      fetchClientList();
     } else {
-      // ❌ error from API
-      alert(data.errorDetail || "Failed to create camp. Please try again.");
+      toast.error(data.details || "Failed to create client");
     }
   } catch (error) {
-    console.error("Error in handleSubmit:", error);
-    alert(`Error: ${error.message}`);
+    console.error("Error submitting form:", error);
+    toast.error("Something went wrong while creating client");
   }
 };
+
 
 
     useEffect(() => {
         getMonthlyCampDetails();
         getCampTypeList();
     }, [])
-
-    console.log("mycampdetails : ",myCampDetails)
 
     return loading ? (
         <Loader />
@@ -278,7 +282,6 @@ const Clients = () => {
                     </div>
                 </div>
             </div>
-            {console.log("camptypelist : ", campTypeList)}
             {/* Modal */}
             {showModal && (
   <div
@@ -312,20 +315,6 @@ const Clients = () => {
             required
           />
         </div>
-
-        {/* Website URL */}
-        <div className="mb-3">
-          <label className="fw-semibold text-secondary">Website URL</label>
-          <input
-            type="url"
-            className="form-control rounded-pill"
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
-            placeholder="https://www.example.com"
-            required
-          />
-        </div>
-
         {/* Client Logo */}
         <div className="mb-3">
           <label className="fw-semibold text-secondary">Client Logo</label>

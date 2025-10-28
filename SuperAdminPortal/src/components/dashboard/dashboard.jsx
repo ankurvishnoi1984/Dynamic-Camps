@@ -30,14 +30,13 @@ function Dashboard() {
   const [password, SetPassword] = useState("");
   const [role, SetRole] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [sDate, setSDate] = useState("");
-  const [eDate, setEDate] = useState("");
+  const [recentClients,setRecentClients] = useState([]);
+  const [recentCamps,setRecentCamps] = useState([]);
+
 
   const [addUserModel, setAddUserModel] = useState(false)
 
   const [catValue, setCatValue] = useState('');
-
-  const [categoryList, setCategoryList] = useState([]);
 
   const [dashboardSummary, setDashSummary] = useState([]);
 
@@ -62,50 +61,48 @@ function Dashboard() {
   }
 
   const [totals, setTotals] = useState({
-    totalDoctorCount: 0,
-    totalCampCount: 0,
-    totalPrescriptionCount: 0,
-    totalApprovalPendingCount: 0,
-    totalApprovalCompletedCount: 0,
+   totalClient:0,
+   totalDept:0,
+   totalEmp:0,
+   totalCamps:0
   });
 
-  useEffect(() => {
-    if (!dashboardSummary || dashboardSummary.length === 0) {
-      setTotals({
-        totalDoctorCount: 0,
-        totalCampCount: 0,
-        totalPrescriptionCount: 0,
-        totalApprovalPendingCount: 0,
-        totalApprovalCompletedCount: 0,
-      });
-      return;
-    }
+  // useEffect(() => {
+  //   if (!dashboardSummary || dashboardSummary.length === 0) {
+  //     setTotals({
+  //       totalClient: 0,
+  //       totalDept: 0,
+  //       totalEmp: 0,
+  //       totalCamps: 0,
+  //     });
+  //     return;
+  //   }
 
-    // take doctor total directly from API (first row)
-    const doctorTotal = dashboardSummary[0].totalDoctors;
+  //   // take doctor total directly from API (first row)
+  //   const empTotal = recentClients.totalEmployees;
 
-    // sum the other fields across rows
-    const summed = dashboardSummary.reduce(
-      (acc, item) => {
-        acc.totalCampCount += item.total_camps || 0;
-        acc.totalPrescriptionCount += Number(item.total_prescriptions) || 0;
-        acc.totalApprovalPendingCount += Number(item.approval_pending) || 0;
-        acc.totalApprovalCompletedCount += Number(item.approval_completed )|| 0;
-        return acc;
-      },
-      {
-        totalCampCount: 0,
-        totalPrescriptionCount: 0,
-        totalApprovalPendingCount: 0,
-        totalApprovalCompletedCount: 0,
-      }
-    );
+  //   // sum the other fields across rows
+  //   const summed = recentClients.reduce(
+  //     (acc, item) => {
+  //       acc.totalClient += item.totalClient || 0;
+  //       acc.totalDept += Number(item.totalDept) || 0;
+  //       acc.totalApprovalPendingCount += Number(item.approval_pending) || 0;
+  //       acc.totalApprovalCompletedCount += Number(item.approval_completed )|| 0;
+  //       return acc;
+  //     },
+  //     {
+  //       totalCampCount: 0,
+  //       totalPrescriptionCount: 0,
+  //       totalApprovalPendingCount: 0,
+  //       totalApprovalCompletedCount: 0,
+  //     }
+  //   );
 
-    setTotals({
-      totalDoctorCount: doctorTotal,
-      ...summed,
-    });
-  }, [dashboardSummary]);
+  //   setTotals({
+  //     totalDoctorCount: doctorTotal,
+  //     ...summed,
+  //   });
+  // }, [dashboardSummary]);
 
 
   const handelCloseModel = () => {
@@ -130,7 +127,49 @@ function Dashboard() {
     setLoading(true)
     try {
       const res = await axios.get(`${BASEURL2}/basic/getCampNonCampType`)
-      setMyCampType(res.data.data)
+      setRecentCamps(res.data.data)
+      console.log("res.data.data", res.data)
+    } catch (error) {
+      console.log(error)
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
+    const getRecentClients = async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get(`${BASEURL2}/dashboard/getRecentClientDetails`)
+      setRecentClients(res.data.data)
+      console.log("res.data.data", res.data)
+    } catch (error) {
+      console.log(error)
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
+  const getRecentCamps = async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get(`${BASEURL2}/dashboard/getRecentCampDetails`)
+      setRecentCamps(res.data.data)
+      console.log("res.data.data", res.data)
+    } catch (error) {
+      console.log(error)
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
+  const getTotalCountDetails = async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get(`${BASEURL2}/dashboard/totalCountDetails`)
+      setTotals(res.data.data)
       console.log("res.data.data", res.data)
     } catch (error) {
       console.log(error)
@@ -142,10 +181,11 @@ function Dashboard() {
 
 
   useEffect(() => {
-    // GetCatData()
-    // getCategory();
     getSummaryByActivity();
     getMyCampsType();
+    getRecentClients();
+    getRecentCamps();
+    getTotalCountDetails();
   }, [filters])
 
   const handleOpenModal = (action, crid) => {
@@ -167,17 +207,6 @@ function Dashboard() {
       SetCatData(res.data);
 
 
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  async function getCategory() {
-    try {
-      const res = await axios.get(`${BASEURL}/cat/getSubCategory`);
-      if (res?.data?.errorCode == 1) {
-        setCategoryList(res.data.data)
-      }
     } catch (error) {
       console.log(error)
     }
@@ -281,29 +310,8 @@ function Dashboard() {
 
   }
 
-  async function GetFilterDataByDate(start, end) {
 
-    if (filter) {
-      alert("Please Select Selected All Filter")
-    }
-    if (start && end) {
 
-      try {
-        const res = await axios.get(`${BASEURL}/admin/getSubCatFilterData?startDate=${start}&endDate=${end}`);
-        SetCatData(res.data)
-        console.log("GetFilterDataByDate response : ", res.data)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    else {
-      GetCatData();
-    }
-  }
-
-  useEffect(() => {
-    GetFilterDataByDate(sDate, eDate)
-  }, [sDate, eDate])
 
 
 

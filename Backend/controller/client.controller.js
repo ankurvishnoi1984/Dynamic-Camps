@@ -4,13 +4,22 @@ const logger = require('../utils/logger')
 exports.addNewClient = (req, res) => {
   const { clientName, coName, coContact, userId } = req.body;
 
-  // Handle file upload
+  if (!clientName || !coName || !coContact || !userId) {
+    return res.status(400).json({
+      errorCode: 0,
+      message: "Missing required fields",
+      details: "clientName, coName, coContact, and userId are required.",
+    });
+  }
+
+  // Handle file upload (logo)
   let logoFile = null;
-  if (req.files && req.files.length > 0) {
-    const logo = req.files.find((f) => f.fieldname === "logo");
-    if (logo) {
-      logoFile = logo.filename; // save filename in DB
-    }
+  if (req.file) {
+    // If multer single('logo') used
+    logoFile = req.file.filename;
+  } else if (req.files && req.files.logo) {
+    // If multer fields([{ name: 'logo', maxCount: 1 }]) used
+    logoFile = req.files.logo[0].filename;
   }
 
   const query = `
@@ -30,14 +39,10 @@ exports.addNewClient = (req, res) => {
       [clientName, coName, coContact, logoFile, userId],
       (err, results) => {
         if (err) {
-          logger.error(
-            `Error in /controller/client/addNewClient (query): ${err.message}`
-          );
+          logger.error(`Error in /controller/client/addNewClient (query): ${err.message}`);
           return res.status(500).json({
             errorCode: 0,
             errorDetail: err.message,
-            responseData: {},
-            status: "ERROR",
             details: "Failed to create client record",
           });
         }
@@ -50,15 +55,14 @@ exports.addNewClient = (req, res) => {
       }
     );
   } catch (error) {
-    logger.error(
-      `Error in /controller/client/addNewClient (try-catch): ${error.message}`
-    );
+    logger.error(`Error in /controller/client/addNewClient (try-catch): ${error.message}`);
     res.status(500).json({
       message: "Unexpected error occurred",
       error: error.message,
     });
   }
 };
+
 
 
 exports.getClientDetails = (req, res) => {
