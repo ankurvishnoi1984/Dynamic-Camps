@@ -15,12 +15,9 @@ const Departments = () => {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const userId = sessionStorage.getItem("userId");
-    const [doctorFieldRequired, setDoctorRequired] = useState("")
-    const [prescriptionFieldRequired, setPrescRequired] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [clientName, setClientName] = useState(null);
-      const [clientLogo, setClientLogo] = useState(null);
+    const [clientId, setClientId] = useState(null);
+    const [deptName,setDeptName] = useState("");
+      const [deptLogo, setDeptLogo] = useState(null);
         const [websiteUrl, setWebsiteUrl] = useState(null);
           const [spokePersonName, setSpokePersonName] = useState(null);
               const [spokePersonContact, setSpokePersonContact] = useState(null);
@@ -29,6 +26,8 @@ const Departments = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [newStatus, setNewStatus] = useState("Y");
+  const [deptList,setDeptList] = useState([]);
+  const [clientList,setClientList] = useState([]);
 
   const handleStatusUpdate = (camp)=>{
         setSelectedCamp(camp);
@@ -103,6 +102,19 @@ const Departments = () => {
         }
     }
 
+        const getDepartmentList = async () => {
+        setLoading(true)
+
+        try {
+            const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`)
+            setDeptList(res.data.data)
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const handleFieldChange = (index, key, value) => {
         const updated = [...fields];
         updated[index][key] = value;
@@ -132,58 +144,69 @@ const Departments = () => {
         setFields(updated);
     };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
-
-  const payload = {
-    campName,
-    campTypeId,
-    userId,
-    starDate:startDate, // 🟢 fixed typo ("starDate" → "startDate")
-    endDate,
-    clientId: CLIENTID,
-    deptId: DEPTID,
-    isDrRequired: doctorFieldRequired,
-    isPrescRequired: prescriptionFieldRequired,
-  };
+  // Validation (optional)
+  if (!clientId  || !deptName || !deptLogo || !spokePersonName || !spokePersonContact) {
+    alert("Please fill all required fields");
+    return;
+  }
 
   try {
-    const response = await axios.post(
-      `${BASEURL2}/monthlyCamps/createMonthlyCamp`,
-      payload
-    );
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("clientId", clientId);
+    formData.append("websiteUrl",websiteUrl)
+    formData.append("deptName", deptName);
+    formData.append("coName", spokePersonName);
+    formData.append("coContact", spokePersonContact);
+    formData.append("userId", userId); // assuming you have it from session/context
+    formData.append("logo", deptLogo); // attach the image
 
-    const data = response.data;
+    // API call
+    const response = await fetch(`${BASEURL2}/department/addNewDepartment`, {
+      method: "POST",
+      body: formData,
+    });
 
-    if (data && data.errorCode === 1) {
-      // ✅ success
-      alert("Monthly camp created successfully!");
-      getMonthlyCampDetails()
-      setShowModal(false); // ✅ close modal
-      // optional: clear form
-      setCampName("");
-      setCampTypeId("");
-      setDoctorRequired("");
-      setPrescRequired("");
-      setStartDate("");
-      setEndDate("");
+    const data = await response.json();
+
+    if (data.errorCode === 1) {
+      alert("Department created successfully!");
+      setShowModal(false);
+      // Optionally refresh client list
+      getDepartmentList();
     } else {
-      // ❌ error from API
-      alert(data.errorDetail || "Failed to create camp. Please try again.");
+      alert(data.details || "Failed to create dept");
     }
   } catch (error) {
-    console.error("Error in handleSubmit:", error);
-    alert(`Error: ${error.message}`);
+    console.error("Error submitting form:", error);
+    alert("Something went wrong while creating dept");
   }
 };
 
+  const getClientList = async () => {
+    setLoading(true)
+
+    try {
+      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+      setClientList(res.data.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  }
+  console.log("client list",clientList)
 
     useEffect(() => {
         getMonthlyCampDetails();
         getCampTypeList();
+        getDepartmentList();
+        getClientList();
     }, [])
 
-    console.log("mycampdetails : ",myCampDetails)
+    console.log("deptList : ",deptList)
 
     return loading ? (
         <Loader />
@@ -218,65 +241,25 @@ const Departments = () => {
           </tr>
         </thead>
         <tbody>
-          {[
-            {
-              client_name: "Apollo Hospitals",
-              website: "https://www.apollohospitals.com",
-              dept: "Cardiology",
-              spoke_person: "Dr. Ramesh Iyer",
-              contact: "+91 98231 44567",
-              created_date: "2025-10-15",
-            },
-            {
-              client_name: "Fortis Healthcare",
-              website: "https://www.fortishealthcare.com",
-              dept: "General Medicine",
-              spoke_person: "Dr. Nisha Gupta",
-              contact: "+91 98745 11223",
-              created_date: "2025-10-14",
-            },
-            {
-              client_name: "Sunshine Diagnostics",
-              website: "https://www.sunshinediagnostics.in",
-              dept: "Pathology",
-              spoke_person: "Dr. Kunal Shah",
-              contact: "+91 98672 33445",
-              created_date: "2025-10-12",
-            },
-            {
-              client_name: "CarePlus Clinic",
-              website: "https://www.careplusclinic.com",
-              dept: "Pediatrics",
-              spoke_person: "Dr. Sneha Patil",
-              contact: "+91 99224 55678",
-              created_date: "2025-10-10",
-            },
-            {
-              client_name: "Medicare Wellness Center",
-              website: "https://www.medicarewellness.in",
-              dept: "Physiotherapy", 
-              spoke_person: "Dr. Aniket Joshi",
-              contact: "+91 98123 66789",
-              created_date: "2025-10-09",
-            },
-          ].map((e, i) => (
-            <tr key={i}>
+          {console.log("deptlist",deptList)}
+          {deptList.map((e) => (
+            <tr key={e.dept_id}>
               <td>{e.client_name}</td>
-                <td>{e.dept}</td>
+                <td>{e.dept_name}</td>
               <td>
                 <a
-                  href={e.website}
+                  href={e.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary text-decoration-none"
                 >
-                  {e.website}
+                  {e.website_url}
                 </a>
               </td>
-              <td>{e.spoke_person}</td>
-              <td>{e.contact}</td>
+              <td>{e.dept_coordinator_name}</td>
+              <td>{e.dept_coordinator_contact}</td>
               <td>
-                {new Date(e.created_date).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
+                {new Date(e.dept_created_at).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
               </td>
             </tr>
           ))}
@@ -285,7 +268,6 @@ const Departments = () => {
                     </div>
                 </div>
             </div>
-            {console.log("camptypelist : ", campTypeList)}
             {/* Modal */}
             {showModal && (
   <div
@@ -314,12 +296,13 @@ const Departments = () => {
               </label>
               <select
                 className="form-select form-control rounded-pill"
-                value={doctorFieldRequired}
-                onChange={(e) => setDoctorRequired(e.target.value)}
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
               >
                 <option value="">Select...</option>
-                <option value="Y">Yes</option>
-                <option value="N">No</option>
+                {clientList.map((el)=>
+                  <option value={el.client_id}>{el.client_name}</option>
+                )}
               </select>
             </div></div>
         <div className="mb-3">
@@ -327,9 +310,9 @@ const Departments = () => {
           <input
             type="text"
             className="form-control rounded-pill"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            placeholder="Enter client name..."
+            value={deptName}
+            onChange={(e) => setDeptName(e.target.value)}
+            placeholder="Enter department name..."
             required
           />
         </div>
@@ -354,10 +337,10 @@ const Departments = () => {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setClientLogo(e.target.files[0])}
+              onChange={(e) => setDeptLogo(e.target.files[0])}
               style={{ display: "none" }}
               id="clientLogoInput"
-              required
+              name="deptLogo"
             />
             <button
               type="button"
@@ -366,7 +349,7 @@ const Departments = () => {
             >
               Browse
             </button> 
-            <span>{clientLogo ? clientLogo.name : "     No file chosen"}</span>
+            <span>{deptLogo ? deptLogo.name : "     No file chosen"}</span>
           </div>
         </div>
 

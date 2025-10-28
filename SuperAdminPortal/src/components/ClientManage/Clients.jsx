@@ -87,18 +87,19 @@ const Clients = () => {
         }
     }
 
-        const getClientDetails = async () => {
-        setLoading(true)
 
-        try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getMonthlyCampsList`)
-            setClientDetails(res.data.data)
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false);
-        }
+  const getClientDetails = async () => {
+    setLoading(true)
+
+    try {
+      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+      setClientDetails(res.data.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
     }
+  }
 
     const getCampTypeList = async () => {
         setLoading(true)
@@ -147,7 +148,7 @@ const handleSubmit = async (e) => {
 
   // Validation (optional)
   if (!clientName || !clientLogo || !spokePersonName || !spokePersonContact) {
-    toast.error("Please fill all required fields");
+    alert("Please fill all required fields");
     return;
   }
 
@@ -169,16 +170,16 @@ const handleSubmit = async (e) => {
     const data = await response.json();
 
     if (data.errorCode === 1) {
-      toast.success("Client created successfully!");
+      alert("Client created successfully!");
       setShowModal(false);
       // Optionally refresh client list
-      fetchClientList();
+      getClientDetails();
     } else {
-      toast.error(data.details || "Failed to create client");
+      alert(data.details || "Failed to create client");
     }
   } catch (error) {
     console.error("Error submitting form:", error);
-    toast.error("Something went wrong while creating client");
+    alert("Something went wrong while creating client");
   }
 };
 
@@ -187,6 +188,7 @@ const handleSubmit = async (e) => {
     useEffect(() => {
         getMonthlyCampDetails();
         getCampTypeList();
+        getClientDetails();
     }, [])
 
     return loading ? (
@@ -214,53 +216,18 @@ const handleSubmit = async (e) => {
         <thead>
           <tr>
             <th>Client Name</th>
-            <th>Website URL</th>
+            {/* <th>Website URL</th> */}
             <th>Spoke Person Name</th>
             <th>Spoke Person Contact</th>
             <th>Created Date</th>
           </tr>
         </thead>
         <tbody>
-          {[
-            {
-              client_name: "Apollo Hospitals",
-              website: "https://www.apollohospitals.com",
-              spoke_person: "Dr. Ramesh Iyer",
-              contact: "+91 98231 44567",
-              created_date: "2025-10-15",
-            },
-            {
-              client_name: "Fortis Healthcare",
-              website: "https://www.fortishealthcare.com",
-              spoke_person: "Dr. Nisha Gupta",
-              contact: "+91 98745 11223",
-              created_date: "2025-10-14",
-            },
-            {
-              client_name: "Sunshine Diagnostics",
-              website: "https://www.sunshinediagnostics.in",
-              spoke_person: "Dr. Kunal Shah",
-              contact: "+91 98672 33445",
-              created_date: "2025-10-12",
-            },
-            {
-              client_name: "CarePlus Clinic",
-              website: "https://www.careplusclinic.com",
-              spoke_person: "Dr. Sneha Patil",
-              contact: "+91 99224 55678",
-              created_date: "2025-10-10",
-            },
-            {
-              client_name: "Medicare Wellness Center",
-              website: "https://www.medicarewellness.in",
-              spoke_person: "Dr. Aniket Joshi",
-              contact: "+91 98123 66789",
-              created_date: "2025-10-09",
-            },
-          ].map((e, i) => (
+          {console.log("client details",clientDetails)}
+          {clientDetails.map((e, i) => (
             <tr key={i}>
               <td>{e.client_name}</td>
-              <td>
+              {/* <td>
                 <a
                   href={e.website}
                   target="_blank"
@@ -269,11 +236,11 @@ const handleSubmit = async (e) => {
                 >
                   {e.website}
                 </a>
-              </td>
-              <td>{e.spoke_person}</td>
-              <td>{e.contact}</td>
+              </td> */}
+              <td>{e.coordinator_name}</td>
+              <td>{e.coordinator_contact}</td>
               <td>
-                {new Date(e.created_date).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
+                {new Date(e.created_at).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
               </td>
             </tr>
           ))}

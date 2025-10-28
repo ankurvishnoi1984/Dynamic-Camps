@@ -20,7 +20,7 @@ exports.addNewDepartment = (req, res) => {
       dept_name,
       coordinator_name,
       coordinator_contact,
-      logo,
+      dept_logo,
       website_url,
       created_by
     )
