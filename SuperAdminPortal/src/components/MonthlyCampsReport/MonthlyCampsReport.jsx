@@ -10,24 +10,19 @@ import MonthlyCImgDownload from "./MonthlyCImgDownload";
 
 const MonthlyCampsReport = () => {
 
-
-
-    const [subCatData, SetSubCatData] = useState([]);
     const empcode = sessionStorage.getItem('empcode')
     const userId = sessionStorage.getItem('userId');
      const [show,setShow]= useState(false);
     const [myCampDetails, setMyCampDetails] = useState([]);
 
-    const [subCatId, setSubCatId] = useState("");
-
-    const [sDate, setSDate] = useState("");
-    const [eDate, setEDate] = useState("");
-
-    const [reportNumberWise, setReportNumberWise] = useState([])
 
     const [allReportData, setAllReportData] = useState([]);
     const [loading, setLoading] = useState(false)
     const [myCampType, setMyCampType] = useState([]);
+    const [clientList,setClientList] = useState([]);
+  const [clientId,setClientId] = useState("");
+  const [deptList,setDeptList]= useState([]);
+  const [deptId,setDeptId]=useState("");
 
     const [filters, setFilters] = useState({
         userId: userId,         // you will probably get this from logged-in user
@@ -72,14 +67,54 @@ const MonthlyCampsReport = () => {
         }
         GetDetiledData();
         getMyCampsType();
-    }, [filters])
+    }, [filters,deptId])
 
 
     useEffect(() => {
         if (filters.campId) {
             getMyCampDetailsByEmpcode();
         }
-    }, [filters.campId]);
+    }, [filters.campId,deptId]);
+
+    useEffect(() => {
+        getClientList();
+    }, [])
+
+
+    const getClientList = async () => {
+        setLoading(true)
+
+        try {
+            const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+            const clients = res.data.data;
+            setClientList(res.data.data)
+            // Auto-select first client and load its departments
+            if (clients && clients.length > 0) {
+                const firstClientId = clients[0].client_id;
+                setClientId(firstClientId);
+                await getDepartmentList(firstClientId);
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getDepartmentList = async (clientId) => {
+        setLoading(true)
+        try {
+            const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
+                { clientId }
+            )
+            setDeptList(res.data.data)
+            setDeptId(res.data.data[0].dept_id)
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    }
 
 
 
@@ -89,6 +124,7 @@ const MonthlyCampsReport = () => {
             searchKeyword: filters.searchKeyword.trim() || null,
             campId: filters.campId,
             empcode:empcode,
+            deptId,
         };
 
         try {
@@ -102,9 +138,12 @@ const MonthlyCampsReport = () => {
     }
 
     const getMyCampsType = async () => {
+        if(!deptId)return
         setLoading(true);
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`);
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,
+                {deptId}
+            );
             const camps = res.data.data || [];
             setMyCampType(camps);
 
@@ -125,6 +164,7 @@ const MonthlyCampsReport = () => {
 
 
     async function GetDetiledData() {
+        // check if deptid needed
         const payload = {
             empcode: filters.empcode,
             searchKeyword: filters.searchKeyword.trim() || null,
@@ -200,6 +240,40 @@ const MonthlyCampsReport = () => {
 
 
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
+
+                <div className="dropdown ml-2">
+            <select
+              className="form-control selectStyle selecCamp"
+              name="clientId"
+              id="clientId"
+              value={clientId}
+              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
+            >
+              {clientList && clientList.map((e) => (
+                <option key={e.client_id} value={e.client_id}>
+                  {e.client_name}
+                </option>
+              ))}
+            </select>
+
+          </div>
+
+          <div className="dropdown ml-2">
+            <select
+              className="form-control selectStyle selecCamp"
+              name="deptId"
+              id="deptId"
+              value={deptId}
+              onChange={(e)=>setDeptId(e.target.value)}
+            >
+              {deptList && deptList.map((e) => (
+                <option key={e.dept_id} value={e.dept_id}>
+                  {e.dept_name}
+                </option>
+              ))}
+            </select>
+
+          </div>
 
                 <div className="form-group ml-2">
                     <label htmlFor="searchKeyword" >Doctor Name:</label>

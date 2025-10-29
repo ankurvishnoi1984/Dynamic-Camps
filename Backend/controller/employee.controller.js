@@ -123,7 +123,7 @@ exports.getAllEmployee = async (req, res) => {
 };
 
 
-exports.addEmp = (req, res) => {
+exports.addEmployee = (req, res) => {
   const {
     name,
     empcode,

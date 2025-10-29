@@ -613,7 +613,7 @@ exports.getActiveCampsNavList = (req, res) => {
     WHERE 
       m.status = 'Y'
       AND m.is_active = 'Y'
-      AND dept_id = ?
+      AND m.dept_id = ?
       AND CURRENT_DATE() BETWEEN DATE(m.start_date) AND DATE(m.end_date)
     ORDER BY m.start_date DESC;
   `;
