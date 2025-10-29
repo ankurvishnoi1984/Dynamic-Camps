@@ -45,7 +45,9 @@ const CampType = () => {
     setLoading(true)
 
     try {
-      const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampDetailsAdmin`)
+      const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampDetailsAdmin`,
+        {deptId}
+      )
       setMyCampDetails(res.data.data)
     } catch (error) {
       console.log(error)
@@ -80,6 +82,7 @@ const CampType = () => {
         {clientId}
       )
       setDeptList(res.data.data)
+      setDeptId(res.data.data[0].dept_id)
     } catch (error) {
       console.log(error)
     } finally {
@@ -119,11 +122,18 @@ const CampType = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!campTypeName || !userId || !deptId || !fields){
+      console.log("dept id inside submit",deptId)
+      alert("Please fill all the required fields")
+      return;
+    }
+
     try {
       // Step 1: Prepare payload for camp type
       const campTypePayload = {
         campTypeName,
         userId: userId,
+        deptId:deptId
       };
 
       console.log("Creating Camp Type:", campTypePayload);
@@ -145,6 +155,7 @@ const CampType = () => {
       // Step 4: Prepare payload for camp config fields
       const fieldsPayload = {
         campTypeId,
+        deptId,
         fields: fields.map((f) => ({
           ...f,
           options_json:
@@ -190,9 +201,12 @@ const CampType = () => {
   };
 
   useEffect(()=>{
-    getMonthlyCampDetails();
     getClientList();
   },[])
+
+    useEffect(()=>{
+    getMonthlyCampDetails();
+  },[deptId])
 
   return loading ? (
     <Loader />
@@ -477,6 +491,7 @@ const CampType = () => {
           editData={editData}
           editMode={!!editData}
           onSuccess={() => getMonthlyCampDetails()}
+          deptId={deptId}
         />}
 
     </div>

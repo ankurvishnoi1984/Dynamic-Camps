@@ -26,6 +26,10 @@ const MonthlyCamp = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [newStatus, setNewStatus] = useState("Y");
+   const [clientList,setClientList] = useState([]);
+  const [clientId,setClientId] = useState("");
+  const [deptList,setDeptList]= useState([]);
+  const [deptId,setDeptId]=useState("");
 
   const handleStatusUpdate = (camp)=>{
         setSelectedCamp(camp);
@@ -78,7 +82,9 @@ const MonthlyCamp = () => {
         setLoading(true)
 
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getMonthlyCampsList`)
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getMonthlyCampsList`,
+              {deptId}
+            )
             setMyCampDetails(res.data.data)
         } catch (error) {
             console.log(error)
@@ -100,46 +106,52 @@ const MonthlyCamp = () => {
         }
     }
 
-    const handleFieldChange = (index, key, value) => {
-        const updated = [...fields];
-        updated[index][key] = value;
+        const getClientList = async () => {
+    setLoading(true)
 
-        // Reset options_json if not dropdown
-        if (key === "field_type" && value !== "dropdown") {
-            updated[index].options_json = null;
-        }
-        setFields(updated);
-    };
+    try {
+      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+      const clients = res.data.data;
+      setClientList(res.data.data)
+        // Auto-select first client and load its departments
+    if (clients && clients.length > 0) {
+      const firstClientId = clients[0].client_id;
+      setClientId(firstClientId);
+      await getDepartmentList(firstClientId);
+    }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    const handleAddField = () => {
-        setFields([
-            ...fields,
-            {
-                label: "",
-                field_type: "text",
-                is_required: "Y",
-                options_json: null,
-                order_index: fields.length + 1,
-            },
-        ]);
-    };
-
-    const handleRemoveField = (index) => {
-        const updated = fields.filter((_, i) => i !== index);
-        setFields(updated);
-    };
+  const getDepartmentList = async (clientId) => {
+    setLoading(true)
+    try {
+      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
+        {clientId}
+      )
+      setDeptList(res.data.data)
+      setDeptId(res.data.data[0].dept_id)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  }
 
  const handleSubmit = async (e) => {
   e.preventDefault();
 
   const payload = {
     campName,
+    deptId,
     campTypeId,
     userId,
     starDate:startDate, // 🟢 fixed typo ("starDate" → "startDate")
     endDate,
-    clientId: CLIENTID,
-    deptId: DEPTID,
+    deptId: deptId,
     isDrRequired: doctorFieldRequired,
     isPrescRequired: prescriptionFieldRequired,
   };
@@ -176,9 +188,13 @@ const MonthlyCamp = () => {
 
 
     useEffect(() => {
-        getMonthlyCampDetails();
-        getCampTypeList();
+        getClientList();
     }, [])
+
+  useEffect(() => {
+    getMonthlyCampDetails();
+    getCampTypeList();
+  }, [deptId])
 
     console.log("mycampdetails : ",myCampDetails)
 
@@ -187,6 +203,43 @@ const MonthlyCamp = () => {
     ) : (
         <div className="container-fluid">
             <div className="card shadow mb-4">
+
+            <div className="d-sm-flex align-items-start justify-content-end mb-4">
+              <div className="dropdown ml-2">
+                <select
+                  className="form-control selectStyle selecCamp"
+                  name="clientId"
+                  id="clientId"
+                  value={clientId}
+                  onChange={(e) => { setClientId(e.target.value), getDepartmentList(e.target.value) }}
+                >
+                  {clientList && clientList.map((e) => (
+                    <option key={e.client_id} value={e.client_id}>
+                      {e.client_name}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+
+              <div className="dropdown ml-2">
+                <select
+                  className="form-control selectStyle selecCamp"
+                  name="deptId"
+                  id="deptId"
+                  value={deptId}
+                  onChange={(e) => setDeptId(e.target.value)}
+                >
+                  {deptList && deptList.map((e) => (
+                    <option key={e.dept_id} value={e.dept_id}>
+                      {e.dept_name}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+            </div>
+
                 <div className="card-header text-right py-3">
                     <button
                         className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
@@ -435,6 +488,7 @@ const MonthlyCamp = () => {
               onSuccess={() => getMonthlyCampDetails()}
               campTypeList = {campTypeList}
               userId = {userId}
+              deptId={deptId}
             />
           )}
 

@@ -7,6 +7,7 @@ const EditCampTypeModal = ({
   editData = null,      // when editing, pass the camp_type object here
   userId,               // current logged-in user's ID
   onSuccess,            // callback to refresh parent list
+  deptId,
 }) => {
   const [campTypeName, setCampTypeName] = useState("");
   const [fields, setFields] = useState([]);
@@ -77,6 +78,7 @@ const EditCampTypeModal = ({
     const payload = {
       camp_type_id: editData?.camp_type_id || null,
       camp_type_name: campTypeName.trim(),
+      deptId,
       userId: userId,
       fields: fields.map((f) => ({
         field_id: f.field_id || null,

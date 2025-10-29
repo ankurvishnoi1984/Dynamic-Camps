@@ -12,7 +12,8 @@ const EditMonthlyCampModal = ({
   editData,
   onSuccess,
   campTypeList,
-  userId
+  userId,
+  deptId,
 }) => {
   const [campName, setCampName] = useState("");
   const [campTypeId, setCampTypeId] = useState("");
@@ -45,6 +46,7 @@ const EditMonthlyCampModal = ({
       isDoctorRequired,
       isPrescriptionRequired,
       userId, // replace with logged-in user id
+      deptId
     };
     const endpoint = `${BASEURL2}/monthlyCamps/updateMonthlyCamp` 
       axios

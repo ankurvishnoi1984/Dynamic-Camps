@@ -260,7 +260,7 @@ exports.createMonthlyCamp = (req, res) => {
   created_by,
   start_date,
   end_date,
-  department_id,
+  dept_id,
   is_doctor_required,
   is_prescription_required
   )
