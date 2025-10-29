@@ -5,6 +5,7 @@ const clientRoutes = require("./routes/client.route");
 const dashboardRoutes = require("./routes/dashboard.route");
 const monthlyCampRoutes = require("./routes/monthlyCamps.route")
 const deptRoutes = require("./routes/department.route")
+const employeeRoutes = require("./routes/employee.route");
 
 const path = require('path');
 
@@ -25,7 +26,8 @@ app.use("/auth", authRoutes);
 app.use("/client",clientRoutes);
 app.use("/dashboard",dashboardRoutes);
 app.use("/monthlyCamps",monthlyCampRoutes);
-app.use("/department",deptRoutes)
+app.use("/department",deptRoutes);
+app.use("/employee",employeeRoutes);
 
 const PORT = process.env.PORT || 8035;
 

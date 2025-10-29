@@ -3,39 +3,47 @@ const logger = require("../utils/logger");
 const moment = require('moment');
 
 exports.getAllEmployee = async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const offset = (page - 1) * limit;
-    const searchName = req.query.searchName || '';
-    const empcodeFilter = req.query.empcode || ''; // empcode from request
-    const deptId = req.query.dept_id || ''; // new department filter
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = (page - 1) * limit;
+  const searchName = req.query.searchName || '';
+  const empcodeFilter = req.query.empcode || '';
+  const deptId = req.query.deptId || '';
+  console.log("deptId",deptId)
 
-    // If dept_id is provided, restrict data to that department only
-    const deptCondition = deptId ? `AND dept_id = ${db.escape(deptId)}` : '';
+  if (!deptId) {
+    return res.status(400).json({
+      success: false,
+      message: "Department ID (deptId) is required.",
+    });
+  }
 
-    // Recursive CTE to get empcode and all subordinates
-    const baseCTE = `
+  // Fully qualify dept_id column to avoid ambiguity
+  const deptConditionBase = deptId ? `AND u.dept_id = ${db.escape(deptId)}` : '';
+  const deptConditionCTE = deptId ? `AND eh.dept_id = ${db.escape(deptId)}` : '';
+
+  // Recursive CTE for employee hierarchy
+  const baseCTE = `
     WITH RECURSIVE employee_hierarchy AS (
-       SELECT 
-        user_id, 
-        empcode, 
-        name, 
-        designation, 
-        role, 
-        doj,
-        zone,
-        region,
-        area,
-        hq,
-        reporting,
-        mobile,
-        email,
-        status,
-        dept_id
-      FROM user_mst
-      WHERE status = 'Y'
-        ${empcodeFilter ? `AND empcode = ${db.escape(empcodeFilter)}` : ''}
-        ${deptCondition}
+      SELECT 
+        u.user_id, 
+        u.empcode, 
+        u.name, 
+        u.designation, 
+        u.role, 
+        u.doj,
+        u.zone,
+        u.region,
+        u.area,
+        u.hq,
+        u.reporting,
+        u.mobile,
+        u.email,
+        u.status,
+        u.dept_id
+      FROM user_mst u
+      WHERE u.status = 'Y'
+        ${empcodeFilter ? `AND u.empcode = ${db.escape(empcodeFilter)}` : ''}
 
       UNION ALL
 
@@ -59,67 +67,61 @@ exports.getAllEmployee = async (req, res) => {
       INNER JOIN employee_hierarchy eh 
         ON u.reporting = eh.empcode
       WHERE u.status = 'Y'
-        ${deptCondition}
+        
     )
   `;
 
-    const dataQuery = `
+  const dataQuery = `
     ${baseCTE}
     SELECT *
     FROM employee_hierarchy
     WHERE name LIKE ${db.escape('%' + searchName + '%')}
+    AND dept_id = ${deptId}
     LIMIT ${limit} OFFSET ${offset};
   `;
 
-    const countQuery = `
+  const countQuery = `
     ${baseCTE}
     SELECT COUNT(*) AS totalCount
     FROM employee_hierarchy
     WHERE name LIKE ${db.escape('%' + searchName + '%')};
   `;
 
-    try {
-        const users = await new Promise((resolve, reject) => {
-            db.query(dataQuery, (err, result) => {
-                if (err) {
-                    logger.error(err.message);
-                    reject(err);
-                } else {
-                    resolve(result);
-                }
-            });
+  try {
+    const [users, totalRowCountResult] = await Promise.all([
+      new Promise((resolve, reject) => {
+        db.query(dataQuery, (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
         });
-
-        const totalRowCountResult = await new Promise((resolve, reject) => {
-            db.query(countQuery, (err, result) => {
-                if (err) {
-                    logger.error(err.message);
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
-            });
+      }),
+      new Promise((resolve, reject) => {
+        db.query(countQuery, (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0]);
         });
-
-        res.status(200).json({
-            success: true,
-            users,
-            totalCount: totalRowCountResult.totalCount,
-            filters: {
-                dept_id: deptId || null,
-                empcode: empcodeFilter || null,
-                search: searchName || null
-            }
-        });
-    } catch (error) {
-        logger.error(error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching employee data',
-            error: error.message
-        });
-    }
+      }),
+    ]);
+    res.status(200).json({
+      success: true,
+      users,
+      totalCount: totalRowCountResult.totalCount,
+      filters: {
+        dept_id: deptId,
+        empcode: empcodeFilter || null,
+        search: searchName || null,
+      },
+    });
+  } catch (error) {
+    logger.error(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching employee data",
+      error: error.message,
+    });
+  }
 };
+
 
 exports.addEmployee = async (req, res) => {
     const { name, empcode, state, hq, pincode, reporting, password, role, deptId } =

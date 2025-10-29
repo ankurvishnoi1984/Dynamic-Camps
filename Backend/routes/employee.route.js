@@ -8,3 +8,5 @@ router.delete("/deleteEmployee/:id", deleteEmployee)
 router.post("/getSeniorEmpcodesByDesignation", getSeniorEmpcodesByDesignation)
 router.post("/addEmp", addEmployee)
 router.put("/updateEmp", updateEmp)
+
+module.exports= router;
