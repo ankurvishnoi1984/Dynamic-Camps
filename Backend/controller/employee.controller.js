@@ -123,42 +123,97 @@ exports.getAllEmployee = async (req, res) => {
 };
 
 
-exports.addEmployee = async (req, res) => {
-    const { name, empcode, state, hq, pincode, reporting, password, role, deptId } =
-        req.body;
+exports.addEmp = (req, res) => {
+  const {
+    name,
+    empcode,
+    hq,
+    reporting,
+    password,
+    designation,
+    zone,
+    region,
+    usernamehq,
+    mobile,
+    email,
+    created_by,
+    deptId,
+  } = req.body;
 
-    console.log(req.body)
-    const query =
-        "insert into user_mst(name,empcode,state,hq,pincode,reporting,password,role,dept_id) values(?,?,?,?,?,?,?,?,?)";
-    try {
-        db.query(
-            query,
-            [name, empcode, state, hq, pincode, reporting, password, role, deptId],
-            (err, result) => {
-                if (err) {
-                    logger.error(err.message);
-                    res.status(500).json({
-                        errorCode: "0",
-                        errorDetail: err.message,
-                        responseData: {},
-                        status: "ERROR",
-                        details: "An internal server error occurred",
-                        getMessageInfo: "An internal server error occurred",
-                    });
-                } else {
-                    logger.info("Employee Added Successfully");
+  if (!name || !empcode || !usernamehq || !designation || !created_by || deptId) {
+    return res
+      .status(400)
+      .json({ errorCode: "0", message: "Missing required fields" });
+  }
 
-                    res
-                        .status(200)
-                        .json({ message: "Employee Added Successfully", errorCode: "1" });
-                }
-            }
-        );
-    } catch (error) {
-        logger.error(error.message);
+  // Role mapping based on designation
+  const roleMapping = {
+    "MARKETING EXECUTIVE": 5,
+    "AREA BUSINESS MANAGER": 4,
+    "SENIOR AREA BUSINESS MANAGER": 4,
+    "REGIONAL MANAGER": 3,
+    "SENIOR REGIONAL MANAGER": 3,
+    "DIVISIONAL SALES MANAGER": 2,
+    "ZONAL SALES MANAGER": 2,
+    "SALES MANAGER": 2,
+    "Associate General Manager - Sales - Sale": 1,
+    "NATIONAL SALES MANAGER": 1,
+  };
 
-        res.send(error);
+  const role = roleMapping[designation] || 5; // Default lowest if not found
+
+  // Step 1️⃣ — Check if usernamehq already exists
+  const checkUsernameQuery = "SELECT user_id FROM user_mst WHERE usernamehq = ? AND status = 'Y'";
+  db.query(checkUsernameQuery, [usernamehq], (err, result) => {
+    if (err) {
+      logger.error(err.message);
+      return res.status(500).json({ errorCode: "0", message: err.message });
     }
+
+    if (result.length > 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: "Username already exists. Please choose another.",
+      });
+    }
+
+    // Step 2️⃣ — Insert new employee
+    const insertQuery = `
+      INSERT INTO user_mst
+      (empcode, name, designation, role, zone, region, hq, reporting, 
+       mobile, email, usernamehq, password, status, created_by, created_date,dept_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Y', ?, NOW(),?)
+    `;
+
+    const insertValues = [
+      empcode,
+      name,
+      designation,
+      role,
+      zone,
+      region,
+      hq,
+      reporting,
+      mobile,
+      email,
+      usernamehq,
+      password,
+      created_by,
+      deptId
+    ];
+
+    db.query(insertQuery, insertValues, (err, result2) => {
+      if (err) {
+        logger.error(err.message);
+        return res.status(500).json({ errorCode: "0", message: err.message });
+      }
+
+      return res.status(200).json({
+        errorCode: "1",
+        message: "Employee added successfully",
+      });
+    });
+  });
 };
 
 exports.updateEmp = (req, res) => {

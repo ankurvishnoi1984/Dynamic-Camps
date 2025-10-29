@@ -31,7 +31,7 @@ export default function EditEmployeeModal({
   const fetchSeniorEmpList = async () => {
     try {
       const res = await axios.post(
-        `${BASEURL2}/admin/getSeniorEmpcodesByDesignation`,
+        `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
         { designation: formData.designation }
       );
       setSeniorEmpcodes(res.data.seniors)
@@ -56,7 +56,7 @@ export default function EditEmployeeModal({
         modified_by: loggedInUserId,    // ✅ attach logged-in user id
       };
 
-      await axios.put(`${BASEURL2}/admin/updateEmp`, updatedData);
+      await axios.put(`${BASEURL2}/employee/updateEmp`, updatedData);
       toast.success("Employee updated successfully");
       getfun();
       setEditUserModel(false);

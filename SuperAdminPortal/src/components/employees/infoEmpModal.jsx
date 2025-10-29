@@ -15,7 +15,7 @@ export default function InfoEmpModal({ setInfoUserModel, empData }) {
   const fetchSeniorEmpList = async () => {
     try {
       const res = await axios.post(
-        `${BASEURL2}/admin/getSeniorEmpcodesByDesignation`,
+        `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
         { designation: formData.designation }
       );
       setSeniorEmpcodes(res.data.seniors);

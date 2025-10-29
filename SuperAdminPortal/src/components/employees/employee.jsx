@@ -88,7 +88,7 @@ function Employee() {
       setSeniorEmpcodes(res.data.seniors)
     } catch (error) {
       console.error(error);
-      toast.error("Failed to fetch employees");
+      toast.error("Failed to fetch seniors list");
     }
   };
 
@@ -137,7 +137,7 @@ function Employee() {
 
   const fetchEmployeeById = async (id) => {
     try {
-      const res = await axios.get(`${BASEURL2}/admin/getEmpWithId/${id}`);
+      const res = await axios.get(`${BASEURL2}/employee/getEmpWithId/${id}`);
       setSelectedEmp(res.data?.user?.[0] || {});
     } catch (error) {
       console.error(error);
@@ -227,9 +227,10 @@ function Employee() {
         email: formData.email,
         dob: formData.dateOfBirth,
         created_by: userId, // assuming you have userId stored (e.g. from login)
+        deptId,
       };
 
-      const res = await axios.post(`${BASEURL2}/admin/addEmp`, payload);
+      const res = await axios.post(`${BASEURL2}/employee/addEmp`, payload);
 
       if (res.data.errorCode === "1") {
         toast.success("Employee created successfully");
