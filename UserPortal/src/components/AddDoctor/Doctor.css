@@ -1,0 +1,271 @@
+.docbtn {
+    width: 30%;
+  }
+  .hole {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .content-header {
+    padding: 0.5rem 0.5rem !important;
+  }
+  .input-container {
+    position: relative;
+  }
+  
+  .input-container .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #999;
+  }
+  
+  .input-container .form-control {
+    padding-left: 35px; /* Adjust padding to avoid overlapping the icon */
+  }
+  /* (B2) "CONVERT PIE TO DONUT" - CENTER SMALLER CIRCLE */
+  .donut {
+    /* (A1) CIRCLE */
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* (A2) SEGMENTS */
+    background: conic-gradient(
+      rgb(6, 83, 128) 80deg 190deg,
+      rgb(34, 169, 179) 190deg 360deg
+    );
+  }
+  
+  .hole1 {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  
+  /* (B2) "CONVERT PIE TO DONUT" - CENTER SMALLER CIRCLE */
+  .donut1 {
+    /* (A1) CIRCLE */
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* (A2) SEGMENTS */
+    background: conic-gradient(
+      rgb(29, 156, 230) 50deg 220deg,
+      rgb(34, 179, 136) 140deg 320deg
+    );
+  }
+  
+  .legend {
+    display: flex;
+    margin-top: 30px;
+  }
+  
+  /* (C2) SEGMENTS */
+  .legend div {
+    padding: 0 10px;
+  }
+  
+  .segment1 {
+    color: #fff;
+    background: rgb(6, 83, 128);
+  }
+  
+  .segment2 {
+    color: #fff;
+    background: rgb(34, 169, 179);
+  }
+  
+  .segment11 {
+    color: #fff;
+    background: rgb(29, 156, 230);
+  }
+  .contentdiv {
+    display: none;
+  }
+  
+  .contentdiv.active {
+    display: block;
+  }
+  
+  .segment21 {
+    color: #fff;
+    background: rgb(34, 179, 136);
+  }
+  .mg-blue {
+    margin-left: 5px;
+  }
+  .avatar {
+    vertical-align: middle;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+  }
+  
+  .avatar1 {
+    vertical-align: middle;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+  }
+  
+  .card-horizontal {
+    display: flex;
+    flex: 1 1 auto;
+  }
+  .btcolor {
+    font-weight: 600;
+  }
+  
+  .img__img {
+    width: 100%;
+  }
+  
+  .img__wrap p {
+    margin-bottom: 0px !important;
+  }
+  
+  .img__description {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* background: rgba(42, 43, 44, 0.534); */
+    color: #fff;
+    visibility: visible;
+    opacity: 1;
+    /* transition effect. not necessary */
+    /* transition: opacity .2s, visibility .2s; */
+  }
+  
+  /* .img_wrap:hover .img_description {
+      visibility: visible;
+      opacity: 1;
+    } */
+  .img__description .inner {
+    margin-top: 90%;
+    background-color: #f2eeeebd;
+    padding: 6px;
+  }
+  .bottlogo {
+    width: 10%;
+    margin: auto;
+  }
+  .inner a {
+    color: #0d4890 !important;
+  }
+  
+  .img__description a {
+    cursor: pointer;
+  }
+  
+  .img__description i:hover {
+    color: #00458f !important;
+    text-decoration: none;
+  }
+  
+  .textimg {
+    color: #fff;
+    margin-top: -40px;
+    padding: 0px 5px;
+    position: relative;
+  }
+  
+  .img-si {
+    width: 45px;
+  }
+  
+  #outer {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .inner {
+    display: inline-block;
+  }
+  
+  hr {
+    margin: auto !important;
+    border-top: 1px solid rgb(255, 255, 255) !important;
+  }
+  
+  .invitebtn {
+    border: 1px solid #0d4890 !important;
+    color: #0d4890 !important;
+    padding: 0px 10px;
+    float: right;
+    border-radius: 0.4em;
+  }
+  
+  .card-body {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+  .card-title {
+    float: none !important;
+  }
+  
+  .doc_card {
+    width: 11rem;
+    background-color: #e1def9;
+    border: 1px solid #b5b0e3;
+    padding: 10px;
+    margin: auto;
+    padding-bottom: 0px !important;
+  }
+  .search-box{
+    width: 20%;
+  }
+  
+  @media only screen and (max-width: 1300px) {
+    .doc_card {
+      width: 10rem;
+      padding: 10px;
+      margin: auto;
+      padding-bottom: 0px !important;
+    }
+  }
+  @media only screen and (max-width: 1200px) {
+    .doc_card {
+      width: 9rem;
+      padding: 10px;
+      margin: auto;
+      padding-bottom: 0px !important;
+    }
+  }
+  @media only screen and (max-width: 1100px) {
+    .doc_card {
+      width: 8rem;
+      padding: 10px;
+      margin: auto;
+      padding-bottom: 0px !important;
+    }
+  }
+  
+  @media screen and (max-width: 767px) {
+    .doc_card {
+      background-color: #e1def9;
+      border: 1px solid #b5b0e3;
+      width: 11.5rem;
+    }
+    .docbtn {
+      width: 60%;
+    }
+    /* .content-wrapper {
+      height: 100% !important;
+    } */
+    .search-box{
+      width: 95% !important;
+    } 
+  }
+  
