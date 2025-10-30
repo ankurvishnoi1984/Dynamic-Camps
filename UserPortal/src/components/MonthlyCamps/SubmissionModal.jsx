@@ -245,6 +245,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                 presFormData.append("campId", campId);
                 presFormData.append("userId", userId);
                 presFormData.append("submissionId", submissionId);
+                presFormData.append("deptId",DeptId)
 
                 const brandsMeta = selectedBrands.map((b) => ({
                     brandId: b.value,
