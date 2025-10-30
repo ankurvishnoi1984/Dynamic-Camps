@@ -8,7 +8,6 @@ const deptRoutes = require("./routes/department.route")
 const employeeRoutes = require("./routes/employee.route");
 const drRoutes = require("./routes/doctor.route");
 const basicRoutes = require("./routes/basic.route");
-const userDashboardRoutes = require("./routes/userDashboard.route");
 
 const path = require('path');
 

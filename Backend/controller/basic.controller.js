@@ -2,7 +2,7 @@ const db = require("../config/db")
 const logger = require('../utils/logger');
 
 exports.getBrandsList = async (req, res) => {
-    const deptId = req.body;
+    const {deptId} = req.body;
     const query = `
         SELECT MIN(brand_id) AS brand_id, brand_name
         FROM brand_mst
@@ -13,6 +13,7 @@ exports.getBrandsList = async (req, res) => {
     try {
         db.query(query,[deptId], (err, result) => {
             if (err) {
+        console.log("error brandlist",err)
                 logger.error(`Error in /controller/basic/getBrandsList: ${err.message}`);
                 return res.status(500).json({
                     errorCode: "INTERNAL_SERVER_ERROR",
@@ -33,6 +34,7 @@ exports.getBrandsList = async (req, res) => {
             });
         });
     } catch (error) {
+        console.log("error brandlist",error)
         logger.error(`Error in /controller/basic/getBrandsList: ${error.message}`);
         res.send(error);
     }

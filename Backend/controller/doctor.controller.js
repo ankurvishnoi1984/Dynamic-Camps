@@ -16,18 +16,19 @@ exports.getDoctorList = async (req, res) => {
       FROM user_mst u
       INNER JOIN hierarchy h ON u.reporting = h.empcode
       WHERE u.status = 'Y'
-      AND u.dept_id = ?
+     
     )
     SELECT DISTINCT d.doctor_id, d.doctor_name, d.speciality, d.garnet_code, d.rps_flag
     FROM doctor_mst d
     INNER JOIN user_mst u ON d.empcode = u.empcode
     WHERE u.user_id IN (SELECT user_id FROM hierarchy)
       AND d.status = 'Y'
-      AND d.dept_id  = ?
+      AND d.dept_id = ?
+     
   `;
 
   try {
-    db.query(query, [deptId,empcode,deptId], (err, results) => {
+    db.query(query, [empcode,deptId], (err, results) => {
       if (err) {
         logger.error(`Error in /controller/doctor/getDoctorList: ${err.message}`);
         res.status(500).json({

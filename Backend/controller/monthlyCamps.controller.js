@@ -710,7 +710,7 @@ exports.getCampSubmissionsFull = (req, res) => {
         csv.value
       FROM camp_submission_values csv
       JOIN camp_type_fields f ON csv.field_id = f.field_id
-      WHERE csv.submission_id IN (?) AND dept_id = ?
+      WHERE csv.submission_id IN (?) AND csv.dept_id = ?
     `;
 
     db.query(fieldQuery, [submissionIds,deptId], (err2, fieldValues) => {
@@ -733,7 +733,7 @@ exports.getCampSubmissionsFull = (req, res) => {
           p.created_date
         FROM monthly_camp_prescription_mst p
         LEFT JOIN brand_mst b ON p.brand_id = b.brand_id
-        WHERE p.submission_id IN (?) AND dept_id = ?
+        WHERE p.submission_id IN (?) AND p.dept_id = ?
       `;
 
       db.query(presQuery, [submissionIds,deptId], (err3, presData) => {
