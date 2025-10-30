@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom'
-import { BASEURL2 } from '../constant/constant';
+import { BASEURL2,DeptId } from '../constant/constant';
 
 const Sidebar = ({toggleSideBar}) => {
 
@@ -24,7 +24,8 @@ const menuItems = [
 
 const fetchActiveCamps = async () => {
   try {
-    const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`);
+    const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,{deptId:DeptId});
+    console.log("res , ",res)
     if (res.data.errorCode === 1) {
       setActiveCamps(res.data.data);
     }
@@ -36,7 +37,6 @@ const fetchActiveCamps = async () => {
     fetchActiveCamps();
   }, []);
 
-  console.log("activeCamps",activeCamps)
 
 const filteredMenuItems =
     designation === "AREA BUSINESS MANAGER" && Number(role) === 4
@@ -56,18 +56,18 @@ const filteredMenuItems =
         <aside className="sidebar" style={{ left: toggleSideBar ? "0" : "" }}>
             <ul className="sidebar-nav">
 
-              {filteredMenuItems.map((item)=>(
+              {/* {filteredMenuItems.map((item)=>(
                 <li key={item.path} className="nav-item">
                 <NavLink to={item.path} className={({isActive})=> isActive? "nav-link" :"nav-link collapsed"}>
                   <i className={item.icon}></i>
                   <span>{item.label}</span>
                 </NavLink>
                 </li>
-              ))}
+              ))} */}
 
           {activeCamps.length > 0 && (
             <>
-              <li className="nav-heading mt-3">Active Monthly Camps</li>
+              <li className="nav-heading mt-3">Active Camps</li>
               {dynamicCampLinks.map((camp) => (
                 <li key={camp.path} className="nav-item">
                   <NavLink to={camp.path} className={({ isActive }) => (isActive ? "nav-link" : "nav-link collapsed")}>

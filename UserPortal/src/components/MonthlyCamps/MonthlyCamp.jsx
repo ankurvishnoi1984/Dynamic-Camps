@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BASEURL, BASEURL2, ImageLimit, PageCount } from "../constant/constant";
+import { BASEURL, BASEURL2, DeptId, ImageLimit, PageCount } from "../constant/constant";
 import ConfirmationPopup from "../popup/Popup";
 import Select from "react-select";
 import toast from "react-hot-toast";
@@ -16,12 +16,10 @@ const MonthlyCamp = () => {
   const userId = sessionStorage.getItem("userId");
   const { campId } = useParams();
 
-  console.log("campid : ",campId)
  const [openActionId, setOpenActionId] = useState(null);
   const [campList] = useCampList();
   const [brandList, setBrandList] = useState([]);
 
-  const [brandMapping, setBrandMapping] = useState([])
 
   const [campType, setCampType] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -29,13 +27,10 @@ const MonthlyCamp = () => {
 
   const [doctorName, setDoctorName] = useState("");
   const [speciality, setSpeciality] = useState("");
-  const [isPrescriptionGen, setisPrescriptionGen] = useState("N");
-  const[isEmpLaunched,setEmpLaunched] = useState("N");
 
 
   const [screenedCount, setScreenedCount] = useState(null);
   const [rxCount, setRxCount] = useState(null);
-  const [therapyDay,setTherapyDay]= useState(null);
 
 
   const [campVenue, setCampVenue] = useState("");
@@ -130,13 +125,7 @@ const MonthlyCamp = () => {
     
   };
 
-  // const handelInfo = async (campReportId) => {
-  //   const infoData = campReportList.find((e)=>e.crid === campReportId);
-  //   setInfoData(infoData);
-  //   await getCampReportImages(campReportId);
-  //   await getBrandMapping(campReportId)
-  //   setInfoReportModel(true);
-  // };
+
 
  const handelInfo = (submissionId) => {
   const selected = campReportList.find(
@@ -152,10 +141,7 @@ const MonthlyCamp = () => {
     setInfoData({});
   };
 
-  const handelDelete = (campReportId) => {
-    setShowDeleteConfirmation(true);
-    setDelId(campReportId);
-  };
+
   const handelCancelDelete = () => {
     setShowDeleteConfirmation(false);
     setDelId("");
@@ -194,85 +180,27 @@ const MonthlyCamp = () => {
     }
   };
 
-  const getBrandMapping = async (crid) => {
-    try {
-      const res = await axios.post(`${BASEURL}/report/getBrandMapping`, {
-        crId: crid,
-      });
-      if (res?.status === 200) {
-        setBrandMapping(res?.data?.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const getBrandMapping1 = async (crid) => {
-    try {
-      const res = await axios.post(`${BASEURL}/report/getBrandMapping`, {
-        crId: crid,
-      });
-      if (res?.status === 200) {
-
-        const editData = res?.data?.data;
-        const preFilledData = editData.map((data) => ({
-          mappingId:data.bmid,
-          brand: data.brand, 
-          sku: data.sku, 
-          therapyDay: data.therapyDay
-        }));
-       setBrandInputs(preFilledData);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   //  for showing dashboard list
-  const getCampReportList = async () => {
-    setLoading(true)
-    try {
-      const res = await axios.post(
-        `${BASEURL2}/dashboard/getCampReportListWithImage?searchName=${searchQuery}`,
-        { ...filters, userId,activityId:'4' }
-      );
-      if (res?.data?.errorCode == "1") {
-        // setCampReportList(res?.data?.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    finally{
-      setLoading(false);
-    }
-  };
-
-  // const handelReportDownload = () => {
-
-  //   // New headers for camp report
-  //   const headers = [
-  //     "Doctor Name",
-  //     "Speciality",
-  //     "Camp Type",
-  //     "Prescription Date",
-  //     "No of kits given",
-  //   ];
-
-  //   const mappedData = (campReportList || []).map((item) => ({
-  //     "Doctor Name": item.doctor_name,
-  //     "Speciality": item.speciality,
-  //     "Camp Type": item.camp_type_name,
-  //     "Prescription Date": item.camp_date1,
-  //     "No of kits given": item.no_of_kits_given
-
-  //   }));
-
-  //   const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
-  //   const wb = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(wb, ws, "Camp Reports");
-  //   const rn = Math.floor(Math.random() * 1000) + 1;
-  //   XLSX.writeFile(wb, `Jai_Ho_Reports_${rn}.xlsx`);
-
+  // const getCampReportList = async () => {
+  //   setLoading(true)
+  //   try {
+  //     const res = await axios.post(
+  //       `${BASEURL2}/dashboard/getCampReportListWithImage?searchName=${searchQuery}`,
+  //       { ...filters, userId,activityId:'4' }
+  //     );
+  //     if (res?.data?.errorCode == "1") {
+  //       // setCampReportList(res?.data?.data);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   finally{
+  //     setLoading(false);
+  //   }
   // };
+
+ 
   const handelReportDownload = () => {
   if (!campReportList || campReportList.length === 0) {
     alert("No data to export");
@@ -323,38 +251,28 @@ const MonthlyCamp = () => {
 };
 
 
-  useEffect(() => {
-    if(searchQuery){
-      let timer =setTimeout(()=>{
-        getCampReportList();
-      },1000)
+  // useEffect(() => {
+  //   if(searchQuery){
+  //     let timer =setTimeout(()=>{
+  //       getCampReportList();
+  //     },1000)
       
-      return ()=>{
-        clearTimeout(timer)
-      }
-    }
-    else{
-      getCampReportList();
-    }
-  }, [listCampType, searchQuery]);
+  //     return ()=>{
+  //       clearTimeout(timer)
+  //     }
+  //   }
+  //   else{
+  //     getCampReportList();
+  //   }
+  // }, [listCampType, searchQuery]);
 
-  // for get camp type
-
-  const getCampList = async () => {
-    try {
-      const res = await axios.get(`${BASEURL}/basic/getCampType`);
-      // setCampList(res?.data?.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
 
   const getBrandList = async()=>{
     setLoading(true);
     try {
       let res;
-      res = await axios.get(`${BASEURL2}/basic/getBrandsList`);
+      res = await axios.post(`${BASEURL2}/basic/getBrandsList`,{deptId:DeptId});
       if(res?.data?.errorCode === 1){
         setBrandList(res.data.data)
       }
@@ -367,7 +285,7 @@ const MonthlyCamp = () => {
 
     const getDoctorList = async () => {
       try {
-        const res = await axios.post(`${BASEURL2}/doc/getDoctorList`,{empcode:empId});
+        const res = await axios.post(`${BASEURL2}/doc/getDoctorList`,{empcode:empId,deptId:DeptId});
         setDoctorList(res?.data?.data);
       } catch (error) {
         console.log(error);
@@ -377,7 +295,6 @@ const MonthlyCamp = () => {
 
 
   useEffect(() => {
-    getCampList();
     getBrandList();
     getDoctorList();
     getCampSubmissionsFull();
@@ -389,121 +306,6 @@ const MonthlyCamp = () => {
     setSearchQuery(event.target.value);
   };
 
- 
-
-  const handleAddSubmit = async () => {
-    if (
-      !campType ||
-      !doctorId ||
-      !speciality ||
-      !campDate ||
-      !selectedFiles
-    ) {
-      toast.error("Missing Required Field");
-      return;
-    }
-    const formData = new FormData();
-
-    selectedFiles.forEach((file) => {
-      formData.append("images", file);
-    });
-    let brandsArr = []
-    brandInputs.map((el)=>{
-      brandsArr.push(el.brand)
-    })
-    formData.append("brandIds",brandsArr)
-    formData.append("campType", campType);
-    formData.append("doctorId", doctorId);
-    formData.append("date", campDate);
-    formData.append("userId",userId)
-    formData.append("activityId",4)
-    formData.append("isPrescriptionGenerated",isPrescriptionGen)
-    formData.append("isEmpanormLaunched",isEmpLaunched)
-    let res;
-
-    try {
-       res = await axios.post(`${BASEURL2}/camp/createCamp`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      if(res.status === 500){
-        toast.error("Error uploading images");
-      }
-    } catch (error) {
-      console.error("Error submitting the report:", error);
-      toast.error("Error submitting the report");
-    } finally {
-      if (res.status === 200){
-        toast.success("Camp added successfully");
-      }
-      setSelectedFiles([]);
-      setPreviewUrls([]);
-      setAddRequestModel(false);
-      await getCampReportList();
-    }
-
-  }
-  
-
-  const handelBrandMapping = async(reportId)=>{
-      
-    try {
-        const res = await axios.post(`${BASEURL}/report/addBrandMapping`,{
-          crId:reportId,
-          userId,
-          data:brandInputs
-        })
-        
-    } catch (error) {
-       console.log("error in adding brand mapping",error);
-       toast.error('Error doctor mapping data'); 
-    }
-    
-}
-
-const handelUpdateBrandMapping = async(reportId)=>{
-      
-  try {
-      const res = await axios.post(`${BASEURL}/report/updateBrandMapping`,{
-        crId:reportId,
-        userId,
-        data:brandInputs
-      })
-  } catch (error) {
-     console.log("error in adding brand mapping",error);
-     toast.error('Error doctor mapping data'); 
-  }
-  
-}
-
-  const handleEdit = async (campReportId) => {
-    setEditId(campReportId);
-
-    const infoData = campReportList.find((e)=>e.crid === campReportId);
-
-   
-    if(infoData){
-      setCampType(infoData.camp_type_id);
-      //setDoctorName(infoData.doctor_name);
-      setDoctorId(infoData.doctor_id);
-      setSpeciality(infoData.speciality);
-      setCampDate(infoData.camp_date2);
-      setCampTime(infoData.camp_time1)
-      setCampVenue(infoData.camp_venue);
-      setCampPatients(infoData.patient_count);
-      setScreenedCount(infoData.screen_count);
-      setRxCount(infoData.rx_count);
-      setTherapyDay(infoData.therapy_day);
-      setBrandId(infoData.brand_id);
-    }
-    await getBrandMapping1(campReportId)
-    await getCampReportImages(campReportId);
-    setEditRequestModel(true);
-  };
 
   useEffect(() => {
     // Convert comma-separated string to an array of selected options
@@ -518,107 +320,7 @@ const handelUpdateBrandMapping = async(reportId)=>{
     }
   }, [brandId]);
 
-  const handleEditSubmit = async () => {
-    if (
-      !campType ||
-      !doctorId ||
-      !campPatients ||
-      !screenedCount ||
-      !rxCount 
-    ) {
-      toast.error("Missing Required Field");
-      return;
-    }
 
-
-
-    try {
-      const reportResponse = await axios.post(`${BASEURL}/report/updateReportWithInfo`, {
-          campType,
-          doctorId,
-          patientCount:campPatients,
-          screenCount:screenedCount,
-          rxCount:rxCount,
-          userId,
-          crId: editId   
-      });
-
-      if (reportResponse?.data?.errorCode == 1) {
-        toast.success("Camp Report updated Successfully");
-        //await getCampReportList();
-        
-        await handelUpdateBrandMapping(editId)
-      
-        setScreenedCount("");
-        setRxCount("");
-        setCampType("");
-        setCampVenue("");
-        setCampDate("");
-        setCampPatients("");
-        setDoctorName("");
-        setSpeciality("");
-        setDoctorId('')
-        setBrandInputs([{ brand: "", sku: "", therapyDay: "" },]);
-        if(selectedFiles && selectedFiles.length > 0){
-          const formData = new FormData();
-          selectedFiles.forEach((file) => {
-          formData.append("images", file);
-        });
-        formData.append("crId", editId);
-        formData.append("userId", userId);
-
-        try {
-          // Second API call: Upload images
-          const imageUploadResponse = await axios.post(
-            `${BASEURL}/report/updateImages`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-           
-          if (imageUploadResponse.status === 200) {
-            
-            setSelectedFiles([]);
-            setPreviewUrls([]);
-          } else {
-            toast.error("Failed to upload images");
-          }
-        } catch (error) {
-          console.error("Error uploading images:", error);
-          toast.error("Error uploading images");
-        }
-        }
-        
-      } else {
-        toast.error("Error in submitting the report");
-      }
-    } catch (error) {
-      toast.error("Server error in updating report");
-    } finally {
-      setEditRequestModel(false);
-      await getCampReportList();
-    }
-  };
-
-  
-
-  const handleFileChange = (event) => {
-    const files = Array.from(event.target.files);
-    //const files = event.target.files;
-    if (files.length + selectedFiles.length > ImageLimit) {
-      toast.error(`You can only upload up to ${ImageLimit} images`);
-      //alert('You can only upload up to 3 images')
-      return;
-    }
-
-    setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-
-    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
-  };
 
   const handleEditFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -754,6 +456,7 @@ const handelUpdateBrandMapping = async(reportId)=>{
     const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampSubmissionsFull`, {
       campId: campId,
       userId: userId,
+      deptId:DeptId,
     });
 
     if (res.data.errorCode === 1) {

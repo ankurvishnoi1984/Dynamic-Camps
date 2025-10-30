@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post(`${BASEURL2}/auth/login`, {
-        usernamehq:empcode1,
+        empcode:empcode1,
         password,
       });
       if (Number(res.data.errorCode) === 1) {

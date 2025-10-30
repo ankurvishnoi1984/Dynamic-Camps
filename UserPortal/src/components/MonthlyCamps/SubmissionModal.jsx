@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
 import axios from "axios";
-import { BASEURL2 } from "../constant/constant";
+import { BASEURL2,DeptId } from "../constant/constant";
 import "./submissionModal.css";
 import Popup from "../Modals/Popup";
 import { useParams } from "react-router-dom";
@@ -37,7 +37,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
     const getDoctorList = async () => {
         try {
-            const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId });
+            const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId,deptId:DeptId });
             setDoctorList(res?.data?.data);
         } catch (error) {
             console.log(error);
@@ -48,7 +48,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
         // setLoading(true)
         console.log("field details triggered")
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampFieldDetails`, { campId })
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampFieldDetails`, { campId,deptId:DeptId })
             setFieldDetails(res.data.data)
             setDrFieldReq(res?.data.is_doctor_required)
             setPresFieldReq(res?.data.is_prescription_required)
@@ -63,7 +63,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
     const getBrandList = async () => {
         axios
-            .get(`${BASEURL2}/basic/getBrandsList`) // this hits your SQL above
+            .post(`${BASEURL2}/basic/getBrandsList`,{deptId:DeptId}) // this hits your SQL above
             .then((res) => {
                 // convert your API result into react-select options
                 const options = (res.data.data || []).map((b) => ({
@@ -103,14 +103,31 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
     }
 
-    /*const handleSubmit = async () => {
-        if (!isPrescriptionGen || !doctorId || !campDate || !isEmpanormLaunched) {
+
+    const handleSubmit = async () => {
+        // Step 1️⃣: Validate fixed fields
+        if (!doctorId || !campDate) {
             setPopup({
                 type: "error",
-                message: "Please fill all required fields (Type, Doctor, Date).",
+                message: "Please fill Doctor and Date before submitting.",
             });
             return;
         }
+
+        // Step 2️⃣: Validate dynamic fields
+        const missingRequired = fieldDetails.some(
+            (f) => f.is_required === "Y" && !formData[f.field_id]
+        );
+
+        if (missingRequired) {
+            setPopup({
+                type: "error",
+                message: "Please fill all required fields.",
+            });
+            return;
+        }
+
+        // ✅ Step 2.5️⃣: Prescription validation (from previous code)
         if (isPrescriptionGen === "Y") {
             if (!selectedBrands.length) {
                 setPopup({
@@ -122,13 +139,14 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
             for (const b of selectedBrands) {
                 const brandId = b.value;
+                const brandName = b.label;
                 const prescriptionCount = Number(brandData[brandId]?.count || 0);
                 const files = brandData[brandId]?.files || [];
 
                 if (!prescriptionCount) {
                     setPopup({
                         type: "error",
-                        message: `Please enter prescription count for brand "${b.label}".`,
+                        message: `Please enter prescription count for brand "${brandName}".`,
                     });
                     return;
                 }
@@ -136,7 +154,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                 if (!files.length) {
                     setPopup({
                         type: "error",
-                        message: `Please upload prescription image for brand "${b.label}".`,
+                        message: `Please upload prescription image for brand "${brandName}".`,
                     });
                     return;
                 }
@@ -144,403 +162,136 @@ const SubmissionModal = ({ handelCloseModel }) => {
                 if (prescriptionCount !== files.length) {
                     setPopup({
                         type: "error",
-                        message: `For brand "${b.label}", prescription count (${prescriptionCount}) must match number of uploaded images (${files.length}).`,
+                        message: `For brand "${brandName}", prescription count (${prescriptionCount}) must match number of uploaded images (${files.length}).`,
                     });
                     return;
                 }
             }
         }
+
+        // Step 3️⃣: Prepare dynamic field values
+        const values = fieldDetails
+            .filter((f) => formData[f.field_id] !== undefined)
+            .map((f) => ({
+                fieldId: f.field_id,
+                value:
+                    f.field_type === "image"
+                        ? (formData[f.field_id] || []).map((file) => file.name).join(",")
+                        : formData[f.field_id],
+            }));
+
+        // Step 4️⃣: Build main payload
+        const payload = {
+            campId,
+            userId,
+            doctorId,
+            status: "Y",
+            values,
+            deptId:DeptId,
+        };
+
         try {
+            // Step 5️⃣: Submit form answers
+            const res = await axios.post(
+                `${BASEURL2}/monthlyCamps/submitFormAnswers`,
+                payload
+            );
 
-            const res1 = await axios.post(`${BASEURL2}/camp/prescriptionUpload`, {
-                doctorId: doctorId,
-                date: campDate,
-                isPrescriptionGen: isPrescriptionGen,
-                isEmpanormLaunched: isEmpanormLaunched,
-                userId: userId
-            });
-
-            if (Number(res1.data.errorCode) !== 1) {
-                setPopup({ type: "error", message: res1.data.message || "Error executing camp" });
-                return;
-            }
-            const crid = res1.data.data.insertId
-
-            const formData = new FormData();
-
-            formData.append("campId", crid);
-            formData.append("userId", userId);
-
-            const brandsMeta = [];
-
-            for (const b of selectedBrands) {
-                const brandId = b.value;
-                const prescriptionCount = Number(brandData[brandId]?.count || 0);
-                const files = brandData[brandId]?.files || [];
-
-                brandsMeta.push({
-                    brandId,
-                    prescriptionCount,
-                    fileNames: files.map((f) => f.name),
+            if (Number(res.data.errorCode) !== 1) {
+                setPopup({
+                    type: "error",
+                    message: res.data.errorDetail || "Error saving camp form",
                 });
-
-                files.forEach((file) => {
-                    formData.append(`files_${brandId}[]`, file);
-                });
-            }
-
-            formData.append("brandsMeta", JSON.stringify(brandsMeta));
-
-            // 3️⃣ call saveBrandImages with FormData
-            const res2 = await axios.post(`${BASEURL2}/camp/saveBrandImages`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            if (Number(res2.data.errorCode) !== 1) {
-                setPopup({ type: "error", message: res2.data.message || "Error saving image" });
                 return;
             }
 
-            // handelCloseModel();
-            setPopup({ type: "success", message: "My Camp added successfully!" });
+            const submissionId = res.data.data.submissionId;
+
+            // Step 6️⃣: Upload dynamic field images
+            const hasImages = fieldDetails.some((f) => f.field_type === "image");
+            if (hasImages) {
+                const formDataToUpload = new FormData();
+                formDataToUpload.append("submissionId", submissionId);
+                formDataToUpload.append("campId", campId);
+                formDataToUpload.append("userId", userId);
+                formDataToUpload.append("deptId",DeptId)
+
+                fieldDetails.forEach((f) => {
+                    if (f.field_type === "image" && formData[f.field_id]?.length) {
+                        formData[f.field_id].forEach((file) => {
+                            formDataToUpload.append(`images_${f.field_id}[]`, file);
+                        });
+                    }
+                });
+
+                const uploadRes = await axios.post(
+                    `${BASEURL2}/monthlyCamps/saveBrandImages`,
+                    formDataToUpload,
+                    { headers: { "Content-Type": "multipart/form-data" } }
+                );
+
+                if (Number(uploadRes.data.errorCode) !== 1) {
+                    setPopup({
+                        type: "error",
+                        message: uploadRes.data.errorDetail || "Error uploading images",
+                    });
+                    return;
+                }
+            }
+
+            // Step 7️⃣: Upload prescription data (STATIC)
+            if (isPrescriptionGen === "Y" && selectedBrands.length > 0) {
+                const presFormData = new FormData();
+                presFormData.append("campId", campId);
+                presFormData.append("userId", userId);
+                presFormData.append("submissionId", submissionId);
+
+                const brandsMeta = selectedBrands.map((b) => ({
+                    brandId: b.value,
+                    brandName: b.label,
+                    prescriptionCount: brandData[b.value]?.count || 0,
+                    fileNames: (brandData[b.value]?.files || []).map((f) => f.name),
+                }));
+
+                presFormData.append("brandsMeta", JSON.stringify(brandsMeta));
+
+                selectedBrands.forEach((b) => {
+                    const files = brandData[b.value]?.files || [];
+                    files.forEach((file) => {
+                        presFormData.append(`brandImages_${b.value}[]`, file);
+                    });
+                });
+
+                const presUploadRes = await axios.post(
+                    `${BASEURL2}/monthlyCamps/saveBrandImages`,
+                    presFormData,
+                    { headers: { "Content-Type": "multipart/form-data" } }
+                );
+
+                if (Number(presUploadRes.data.errorCode) !== 1) {
+                    setPopup({
+                        type: "error",
+                        message:
+                            presUploadRes.data.errorDetail ||
+                            "Error saving prescription data",
+                    });
+                    return;
+                }
+            }
+
+            // Step 8️⃣: Success
+            setPopup({
+                type: "success",
+                message: "Camp submission saved successfully!",
+            });
         } catch (error) {
-            console.error(error);
-            setPopup({ type: "error", message: "Something went wrong while submitting camp" });
+            console.error("❌ Error submitting camp:", error);
+            setPopup({
+                type: "error",
+                message: "Something went wrong while submitting camp",
+            });
         }
-    };*/
-
-
-    // const handleSubmit = async () => {
- 
-    //     if (!doctorId || !campDate) {
-    //         setPopup({
-    //             type: "error",
-    //             message: "Please fill Doctor and Date before submitting.",
-    //         });
-    //         return;
-    //     }
-
-
-    //     const missingRequired = fieldDetails.some(
-    //         (f) => f.is_required === "Y" && !formData[f.field_id]
-    //     );
-
-    //     if (missingRequired) {
-    //         setPopup({
-    //             type: "error",
-    //             message: "Please fill all required fields.",
-    //         });
-    //         return;
-    //     }
-
- 
-    //     const values = fieldDetails
-    //         .filter((f) => formData[f.field_id] !== undefined)
-    //         .map((f) => ({
-    //             fieldId: f.field_id,
-    //             value:
-    //                 f.field_type === "image"
-    //                     ? (formData[f.field_id] || []).map((file) => file.name).join(",")
-    //                     : formData[f.field_id],
-    //         }));
-
-
-    //     const payload = {
-    //         campId,
-    //         userId,
-    //         doctorId,
-    //         status: "Y",
-    //         values,
-    //     };
-
-    //     try {
-  
-    //         const res = await axios.post(`${BASEURL2}/monthlyCamps/submitFormAnswers`, payload);
-
-    //         if (Number(res.data.errorCode) !== 1) {
-    //             setPopup({
-    //                 type: "error",
-    //                 message: res.data.errorDetail || "Error saving camp form",
-    //             });
-    //             return;
-    //         }
-
-    //         const submissionId = res.data.data.submissionId;
-
-     
-    //         const hasImages = fieldDetails.some((f) => f.field_type === "image");
-    //         if (hasImages) {
-    //             const formDataToUpload = new FormData();
-    //             formDataToUpload.append("submissionId", submissionId);
-    //             formDataToUpload.append("campId", campId)
-    //             formDataToUpload.append("userId", userId)
-
-    //             fieldDetails.forEach((f) => {
-    //                 if (f.field_type === "image" && formData[f.field_id]?.length) {
-    //                     formData[f.field_id].forEach((file) => {
-    //                         formDataToUpload.append(`images_${f.field_id}[]`, file);
-    //                     });
-    //                 }
-    //             });
-
-    //             const uploadRes = await axios.post(
-    //                 `${BASEURL2}/monthlyCamps/saveBrandImages`,
-    //                 formDataToUpload,
-    //                 { headers: { "Content-Type": "multipart/form-data" } }
-    //             );
-
-    //             if (Number(uploadRes.data.errorCode) !== 1) {
-    //                 setPopup({
-    //                     type: "error",
-    //                     message: uploadRes.data.errorDetail || "Error uploading images",
-    //                 });
-    //                 return;
-    //             }
-    //         }
-
-
-    //         if (isPrescriptionGen === "Y" && selectedBrands.length > 0) {
-    //             const presFormData = new FormData();
-    //             presFormData.append("campId", campId);
-    //             presFormData.append("userId", userId);
-    //             presFormData.append("submissionId", submissionId);
-
-
-    //             const brandsMeta = selectedBrands.map((b) => ({
-    //                 brandId: b.value,
-    //                 brandName: b.label,
-    //                 prescriptionCount: brandData[b.value]?.count || 0,
-    //             }));
-
-    //             presFormData.append("brandsMeta", JSON.stringify(brandsMeta));
-
-
-    //             selectedBrands.forEach((b) => {
-    //                 const files = brandData[b.value]?.files || [];
-    //                 files.forEach((file) => {
-    //                     presFormData.append(`brandImages_${b.value}[]`, file);
-    //                 });
-    //             });
-
-
-    //             const presUploadRes = await axios.post(
-    //                 `${BASEURL2}/monthlyCamps/saveBrandImages`,
-    //                 presFormData,
-    //                 { headers: { "Content-Type": "multipart/form-data" } }
-    //             );
-
-    //             if (Number(presUploadRes.data.errorCode) !== 1) {
-    //                 setPopup({
-    //                     type: "error",
-    //                     message: presUploadRes.data.errorDetail || "Error saving prescription data",
-    //                 });
-    //                 return;
-    //             }
-    //         }
-
-  
-    //         setPopup({
-    //             type: "success",
-    //             message: "Camp submission saved successfully!",
-    //         });
-
-    //     } catch (error) {
-    //         console.error("❌ Error submitting camp:", error);
-    //         setPopup({
-    //             type: "error",
-    //             message: "Something went wrong while submitting camp",
-    //         });
-    //     }
-    // };
-
-    const handleSubmit = async () => {
-  // Step 1️⃣: Validate fixed fields
-  if (!doctorId || !campDate) {
-    setPopup({
-      type: "error",
-      message: "Please fill Doctor and Date before submitting.",
-    });
-    return;
-  }
-
-  // Step 2️⃣: Validate dynamic fields
-  const missingRequired = fieldDetails.some(
-    (f) => f.is_required === "Y" && !formData[f.field_id]
-  );
-
-  if (missingRequired) {
-    setPopup({
-      type: "error",
-      message: "Please fill all required fields.",
-    });
-    return;
-  }
-
-  // ✅ Step 2.5️⃣: Prescription validation (from previous code)
-  if (isPrescriptionGen === "Y") {
-    if (!selectedBrands.length) {
-      setPopup({
-        type: "error",
-        message: "Please select at least one brand for prescription.",
-      });
-      return;
-    }
-
-    for (const b of selectedBrands) {
-      const brandId = b.value;
-      const brandName = b.label;
-      const prescriptionCount = Number(brandData[brandId]?.count || 0);
-      const files = brandData[brandId]?.files || [];
-
-      if (!prescriptionCount) {
-        setPopup({
-          type: "error",
-          message: `Please enter prescription count for brand "${brandName}".`,
-        });
-        return;
-      }
-
-      if (!files.length) {
-        setPopup({
-          type: "error",
-          message: `Please upload prescription image for brand "${brandName}".`,
-        });
-        return;
-      }
-
-      if (prescriptionCount !== files.length) {
-        setPopup({
-          type: "error",
-          message: `For brand "${brandName}", prescription count (${prescriptionCount}) must match number of uploaded images (${files.length}).`,
-        });
-        return;
-      }
-    }
-  }
-
-  // Step 3️⃣: Prepare dynamic field values
-  const values = fieldDetails
-    .filter((f) => formData[f.field_id] !== undefined)
-    .map((f) => ({
-      fieldId: f.field_id,
-      value:
-        f.field_type === "image"
-          ? (formData[f.field_id] || []).map((file) => file.name).join(",")
-          : formData[f.field_id],
-    }));
-
-  // Step 4️⃣: Build main payload
-  const payload = {
-    campId,
-    userId,
-    doctorId,
-    status: "Y",
-    values,
-  };
-
-  try {
-    // Step 5️⃣: Submit form answers
-    const res = await axios.post(
-      `${BASEURL2}/monthlyCamps/submitFormAnswers`,
-      payload
-    );
-
-    if (Number(res.data.errorCode) !== 1) {
-      setPopup({
-        type: "error",
-        message: res.data.errorDetail || "Error saving camp form",
-      });
-      return;
-    }
-
-    const submissionId = res.data.data.submissionId;
-
-    // Step 6️⃣: Upload dynamic field images
-    const hasImages = fieldDetails.some((f) => f.field_type === "image");
-    if (hasImages) {
-      const formDataToUpload = new FormData();
-      formDataToUpload.append("submissionId", submissionId);
-      formDataToUpload.append("campId", campId);
-      formDataToUpload.append("userId", userId);
-
-      fieldDetails.forEach((f) => {
-        if (f.field_type === "image" && formData[f.field_id]?.length) {
-          formData[f.field_id].forEach((file) => {
-            formDataToUpload.append(`images_${f.field_id}[]`, file);
-          });
-        }
-      });
-
-      const uploadRes = await axios.post(
-        `${BASEURL2}/monthlyCamps/saveBrandImages`,
-        formDataToUpload,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      if (Number(uploadRes.data.errorCode) !== 1) {
-        setPopup({
-          type: "error",
-          message: uploadRes.data.errorDetail || "Error uploading images",
-        });
-        return;
-      }
-    }
-
-    // Step 7️⃣: Upload prescription data (STATIC)
-    if (isPrescriptionGen === "Y" && selectedBrands.length > 0) {
-      const presFormData = new FormData();
-      presFormData.append("campId", campId);
-      presFormData.append("userId", userId);
-      presFormData.append("submissionId", submissionId);
-
-      const brandsMeta = selectedBrands.map((b) => ({
-        brandId: b.value,
-        brandName: b.label,
-        prescriptionCount: brandData[b.value]?.count || 0,
-        fileNames: (brandData[b.value]?.files || []).map((f) => f.name),
-      }));
-
-      presFormData.append("brandsMeta", JSON.stringify(brandsMeta));
-
-      selectedBrands.forEach((b) => {
-        const files = brandData[b.value]?.files || [];
-        files.forEach((file) => {
-          presFormData.append(`brandImages_${b.value}[]`, file);
-        });
-      });
-
-      const presUploadRes = await axios.post(
-        `${BASEURL2}/monthlyCamps/saveBrandImages`,
-        presFormData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      if (Number(presUploadRes.data.errorCode) !== 1) {
-        setPopup({
-          type: "error",
-          message:
-            presUploadRes.data.errorDetail ||
-            "Error saving prescription data",
-        });
-        return;
-      }
-    }
-
-    // Step 8️⃣: Success
-    setPopup({
-      type: "success",
-      message: "Camp submission saved successfully!",
-    });
-  } catch (error) {
-    console.error("❌ Error submitting camp:", error);
-    setPopup({
-      type: "error",
-      message: "Something went wrong while submitting camp",
-    });
-  }
-};
+    };
 
 
 
