@@ -151,7 +151,7 @@ const MonthlyCamp = () => {
     userId,
     starDate:startDate, // 🟢 fixed typo ("starDate" → "startDate")
     endDate,
-    deptId: deptId,
+    deptId,
     isDrRequired: doctorFieldRequired,
     isPrescRequired: prescriptionFieldRequired,
   };

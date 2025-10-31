@@ -115,7 +115,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
       onClick={() => setIsCampsOpen(!isCampsOpen)}
     >
       <i className="fas fa-fw fa-cogs"></i>
-      <span>Manage Camps</span>
+      <span>Camps</span>
     </button>
 
     <div
@@ -127,7 +127,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
           Camps Types
         </NavLink>
         <NavLink to={"/monthlyCamp"} className="collapse-item">
-          Monthly Camps
+          Manage Camps
         </NavLink>
       </div>
     </div>

@@ -1,6 +1,6 @@
-const devUrl = 'https://demo2.netcastservice.online'
+const devUrl = 'https://dynamiccampsapi.netcastservice.online'
 const localUrl = 'http://localhost:8035'
-export const BASEURL = localUrl
-export const BASEURL2 = localUrl
+export const BASEURL = devUrl
+export const BASEURL2 = devUrl
 export const CLIENTID = '101';
 export const DEPTID = '101';
