@@ -275,8 +275,8 @@ function Employee() {
   return (
     <div className="container-fluid">
       {/* Header */}
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <div className="d-sm-flex align-items-start justify-content-end mb-4">
+      <div className="d-flex align-items-center justify-content-between mb-2">
+        <div className="d-sm-flex align-items-start justify-content-end mb-2">
             <div className="dropdown ml-2">
             <select
               className="form-control selectStyle selecCamp"
@@ -311,7 +311,7 @@ function Employee() {
 
           </div>
           </div>
-        <div className="input-group w-50">
+        <div className="input-group mb-0 w-50">
           <input
             type="text"
             className="form-control bg-light border-1 small"
