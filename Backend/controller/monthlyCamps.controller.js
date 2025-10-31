@@ -479,10 +479,11 @@ exports.getCampTypeDetailsAdmin = (req, res) => {
 };
 
 exports.getCampTypeList = (req, res) => {
+  const {deptId} = req.body;
   const query = `select camp_type_id, camp_type_name, created_date,created_by from camp_type_mst
-  where status = 'Y' `
+  where status = 'Y' and dept_id = ?`
   try {
-    db.query(query, (err, results) => {
+    db.query(query,[deptId], (err, results) => {
       if (err) {
         logger.error(`Error in /controller/monthlyCamps/getAllCampType (query): ${err.message}`);
         return res.status(500).json({

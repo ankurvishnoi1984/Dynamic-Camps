@@ -97,7 +97,7 @@ const MonthlyCamp = () => {
         setLoading(true)
 
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getAllCampType`)
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getAllCampType`,{deptId})
             setCampTypeList(res.data.data)
         } catch (error) {
             console.log(error)
@@ -151,7 +151,6 @@ const MonthlyCamp = () => {
     userId,
     starDate:startDate, // 🟢 fixed typo ("starDate" → "startDate")
     endDate,
-    deptId,
     isDrRequired: doctorFieldRequired,
     isPrescRequired: prescriptionFieldRequired,
   };
