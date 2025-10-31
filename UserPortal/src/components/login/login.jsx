@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import { useEffect, useState } from "react";
+import { DeptId, BASEURL2 } from "../constant/constant";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import axios from "axios";
@@ -8,6 +8,8 @@ const Login = () => {
   const [empcode, setEmpcode] = useState("");
   const [password, setPassWord] = useState("");
   const [error, setError] = useState("");
+  const [activeCamps, setActiveCamps] = useState([]);
+
 
   const navigate = useNavigate();
   const handelSubmit = async (e) => {
@@ -31,7 +33,8 @@ const Login = () => {
         sessionStorage.setItem("sessionId", sessionId);
         sessionStorage.setItem("role", role);
         sessionStorage.setItem("designation",designation)
-        navigate("/dashboard");
+        // navigate("/dashboard");
+        navigate(`/camp/${activeCamps[0].camp_id}`);
       } else {
         //console.log("details",res.response.data.details)
         setError("Invalid Credential");
@@ -40,6 +43,22 @@ const Login = () => {
       setError("Invalid Credential");
     }
   };
+
+  const fetchActiveCamps = async () => {
+  try {
+    const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,{deptId:DeptId});
+    console.log("res , ",res)
+    if (res.data.errorCode === 1) {
+      setActiveCamps(res.data.data);
+    }
+  } catch (err) {
+    console.error("Error fetching active camps:", err);
+  }
+};
+
+  useEffect(() => {
+    fetchActiveCamps();
+  }, []);
 
   return (
     <main className="bglogin">
