@@ -1,0 +1,71 @@
+.reposerch {
+    width: 300px;
+}
+
+.selecCamp {
+    width: 150px;
+    margin-top: 32px;
+}
+
+.textdiv {
+
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 10px;
+
+}
+
+@media screen and (max-width: 767px) {
+    .selecCamp {
+        width: 100%;
+
+    }
+
+    .resdiv {
+        display: flex;
+        width: 0px;
+    }
+
+    .textdiv {
+        align-items: center;
+    }
+
+}
+
+.action-wrapper {
+  position: relative; /* anchor for absolute dropdown */
+  display: inline-block;
+}
+
+.action-dropdown {
+  position: absolute;
+  top: 100%; /* directly below button */
+  right: 0;  /* align to left of wrapper */
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 1000;
+  border-radius: 4px;
+  min-width: 140px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.action-dropdown .dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+.action-dropdown .dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+.table-responsive {
+    overflow-x: unset !important;
+}
+@media screen and (max-width: 767px) {
+   .table-responsive {
+    overflow-x: auto !important;
+} 
+}

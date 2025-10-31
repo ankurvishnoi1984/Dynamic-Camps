@@ -1,0 +1,28 @@
+.reposerch{
+    width: 300px;
+}
+.selecCamp{
+    width: 150px;
+    margin-top: 32px;
+}
+.textdiv{
+
+    display: flex;
+    justify-content: space-between;
+    padding:0px 10px;
+  
+}
+@media screen and (max-width: 767px) {
+    .selecCamp{
+        width: 100%;
+        
+    }
+    .resdiv{
+        display: flex;
+        width: 0px;
+    }
+    .textdiv{
+        align-items: center;
+    }
+    
+  }
