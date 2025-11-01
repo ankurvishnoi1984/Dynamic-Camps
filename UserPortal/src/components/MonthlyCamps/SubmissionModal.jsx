@@ -106,7 +106,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
     const handleSubmit = async () => {
         // Step 1️⃣: Validate fixed fields
-        if (!doctorId || !campDate) {
+        if (!campDate) {
             setPopup({
                 type: "error",
                 message: "Please fill Doctor and Date before submitting.",
@@ -184,7 +184,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
         const payload = {
             campId,
             userId,
-            doctorId,
+            doctorId:0,
             status: "Y",
             values,
             deptId:DeptId,
@@ -363,7 +363,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                     <label className="form-label did-floating-label">Doctor Name*</label>
                                 </div>}
 
-                                <div className="form-group col-md-4 did-floating-label-content">
+                               {isDoctorFieldReq === "Y"&& <div className="form-group col-md-4 did-floating-label-content">
                                     <input
                                         type="text"
                                         className="form-control did-floating-input"
@@ -372,8 +372,8 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                         readOnly
                                     />
                                     <label className="form-label did-floating-label">Speciality</label>
-                                </div>
-                                <div className="form-group col-md-4 did-floating-label-content">
+                                </div>}
+                                {isDoctorFieldReq === "Y"&&<div className="form-group col-md-4 did-floating-label-content">
                                     <input
                                         type="text"
                                         className="form-control did-floating-input"
@@ -382,7 +382,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                         readOnly
                                     />
                                     <label className="form-label did-floating-label">Garnet Code</label>
-                                </div>
+                                </div>}
 
                                 {isPrescFieldReq === "Y"&&<div className="form-group col-md-4 did-floating-label-content">
                                     <select

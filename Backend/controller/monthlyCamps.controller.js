@@ -302,9 +302,9 @@ exports.createMonthlyCamp = (req, res) => {
 }
 
 exports.submitFormAnswers = (req, res) => {
-  const { campId, userId, doctorId, status = "Y", values,deptId } = req.body;
+  const { campId, userId, doctorId=1, status = "Y", values,deptId } = req.body;
 
-  if (!campId || !userId || !doctorId || !Array.isArray(values) || values.length === 0) {
+  if (!campId || !userId || !Array.isArray(values) || values.length === 0) {
     return res.status(400).json({
       errorCode: 0,
       errorDetail: "Missing required fields or empty values array",

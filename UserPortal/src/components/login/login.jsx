@@ -34,6 +34,7 @@ const Login = () => {
         sessionStorage.setItem("role", role);
         sessionStorage.setItem("designation",designation)
         // navigate("/dashboard");
+        console.log("activeCamps",activeCamps)
         navigate(`/camp/${activeCamps[0].camp_id}`);
       } else {
         //console.log("details",res.response.data.details)
@@ -47,7 +48,6 @@ const Login = () => {
   const fetchActiveCamps = async () => {
   try {
     const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,{deptId:DeptId});
-    console.log("res , ",res)
     if (res.data.errorCode === 1) {
       setActiveCamps(res.data.data);
     }
