@@ -11,12 +11,6 @@ function Navbar({ children }) {
   location.pathname === "/camptype" || location.pathname === "/monthlyCamp";
    const isManageClientsActive = 
   location.pathname === "/clients" || location.pathname === "/departments";
-    const [isOpen, setIsOpen] = useState(false);
-    // const handelLogOut = () => {
-    //     sessionStorage.removeItem("IsAdminLoggedIn");
-    //     navigate("/");
-    //     //window.location.reload();
-    //   };
 
 const [isClientsOpen, setIsClientsOpen] = useState(false);
 const [isCampsOpen, setIsCampsOpen] = useState(false);
@@ -33,7 +27,6 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
 
 
    
-      console.log("is logout ",isLogoutModalOpen)
   const handleLogoutClick = () => {
     setIsLogoutModalOpen(true);
   };
@@ -54,10 +47,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
             <ul className={`navbar-nav ${isSidebarVisible?"nav-show1":"nav-show"} bg-gradient-primary sidebar sidebar-dark accordion`}>
                 {/* Sidebar - Brand */}
                 <NavLink to={"/dashboard"} className="sidebar-brand d-flex align-items-center justify-content-center">
-                    {/* <div className="sidebar-brand-icon">
-                        <i className="fas fa-user"></i>
-                    </div>
-                    <div className="sidebar-brand-text mx-3">Logo</div> */}
+                    
 
                 
 
@@ -80,7 +70,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
                     </NavLink>
                 </li>
                 <hr className="sidebar-divider my-0" />
-        {sessionStorage.getItem("role") === "0" && (
+        {/* {sessionStorage.getItem("role") === "0" && (
   <li className={`nav-item ${isManageClientsActive ? "active-link" : ""}`}>
     <button
       className="nav-link nstbtn collapsed"
@@ -104,7 +94,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
       </div>
     </div>
   </li>
-)}
+)} */}
 
 <hr className="sidebar-divider my-0" />
 
@@ -150,41 +140,6 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
                         <span>Camps Report</span>
                     </NavLink>
                 </li>
-
-                {/* <hr className="sidebar-divider my-0" />
-                 <li className="nav-item ">
-                    <NavLink to={"/myCampsAbmReport"} className={({isActive})=> isActive? "active-link nav-link" :"nav-link"}>
-                        <i className="fas fa-fw fa-file-excel"></i>
-                        <span>My Camps ABM</span>
-                    </NavLink>
-                </li> */}
-                {/* <hr className="sidebar-divider my-0" />
-                 <li className="nav-item ">
-                    <NavLink to={"/cathlabRequests"} className={({isActive})=> isActive? "active-link nav-link" :"nav-link"}>
-                        <i className="fas fa-fw fa-inbox"></i>
-                        <span>Cathlab Requests</span>
-                    </NavLink>
-                </li> */}
-            
-                     {/* <li className={`nav-item ${isManageCampsActive ? "active-link" : ""}`}>
-      <button
-        className="nav-link nstbtn collapsed"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <i className="fas fa-fw fa-cog"></i>
-        <span>Manage Camps</span>
-      </button>
-
-      <div
-        id="collapsePages"
-        className={`collapse ${isOpen ? "show" : ""}`}
-      >
-        <div className="bg-white py-2 collapse-inner rounded">
-          <NavLink to={"/camptype"} className="collapse-item">Camps Types</NavLink>
-          <NavLink to={"/monthlyCamp"}  className="collapse-item" >Monthly Camps</NavLink>
-        </div>
-      </div>
-    </li> */}
 
 
             </ul>
