@@ -103,13 +103,13 @@ const MonthlyCamp = () => {
  
   const handelCloseModel = async () => {
     setAddRequestModel(false);
-    await getCampReportList();
+    // await getCampReportList();
   };
 
 
   const handelCloseEditModel = async () => {
     setEditRequestModel(false);
-    await getCampReportList();
+    // await getCampReportList();
     setCampType("");
     setCampVenue("");
     setCampDate("");
@@ -156,7 +156,7 @@ const MonthlyCamp = () => {
 
       if (res.data.errorCode == "1") {
         toast.success("Camp Report Deleted Successfully");
-        await getCampReportList();
+        // await getCampReportList();
         setDelId("");
       } else {
         toast.error(`Failed to delete employee with ID ${delId}`);
@@ -180,25 +180,6 @@ const MonthlyCamp = () => {
     }
   };
 
-
-  //  for showing dashboard list
-  // const getCampReportList = async () => {
-  //   setLoading(true)
-  //   try {
-  //     const res = await axios.post(
-  //       `${BASEURL2}/dashboard/getCampReportListWithImage?searchName=${searchQuery}`,
-  //       { ...filters, userId,activityId:'4' }
-  //     );
-  //     if (res?.data?.errorCode == "1") {
-  //       // setCampReportList(res?.data?.data);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   finally{
-  //     setLoading(false);
-  //   }
-  // };
 
  
   const handelReportDownload = () => {
@@ -578,32 +559,42 @@ const MonthlyCamp = () => {
                     <table className="table table-hover newcss">
                       <thead>
                         <tr>
-                          <th scope="col">Doctor Name</th>
+                          {/* <th scope="col">Doctor Name</th>
                           <th scope="col">Speciality</th>
-                          <th scope="col">Garnet Code</th>
+                          <th scope="col">Garnet Code</th> */}
+                           {campReportList.length > 0 &&
+                                        campReportList[0].field_values?.map((fv, idx) => (
+                                            <th key={idx}>{fv.field_label}</th>
+                                        ))}
                           <th scope="col">Date</th>
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
                      <tbody>
+                      {console.log("campReportList",campReportList)}
                         {campReportList &&
                           campReportList.length > 0 &&
                           campReportList
                             .slice(page * PageCount - PageCount, page * PageCount)
                             .map((e) => (
                               <tr key={e.submission_id}>
-                                <td>{e.doctor_name || "N/A"}</td>
+                                {/* <td>{e.doctor_name || "N/A"}</td>
                                 <td>{e.speciality || "N/A"}</td>
-                                <td>{e.garnet_code || "N/A"}</td>
+                                <td>{e.garnet_code || "N/A"}</td> */}
+                                 {/* Dynamic field values */}
+                                            {e.field_values?.map((fv, idx) => (
+                                                <td key={idx}>
+                                                    {fv.field_type === "image" ? (
+                                                        <span>🖼️ Image</span>
+                                                    ) : (
+                                                        fv.value || "-"
+                                                    )}
+                                                </td>
+                                            ))}
+                                
                                 <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
                                 <td>
-                                  {/* <button
-                                    className="btn btn-info btn-circle rounded-pill ml-1 mb-1"
-                                    title="Info"
-                                    onClick={() => handelInfo(e.submission_id)}
-                                  >
-                                    <i className="ri-information-2-line"></i>
-                                  </button> */}
+                                 
 
                                   <div className="action-wrapper">
                                          <button
