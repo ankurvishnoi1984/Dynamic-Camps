@@ -633,7 +633,7 @@ exports.getActiveCampsNavList = (req, res) => {
 
       if (!result || result.length === 0) {
         return res.status(200).json({
-          errorCode: 2,
+          errorCode: 1,
           message: "No active camps found",
           data: [],
         });
@@ -1197,8 +1197,8 @@ exports.manageCampStatus = (req,res)=>{
 }
 
 exports.getMonthlyCampsPrescriptionImages = (req, res) => {
-  const userId = req.query.userId || null;
-  const deptId = Number(req.query.deptId);
+  const {userId} = req.body;
+  const {deptId} = req.body;
   const params = [userId,deptId];
 
     if (!deptId) {

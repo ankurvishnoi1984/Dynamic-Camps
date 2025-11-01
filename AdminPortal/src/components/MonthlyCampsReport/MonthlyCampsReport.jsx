@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import "../../../style/css/sb-admin-2.min.css"
 import axios from "axios";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import { BASEURL2, DEPTID } from "../constant/constant";
 import * as XLSX from 'xlsx/xlsx.mjs';
 import "./MonthlyCampsReport.css"
 import Loader from "../utils/Loader";
@@ -19,10 +19,8 @@ const MonthlyCampsReport = () => {
     const [allReportData, setAllReportData] = useState([]);
     const [loading, setLoading] = useState(false)
     const [myCampType, setMyCampType] = useState([]);
-    const [clientList,setClientList] = useState([]);
-  const [clientId,setClientId] = useState("");
-  const [deptList,setDeptList]= useState([]);
-  const [deptId,setDeptId]=useState("");
+  
+  const deptId = DEPTID
 
     const [filters, setFilters] = useState({
         userId: userId,         // you will probably get this from logged-in user
@@ -76,47 +74,7 @@ const MonthlyCampsReport = () => {
         }
     }, [filters.campId,deptId]);
 
-    useEffect(() => {
-        getClientList();
-    }, [])
-
-
-    const getClientList = async () => {
-        setLoading(true)
-
-        try {
-            const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
-            const clients = res.data.data;
-            setClientList(res.data.data)
-            // Auto-select first client and load its departments
-            if (clients && clients.length > 0) {
-                const firstClientId = clients[0].client_id;
-                setClientId(firstClientId);
-                await getDepartmentList(firstClientId);
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const getDepartmentList = async (clientId) => {
-        setLoading(true)
-        try {
-            const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
-                { clientId }
-            )
-            setDeptList(res.data.data)
-            setDeptId(res.data.data[0].dept_id)
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false);
-        }
-    }
-
-
+   
 
     const getMyCampDetailsByEmpcode = async () => {
         setLoading(true)
@@ -124,7 +82,7 @@ const MonthlyCampsReport = () => {
             searchKeyword: filters.searchKeyword.trim() || null,
             campId: filters.campId,
             empcode:empcode,
-            deptId,
+            deptId:deptId,
         };
 
         try {
@@ -142,8 +100,9 @@ const MonthlyCampsReport = () => {
         setLoading(true);
         try {
             const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,
-                {deptId}
+                {deptId:deptId}
             );
+            console.log("getMyCampsType",res.data)
             const camps = res.data.data || [];
             setMyCampType(camps);
 
@@ -170,7 +129,8 @@ const MonthlyCampsReport = () => {
             searchKeyword: filters.searchKeyword.trim() || null,
             fromDate: filters.fromDate || null,
             toDate: filters.toDate || null,
-            campType: filters.campType || null
+            campType: filters.campType || null,
+            deptId,
         };
         try {
             const res = await axios.post(`${BASEURL2}/admin/getMyCampsSheetReport`, payload);
@@ -241,39 +201,6 @@ const MonthlyCampsReport = () => {
 
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
 
-                <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="clientId"
-              id="clientId"
-              value={clientId}
-              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
-            >
-              {clientList && clientList.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="deptId"
-              id="deptId"
-              value={deptId}
-              onChange={(e)=>setDeptId(e.target.value)}
-            >
-              {deptList && deptList.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
 
                 <div className="form-group ml-2">
                     <label htmlFor="searchKeyword" >Doctor Name:</label>
@@ -296,6 +223,7 @@ const MonthlyCampsReport = () => {
                         value={filters.campId}
                         onChange={handleChange}
                     >
+                    {console.log("mycamptype",myCampType)}
                         {myCampType && myCampType.map((e) => (
                             <option key={e.camp_id} value={e.camp_id}>
                                 {e.camp_name}
@@ -336,17 +264,14 @@ const MonthlyCampsReport = () => {
             <div className="card shadow mb-4">
                 <div className="card-header py-3">
 
-                    {/* <button onClick={handelReportDownloadNumberWise} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm">
-                <i className="fas fa-download fa-sm text-white-50"></i>Report Hierarchy</button> */}
                     <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
                         <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
-                          <button  onClick={() => {
-                                            
-                                          
-                                              handleOpenModal();
-                                            }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
-            <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-          </button>
+                        
+                    <button onClick={() => {
+                        handleOpenModal();
+                    }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
+                        <i className="fas fa-images fa-sm text-white-50"></i> Download Images
+                    </button>
                 </div>
  <MonthlyCImgDownload
            show={show}

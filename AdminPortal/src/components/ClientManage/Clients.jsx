@@ -5,7 +5,7 @@ import Loader from "../utils/Loader";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useEffect } from "react";
 import axios from "axios";
-import { BASEURL2, CLIENTID, DEPTID } from "../constant/constant";
+import { BASEURL2 } from "../constant/constant";
 
 
 const Clients = () => {

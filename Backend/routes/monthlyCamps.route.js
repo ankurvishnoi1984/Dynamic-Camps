@@ -18,7 +18,7 @@ router.post("/monthlyCampsAdminReports",monthlyCampsAdminReports)
 router.post("/updateCampType",updateCampType)
 router.post("/updateMonthlyCamp",updateMonthlyCamp)
 router.post("/manageCampStatus",manageCampStatus);
-router.get("/getMonthlyCampsPrescriptionImages",getMonthlyCampsPrescriptionImages)
+router.post("/getMonthlyCampsPrescriptionImages",getMonthlyCampsPrescriptionImages)
 router.post("/saveBrandImages",upload.any(),saveBrandImages)
 
 

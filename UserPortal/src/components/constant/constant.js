@@ -3,8 +3,10 @@
 
 const devUrl = 'https://demo2.netcastservice.online'
 const localUrl = 'http://localhost:8035'
-export const BASEURL = devUrl
-export const BASEURL2 = devUrl
+const liveUrl = 'https://dynamiccampsapi.netcastservice.online/';
+export const DeptId = 3;
+export const BASEURL = liveUrl
+export const BASEURL2 = liveUrl
 export const PageCount = 20;
 export const ImageLimit = 10;
 export const IMG_SIZE = 5; 

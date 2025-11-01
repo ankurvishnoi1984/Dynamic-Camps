@@ -3,7 +3,7 @@ import axios from "axios";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
 import "../Modals/CustomCss.css";
-import { BASEURL2 } from "../constant/constant";
+import { BASEURL2,DEPTID } from "../constant/constant";
 
 function MonthlyCImgDownload({ show, handelCloseModal }) {
   const [employeeData, setEmployeeData] = useState([]);
@@ -14,6 +14,7 @@ function MonthlyCImgDownload({ show, handelCloseModal }) {
 const [batchStatus, setBatchStatus] = useState("");
 
   const getPrescriptionData = async () => {
+    
   try {
     const userId = sessionStorage.getItem("userId");
     const role = sessionStorage.getItem("role");
@@ -21,12 +22,14 @@ const [batchStatus, setBatchStatus] = useState("");
     // base API
     let url = `${BASEURL2}/monthlyCamps/getMonthlyCampsPrescriptionImages`;
 
+    let param = {deptId:DEPTID}
     // if not admin, add userId param
-    if (role !== "0" && userId) {
-      url += `?userId=${userId}`;
+    if (Number(role) !== 0 && userId) {
+      // url += `?userId=${userId}`;
+      param["userId"]=Number(userId)
     }
-
-    const res = await axios.get(url);
+    if(!param["deptId"]){return}
+    const res = await axios.post(url,param);
     setEmployeeData(res.data.transformedResult);
     setPosterLen(res.data.poslength);
   } catch (error) {
@@ -38,7 +41,7 @@ const [batchStatus, setBatchStatus] = useState("");
   const getMyCampsType = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASEURL2}/monthlyCamps/getActiveCamps`);
+      const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCamps`,{deptId:DEPTID});
       setMyCampType(res.data.data);
     } catch (error) {
       console.log("Error fetching camp types:", error);
@@ -56,80 +59,6 @@ const [batchStatus, setBatchStatus] = useState("");
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-//   const handleDownloadZip = async () => {
-//     setLoading(true)
-//     let dataToDownload = employeeData;
-
-//     if (filters.campType !== "All") {
-//       dataToDownload = employeeData.filter(
-//         (emp) => emp.campName === filters.campType
-//       );
-//     }
-
-//     if (!dataToDownload || dataToDownload.length === 0) {
-//       alert("No data available for the selected camp.");
-//       return;
-//     }
-
-//     const zip = new JSZip();
-
-//     for (const employee of dataToDownload) {
-//       const {
-//         employeeName,
-//         employeeCode,
-//         doctorName,
-//         doctorCode,
-//         campName,
-//         campId,
-//         campDate, 
-//         posters,
-//       } = employee;
-
-//       const formattedDate = new Date(campDate)
-//     .toLocaleDateString("en-GB")
-//     .replace(/\//g, "-"); 
-
-//       const campFolder = zip.folder(campName);
-//       const employeeFolder = campFolder.folder(
-//         `${employeeName}_${employeeCode}`
-//       );
-//       const doctorFolder = employeeFolder.folder(
-//         `${doctorName}_${doctorCode}_${formattedDate}_${campId}`
-//       );
-// const brandCount = {};
-//       for (let i = 0; i < posters.length; i++) {
-//         try {
-//           const response = await fetch(
-//             `${BASEURL2}/uploads/${posters[i].posterUrl}`
-//           );
-//           const blob = await response.blob();
-
-//           const brandKey = posters[i].brandName.replace(/\s+/g, "_");
-
- 
-//           if (!brandCount[brandKey]) {
-//             brandCount[brandKey] = 1;
-//           }
-
-//           doctorFolder.file(
-//             `${posters[i].brandName}_prescription_${brandCount[brandKey]}.jpg`,
-//             blob,
-//             { binary: true }
-//           );
-//             brandCount[brandKey]++;
-//         } catch (error) {
-//           console.error("Error fetching image:", error);
-//         }
-//       }
-//     }
-//     zip.generateAsync({ type: "blob" }).then((content) => {
-//       FileSaver.saveAs(
-//         content,
-//         `${filters.campType === "All" ? "all_camps" : filters.campType}_prescriptions.zip`
-//       );
-//     });
-//     setLoading(false)
-//   };
 
 const handleDownloadZip = async () => {
   setLoading(true);
