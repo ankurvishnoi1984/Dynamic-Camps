@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../../style/css/sb-admin-2.min.css";
 import axios from "axios";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import { BASEURL, BASEURL2,DEPTID } from "../constant/constant";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmationPopup from "../popup/Popup";
@@ -46,21 +46,13 @@ function Employee() {
   const entriesPerPage = 20;
   const empCode = sessionStorage.getItem("empcode");
   const userId = sessionStorage.getItem("userId");
-   const [clientList,setClientList] = useState([]);
-  const [clientId,setClientId] = useState("");
-  const [deptList,setDeptList]= useState([]);
-  const [deptId,setDeptId]=useState("");
+  const deptId = DEPTID;
   const [loading,setLoading] = useState(false);
 
   // ----------------- Data Fetching -----------------
   useEffect(() => {
     fetchEmployees();
-  }, [currentPage, searchQuery,deptId]);
-
-  useEffect(() => {
-    getClientList();
-  }, [])
-
+  }, [currentPage, searchQuery]);
 
   const fetchEmployees = async () => {
     if(!deptId)return;
@@ -92,41 +84,6 @@ function Employee() {
     }
   };
 
-
-    const getClientList = async () => {
-    setLoading(true)
-
-    try {
-      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
-      const clients = res.data.data;
-      setClientList(res.data.data)
-      // Auto-select first client and load its departments
-      if (clients && clients.length > 0) {
-        const firstClientId = clients[0].client_id;
-        setClientId(firstClientId);
-        await getDepartmentList(firstClientId);
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const getDepartmentList = async (clientId) => {
-    setLoading(true)
-    try {
-      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
-        { clientId }
-      )
-      setDeptList(res.data.data)
-      setDeptId(res.data.data[0].dept_id)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
 
 
   useEffect(() => {
@@ -276,41 +233,6 @@ function Employee() {
     <div className="container-fluid">
       {/* Header */}
       <div className="d-flex align-items-center justify-content-between mb-2">
-        <div className="d-sm-flex align-items-start justify-content-end mb-2">
-            <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="clientId"
-              id="clientId"
-              value={clientId}
-              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
-            >
-              {clientList && clientList.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="deptId"
-              id="deptId"
-              value={deptId}
-              onChange={(e)=>setDeptId(e.target.value)}
-            >
-              {deptList && deptList.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-          </div>
         <div className="input-group mb-0 w-50">
           <input
             type="text"
