@@ -5,7 +5,7 @@ import Loader from "../utils/Loader";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useEffect } from "react";
 import axios from "axios";
-import { BASEURL2 } from "../constant/constant";
+import { BASEURL2,DEPTID } from "../constant/constant";
 import EditCampTypeModal from "./EditCampTypeModal";
 
 const CampType = () => {
@@ -16,10 +16,7 @@ const CampType = () => {
   const userId = sessionStorage.getItem("userId");
   const [showEditModal,setEditModal] = useState(false)
   const [editData, setEditData] = useState(null);  
-  const [clientList,setClientList] = useState([]);
-  const [clientId,setClientId] = useState("");
-  const [deptList,setDeptList]= useState([]);
-  const [deptId,setDeptId]=useState("");
+  const deptId = DEPTID
 
   const [campTypeName, setCampTypeName] = useState("");
   const [fields, setFields] = useState([
@@ -55,40 +52,7 @@ const CampType = () => {
       setLoading(false);
     }
   }
-    const getClientList = async () => {
-    setLoading(true)
 
-    try {
-      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
-      const clients = res.data.data;
-      setClientList(res.data.data)
-        // Auto-select first client and load its departments
-    if (clients && clients.length > 0) {
-      const firstClientId = clients[0].client_id;
-      setClientId(firstClientId);
-      await getDepartmentList(firstClientId);
-    }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const getDepartmentList = async (clientId) => {
-    setLoading(true)
-    try {
-      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
-        {clientId}
-      )
-      setDeptList(res.data.data)
-      setDeptId(res.data.data[0].dept_id)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const handleFieldChange = (index, key, value) => {
     const updated = [...fields];
@@ -201,53 +165,14 @@ const CampType = () => {
   };
 
   useEffect(()=>{
-    getClientList();
-  },[])
-
-    useEffect(()=>{
     getMonthlyCampDetails();
-  },[deptId])
+  },[])
 
   return loading ? (
     <Loader />
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
-          <div className="d-sm-flex align-items-start justify-content-end mb-4">
-            <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="clientId"
-              id="clientId"
-              value={clientId}
-              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
-            >
-              {clientList && clientList.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="deptId"
-              id="deptId"
-              value={deptId}
-              onChange={(e)=>setDeptId(e.target.value)}
-            >
-              {deptList && deptList.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-          </div>
         <div className="card-header text-right py-3">
           <button
             className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
