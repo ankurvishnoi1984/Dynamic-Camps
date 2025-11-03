@@ -17,7 +17,7 @@ const MonthlyCamp = () => {
   const [showModal, setShowModal] = useState(false);
   const userId = sessionStorage.getItem("userId");
   const doctorFieldRequired = "N";
-  const prescriptionFieldRequired = "N"; 
+  const prescriptionFieldRequired = "N";
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [openActionId, setOpenActionId] = useState(null);
@@ -38,7 +38,8 @@ const MonthlyCamp = () => {
     const payload = {
       userId,
       campId: selectedCamp.camp_id,
-      status: newStatus
+      status: newStatus,
+      deptId,
     }
     const endpoint = `${BASEURL2}/monthlyCamps/manageCampStatus`;
     axios
@@ -173,8 +174,8 @@ const MonthlyCamp = () => {
                   <th>Fields Names</th>
                   <th>Start Date</th>
                   <th>End Date</th>
-                  <th>Is Doctor Required</th>
-                  <th>Is Prescription Required</th>
+                  {/* <th>Is Doctor Required</th>
+                  <th>Is Prescription Required</th> */}
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -206,8 +207,8 @@ const MonthlyCamp = () => {
                           </div></td>
                           <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{formatDate(e.start_date)}</td>
                           <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{formatDate(e.end_date)}</td>
-                          <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{e.is_doctor_required === "Y" ? "Yes" : "No"}</td>
-                          <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{e.is_prescription_required === "Y" ? "Yes" : "No"}</td>
+                          {/* <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{e.is_doctor_required === "Y" ? "Yes" : "No"}</td> */}
+                          {/* <td className={e.is_active === "Y" ? "" : "text-muted"} style={{ opacity: e.is_active === "Y" ? 1 : 0.6 }}>{e.is_prescription_required === "Y" ? "Yes" : "No"}</td> */}
                           <td className={e.is_active === "Y" ? "text-success fw-semibold" : "text-danger fw-semibold"}>
                             {e.is_active === "Y" ? "Active" : "Deactivated"}
                           </td>
