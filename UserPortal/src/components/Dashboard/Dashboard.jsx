@@ -402,7 +402,7 @@ const canExecute = (campDateStr) => {
               <div className="card">
                 <div className="card-body">
                   <small className="msgnote mt-2">*Scroll left for other column of table</small>
-                  <div className="m-3 d-flex justify-content-between align-items-end" >
+                  {/* <div className="m-3 d-flex justify-content-between align-items-end" >
                     <button
                       type="button"
                       className="btn btn-download mt-2 m-1"
@@ -429,9 +429,9 @@ const canExecute = (campDateStr) => {
                       <i className="bi bi-plus"></i> Add New Camp
                     </button></div>
                       
-                  </div>
+                  </div> */}
                   <hr />
-                  <ul className="nav nav-tabs " id="campTabs" role="tablist">
+                  {/* <ul className="nav nav-tabs " id="campTabs" role="tablist">
                     {tabs.map((tab) => (
                       <li className="nav-item" role="presentation" key={tab.key}>
                         <button
@@ -451,101 +451,9 @@ const canExecute = (campDateStr) => {
                         </button>
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
                   {/* Bordered Table */}
-                  <div className="tbst">
-                    {
-                      <table className="table table-striped newcss">
-                        <thead>
-                          <tr>
-                            <th scope="col">Doctor Name</th>
-                            <th scope="col">Speciality</th>
-                            <th scope="col">Doctor Garnet Code</th>
-                            <th scope="col">Camp Type</th>
-                            <th scope="col">Camp Date</th>
-                            {isExecuted === "N" ? "" : (designation !== "AREA BUSINESS MANAGER" && Number(role) !== 4) && <th scope="col">RPS</th>}
-                            {isExecuted === "N" ? "" : (designation !== "AREA BUSINESS MANAGER" && Number(role) !== 4) && <th scope="col">Patient Screened</th>}
-                              {/* {isExecuted === "N" ? "" : (designation !== "AREA BUSINESS MANAGER" && Number(role) !== 4) && <th scope="col">Actions</th>} */}
-
-                            {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && <th>Hospital Name</th>}
-                            {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && <th>Ticavic Activity</th>}
-                            {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && <th scope="col">Status</th>}
-                           <th scope="col">Actions</th>
-
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {campReportList &&
-                            campReportList.length > 0 &&
-                            filteredList
-                              .slice(
-                                page * PageCount - PageCount,
-                                page * PageCount
-                              )
-                              .map((e) => (
-                                <tr key={e.crid}>
-                                  <td>{e.doctor_name}</td>
-                                  <td>{e.speciality}</td>
-                                  <td>{e.garnet_code}</td>
-                                  <td>{e.camp_type_name}</td>
-                                  <td>{e.camp_date1}</td>
-                                  {isExecuted === "N" ? "" : (designation !== "AREA BUSINESS MANAGER" && Number(role) !== 4) && <td>{e.is_rps === "N" ? "No" : "Yes"}</td>}
-                                  {isExecuted === "N" ? "" : (designation !== "AREA BUSINESS MANAGER" && Number(role) !== 4) && <td>{e.screen_count}</td>}
-                                 
-
-                                  {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && <td>{e.camp_type_name === "Cathlab" ? e.hospital_name : "Not Applicable"}</td>}
-                                  {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && <td>{e.camp_type_name === "Cathlab" ? (e.is_ticavic_avl === "Y" ? "Yes" : "No") : "Not Applicable"}</td>}
-                                  {(designation === "AREA BUSINESS MANAGER" && Number(role) === 4) && (
-                                    <td scope="col">{getApprovalStatus(e)}</td>
-                                  )}
-
-
-                                  {/* {isExecuted === "N" ? <td>
-                                    <button
-                                      type="button"
-                                      disabled={handleDisableBtn(e)}
-                                      className="btn btn-primary rounded-pill"
-                                      onClick={() =>
-                                        executeCamp(e.crid, e.camp_type_name)
-                                      }
-                                    >
-                                      Start Execution
-                                    </button>
-                                  </td> : ""} */}
-                                     {isExecuted === "N" ? <td>
-                                    <button
-      type="button"
-      disabled={handleDisableBtn(e) || !canExecute(e.camp_date2)}
-      className="btn btn-primary rounded-pill"
-      onClick={() => executeCamp(e.crid, e.camp_type_name)}
-    >
-      Start Execution
-    </button>
-                                  </td> : ""}
-                                   {isExecuted === "N" ? "" :  <td>
-                            <div className="action-wrapper">
-    <button
-      className="btn btn-sm btn-primary btn-circle border-0"
-      onClick={(event) => {
-        event.stopPropagation();
-        setOpenActionId((prev) => (prev === e.crid ? null : e.crid));
-      }}
-    >
-      <BsThreeDotsVertical />
-    </button>
-
-    {openActionId === e.crid && (
-      <div className="action-dropdown">
-        <button onClick={() => handelInfo(e.crid)}>View Info</button>
-      </div>
-    )}
-  </div></td>}
-                                </tr>
-                              ))}
-                        </tbody>
-                      </table>
-                    }
-                  </div>
+                  <h3>No Camps to show</h3>
                   {/* End Bordered Table */}
                   {campReportList && campReportList.length > 0 && (
                     <div>

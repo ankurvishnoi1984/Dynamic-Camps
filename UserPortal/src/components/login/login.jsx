@@ -33,11 +33,12 @@ const Login = () => {
         sessionStorage.setItem("sessionId", sessionId);
         sessionStorage.setItem("role", role);
         sessionStorage.setItem("designation",designation)
-        // navigate("/dashboard");
-        console.log("activeCamps",activeCamps)
-        navigate(`/camp/${activeCamps[0].camp_id}`);
+        if (activeCamps.length === 0){
+          navigate("/dashboard");
+        }else{
+          navigate(`/camp/${activeCamps[0].camp_id}`);
+        }
       } else {
-        //console.log("details",res.response.data.details)
         setError("Invalid Credential");
       }
     } catch (error) {
