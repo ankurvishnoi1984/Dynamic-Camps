@@ -151,13 +151,9 @@ const MonthlyCampsReport = () => {
         // Prepare headers
         const dynamicHeaders = myCampDetails[0].field_values?.map(fv => fv.field_label) || [];
         const headers = [
-            "Doctor Name",
-            "Speciality",
-            "Garnet Code",
-            "Submitted At",
-            "Status",
             ...dynamicHeaders,
-            "Brands (Prescriptions)"
+            "Status",
+            "Submitted At",
         ];
 
         // Map data
@@ -174,21 +170,21 @@ const MonthlyCampsReport = () => {
                 : "-";
 
             return {
-                "Doctor Name": item.doctor_name,
-                "Speciality": item.speciality,
-                "Garnet Code": item.garnet_code,
-                "Submitted At": new Date(item.submitted_at).toLocaleString(),
-                "Status": item.status === "Y" ? "Active" : "Inactive",
+                // "Doctor Name": item.doctor_name,
+                // "Speciality": item.speciality,
+                // "Garnet Code": item.garnet_code,
                 ...dynamicValues,
-                "Brands (Prescriptions)": presSummary
+                "Status": item.status === "Y" ? "Active" : "Inactive",
+                "Submitted At": new Date(item.submitted_at).toLocaleString(),
+                // "Brands (Prescriptions)": presSummary
             };
         });
 
         // Create worksheet and workbook
         const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "MonthlyCampsReport");
-        XLSX.writeFile(wb, "MonthlyCampsReport.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
+        XLSX.writeFile(wb, "CampsReport.xlsx");
     };
 
 
