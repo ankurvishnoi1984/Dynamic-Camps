@@ -1,5 +1,5 @@
 const express = require("express");
-const { createCampType, createCampConfig, getActiveCamps, getCampFieldDetails, createMonthlyCamp, submitFormAnswers, getCampTypeDetailsAdmin, getCampTypeList, getActiveCampsNavList, getMonthlyCampsList, getCampSubmissionsFull, monthlyCampsAdminReports, updateCampType, updateMonthlyCamp, manageCampStatus, getMonthlyCampsPrescriptionImages, saveBrandImages } = require("../controller/monthlyCamps.controller");
+const { createCampType, createCampConfig, getActiveCamps, getCampFieldDetails, createMonthlyCamp, submitFormAnswers, getCampTypeDetailsAdmin, getCampTypeList, getActiveCampsNavList, getMonthlyCampsList, getCampSubmissionsFull, monthlyCampsAdminReports, updateCampType, updateMonthlyCamp, manageCampStatus, getMonthlyCampsPrescriptionImages, saveBrandImages, getCampsNavListAdmin } = require("../controller/monthlyCamps.controller");
 const { upload } = require("../config/multer");
 const router = express.Router();
 
@@ -20,6 +20,7 @@ router.post("/updateMonthlyCamp",updateMonthlyCamp)
 router.post("/manageCampStatus",manageCampStatus);
 router.post("/getMonthlyCampsPrescriptionImages",getMonthlyCampsPrescriptionImages)
 router.post("/saveBrandImages",upload.any(),saveBrandImages)
+router.post("/getCampsNavListAdmin",getCampsNavListAdmin)
 
 
 

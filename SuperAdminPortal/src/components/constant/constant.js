@@ -4,3 +4,4 @@ export const BASEURL = localUrl
 export const BASEURL2 = localUrl
 export const CLIENTID = '101';
 export const DeptId = 3;
+export const DEPTID = 3;

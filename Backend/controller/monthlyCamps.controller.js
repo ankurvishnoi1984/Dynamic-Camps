@@ -655,6 +655,66 @@ exports.getActiveCampsNavList = (req, res) => {
     });
   }
 };
+exports.getCampsNavListAdmin = (req, res) => {
+  const {deptId} = req.body;
+  const query = `
+    SELECT 
+      m.camp_id,
+      m.camp_name,
+      m.camp_type_id,
+      ct.camp_type_name,
+      m.start_date,
+      m.end_date,
+      m.created_by,
+      m.created_date,
+      m.is_doctor_required,
+      m.is_prescription_required
+    FROM monthly_camp_mst m
+    INNER JOIN camp_type_mst ct 
+      ON m.camp_type_id = ct.camp_type_id
+    WHERE 
+      m.status = 'Y'
+      AND m.is_active = 'Y'
+      AND m.dept_id = ?
+    ORDER BY m.start_date DESC;
+  `;
+
+  try {
+    db.query(query,[deptId], (err, result) => {
+      if (err) {
+        logger.error(`Error in /controller/monthlyCamps/getActiveCamps: ${err.message}`);
+        return res.status(500).json({
+          errorCode: 0,
+          errorDetail: err.message,
+          responseData: [],
+          message: "Failed to fetch active camps",
+        });
+      }
+
+      if (!result || result.length === 0) {
+        return res.status(200).json({
+          errorCode: 1,
+          message: "No active camps found",
+          data: [],
+        });
+      }
+
+      return res.status(200).json({
+        errorCode: 1,
+        message: "Active camps fetched successfully",
+        data: result,
+      });
+    });
+  } catch (error) {
+    logger.error(`Error in /controller/monthlyCamps/getActiveCamps: ${error.message}`);
+    return res.status(500).json({
+      errorCode: 0,
+      errorDetail: error.message,
+      responseData: [],
+      message: "An internal server error occurred",
+    });
+  }
+};
 
 exports.getCampSubmissionsFull = (req, res) => {
   const { campId, userId,deptId } = req.body;

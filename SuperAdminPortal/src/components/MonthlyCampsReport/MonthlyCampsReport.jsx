@@ -141,7 +141,7 @@ const MonthlyCampsReport = () => {
         if(!deptId)return
         setLoading(true);
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampsNavListAdmin`,
                 {deptId}
             );
             const camps = res.data.data || [];
@@ -336,22 +336,21 @@ const MonthlyCampsReport = () => {
             <div className="card shadow mb-4">
                 <div className="card-header py-3">
 
-                    {/* <button onClick={handelReportDownloadNumberWise} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm">
-                <i className="fas fa-download fa-sm text-white-50"></i>Report Hierarchy</button> */}
                     <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
                         <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
-                          <button  onClick={() => {
-                                            
-                                          
-                                              handleOpenModal();
-                                            }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
-            <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-          </button>
+                    <button onClick={() => {
+
+
+                        handleOpenModal();
+                    }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
+                        <i className="fas fa-images fa-sm text-white-50"></i> Download Images
+                    </button>
                 </div>
- <MonthlyCImgDownload
-           show={show}
-    handelCloseModal={handleCloseModal}
-        />
+
+                <MonthlyCImgDownload
+                    show={show}
+                    handelCloseModal={handleCloseModal}
+                />
                 <div className="card-body">
                     <div className="table-responsive">
                         <table
@@ -362,10 +361,9 @@ const MonthlyCampsReport = () => {
                         >
                             <thead>
                                 <tr>
-                                    <th>Doctor Name</th>
+                                    {/* <th>Doctor Name</th>
                                     <th>Speciality</th>
-                                    <th>Garnet Code</th>
-                                    <th>Submitted At</th>
+                                    <th>Garnet Code</th> */}
                                     {/* <th>Status</th> */}
 
                                     {/* Dynamically render camp-specific fields */}
@@ -373,9 +371,10 @@ const MonthlyCampsReport = () => {
                                         myCampDetails[0].field_values?.map((fv, idx) => (
                                             <th key={idx}>{fv.field_label}</th>
                                         ))}
+                                        <th>Submitted At</th>
 
                                     {/* If you want, you can add prescription info */}
-                                    <th>Brands (Prescriptions)</th>
+                                    {/* <th>Brands (Prescriptions)</th> */}
                                 </tr>
                             </thead>
 
@@ -383,10 +382,9 @@ const MonthlyCampsReport = () => {
                                 {myCampDetails && myCampDetails.length > 0 ? (
                                     myCampDetails.map((e, i) => (
                                         <tr key={i}>
-                                            <td>{e.doctor_name}</td>
+                                            {/* <td>{e.doctor_name}</td>
                                             <td>{e.speciality}</td>
-                                            <td>{e.garnet_code}</td>
-                                            <td>{new Date(e.submitted_at).toLocaleString()}</td>
+                                            <td>{e.garnet_code}</td> */}
                                             {/* <td>{e.status === "Y" ? "Submitted" : "Pending"}</td> */}
 
                                             {/* Dynamic field values */}
@@ -399,9 +397,10 @@ const MonthlyCampsReport = () => {
                                                     )}
                                                 </td>
                                             ))}
+                                            <td>{new Date(e.submitted_at).toLocaleString()}</td>
 
                                             {/* Prescriptions summary */}
-                                            <td>
+                                            {/* <td>
                                                 {e.prescriptions && e.prescriptions.length > 0 ? (
                                                     e.prescriptions.map((p, idx2) => (
                                                         <div key={idx2}>
@@ -411,7 +410,7 @@ const MonthlyCampsReport = () => {
                                                 ) : (
                                                     "-"
                                                 )}
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))
                                 ) : (
