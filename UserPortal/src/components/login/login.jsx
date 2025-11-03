@@ -34,7 +34,7 @@ const Login = () => {
         sessionStorage.setItem("role", role);
         sessionStorage.setItem("designation",designation)
         if (activeCamps.length === 0){
-          navigate("/dashboard");
+          navigate("/notFound");
         }else{
           navigate(`/camp/${activeCamps[0].camp_id}`);
         }

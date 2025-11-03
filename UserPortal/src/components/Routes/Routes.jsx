@@ -11,11 +11,13 @@ import PrescriptionPage from "../Pages/PrescriptionPage";
 import EmpanormPage from "../Pages/EmpanormPage";
 import DynamicCampPage from "../Pages/DynamicCampPage";
 import MonthlyCampPage from "../Pages/MonthlyCampPage";
+import NotFoundPage from "../Pages/NotFoundPage";
 
 export const publicRoutes = [{ path: "/", element: <Login /> }];
 
 export const privateRoutes = [
   { path: "/dashboard", element: <DashboardPage /> },
+  { path: "/notFound", element: <NotFoundPage /> },
   { path: "/empanormCampaign", element: <EmpanormPage /> },
   { path: "/bccDistribution", element: <BccDistPage /> },
   { path: "/jaiHo", element: <JaiHoPage/> },
