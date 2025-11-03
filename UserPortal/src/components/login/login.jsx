@@ -19,6 +19,7 @@ const Login = () => {
       const res = await axios.post(`${BASEURL2}/auth/login`, {
         empcode:empcode1,
         password,
+        deptId:DeptId
       });
       if (Number(res.data.errorCode) === 1) {
         console.log(res);
