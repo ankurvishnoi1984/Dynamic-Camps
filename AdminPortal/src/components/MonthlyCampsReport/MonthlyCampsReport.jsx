@@ -99,10 +99,9 @@ const MonthlyCampsReport = () => {
         if(!deptId)return
         setLoading(true);
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampsNavListAdmin`,
                 {deptId:deptId}
             );
-            console.log("getMyCampsType",res.data)
             const camps = res.data.data || [];
             setMyCampType(camps);
 
@@ -273,10 +272,12 @@ const MonthlyCampsReport = () => {
                         <i className="fas fa-images fa-sm text-white-50"></i> Download Images
                     </button>
                 </div>
- <MonthlyCImgDownload
-           show={show}
-    handelCloseModal={handleCloseModal}
-        />
+
+                <MonthlyCImgDownload
+                    show={show}
+                    handelCloseModal={handleCloseModal}
+                />
+                
                 <div className="card-body">
                     <div className="table-responsive">
                         <table
@@ -286,11 +287,10 @@ const MonthlyCampsReport = () => {
                             cellSpacing="0"
                         >
                             <thead>
-                                <tr>
-                                    <th>Doctor Name</th>
+                                 <tr>
+                                    {/* <th>Doctor Name</th>
                                     <th>Speciality</th>
-                                    <th>Garnet Code</th>
-                                    <th>Submitted At</th>
+                                    <th>Garnet Code</th> */}
                                     {/* <th>Status</th> */}
 
                                     {/* Dynamically render camp-specific fields */}
@@ -298,20 +298,20 @@ const MonthlyCampsReport = () => {
                                         myCampDetails[0].field_values?.map((fv, idx) => (
                                             <th key={idx}>{fv.field_label}</th>
                                         ))}
+                                        <th>Submitted At</th>
 
                                     {/* If you want, you can add prescription info */}
-                                    <th>Brands (Prescriptions)</th>
+                                    {/* <th>Brands (Prescriptions)</th> */}
                                 </tr>
                             </thead>
 
-                            <tbody>
+                             <tbody>
                                 {myCampDetails && myCampDetails.length > 0 ? (
                                     myCampDetails.map((e, i) => (
                                         <tr key={i}>
-                                            <td>{e.doctor_name}</td>
+                                            {/* <td>{e.doctor_name}</td>
                                             <td>{e.speciality}</td>
-                                            <td>{e.garnet_code}</td>
-                                            <td>{new Date(e.submitted_at).toLocaleString()}</td>
+                                            <td>{e.garnet_code}</td> */}
                                             {/* <td>{e.status === "Y" ? "Submitted" : "Pending"}</td> */}
 
                                             {/* Dynamic field values */}
@@ -324,9 +324,10 @@ const MonthlyCampsReport = () => {
                                                     )}
                                                 </td>
                                             ))}
+                                            <td>{new Date(e.submitted_at).toLocaleString()}</td>
 
                                             {/* Prescriptions summary */}
-                                            <td>
+                                            {/* <td>
                                                 {e.prescriptions && e.prescriptions.length > 0 ? (
                                                     e.prescriptions.map((p, idx2) => (
                                                         <div key={idx2}>
@@ -336,7 +337,7 @@ const MonthlyCampsReport = () => {
                                                 ) : (
                                                     "-"
                                                 )}
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))
                                 ) : (
