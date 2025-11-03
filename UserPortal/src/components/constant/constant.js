@@ -4,7 +4,7 @@
 const devUrl = 'https://demo2.netcastservice.online'
 const localUrl = 'http://localhost:8035'
 const liveUrl = 'https://dynamiccampsapi.netcastservice.online/';
-export const DeptId = 3;
+export const DeptId = 4;
 export const BASEURL = liveUrl
 export const BASEURL2 = liveUrl
 export const PageCount = 20;

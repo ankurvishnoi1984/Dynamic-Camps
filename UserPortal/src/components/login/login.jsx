@@ -75,7 +75,7 @@ const Login = () => {
                   >
                     <div className="d-flex justify-content-center py-4">
                       <div className="logo1 d-flex align-items-center w-auto">
-                    <img src="/images/logo.png" alt="Logo" />
+                    <img src="/images/logo.svg" alt="Logo" />
                 
                       </div>
                     </div>

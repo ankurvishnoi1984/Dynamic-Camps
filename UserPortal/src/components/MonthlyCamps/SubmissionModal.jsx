@@ -398,34 +398,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                         Is Prescription Generated*
                                     </label>
                                 </div>}
-                                <div className="form-group col-md-4 did-floating-label-content">
-                                    <input
-                                        type="date"
-                                        className="form-control did-floating-input"
-                                        onChange={(e) => {
-                                            // const selected = new Date(e.target.value);
-                                            // const today = new Date();
-                                            // const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-                                            // if (selected < thirtyDaysAgo || selected > today) {
-                                            //     alert("Please select a date within the last 30 days.");
-                                            //     return;
-                                            // }
-                                            setCampDate(e.target.value);
-                                        }}
-
-                                        placeholder="Camp Date*"
-                                        value={campDate}
-                                        // 🔒 restrict to last 30 days:
-                                        // min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-                                        //     .toISOString()
-                                        //     .split("T")[0]}
-                                        // max={new Date().toISOString().split("T")[0]}
-                                    />
-                                    <label className="form-label did-floating-label">
-                                        Date*
-                                    </label>
-                                </div>
+                           
 
                                 {isPrescriptionGen === "Y" && <div className="form-group col-md-6 did-floating-label-content">
                                     <Select
@@ -614,7 +587,34 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                             return null;
                                     }
                                 })}
+     <div className="form-group col-md-4 did-floating-label-content">
+                                    <input
+                                        type="date"
+                                        className="form-control did-floating-input"
+                                        onChange={(e) => {
+                                            // const selected = new Date(e.target.value);
+                                            // const today = new Date();
+                                            // const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
+                                            // if (selected < thirtyDaysAgo || selected > today) {
+                                            //     alert("Please select a date within the last 30 days.");
+                                            //     return;
+                                            // }
+                                            setCampDate(e.target.value);
+                                        }}
+
+                                        placeholder="Camp Date*"
+                                        value={campDate}
+                                        // 🔒 restrict to last 30 days:
+                                        // min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                                        //     .toISOString()
+                                        //     .split("T")[0]}
+                                        // max={new Date().toISOString().split("T")[0]}
+                                    />
+                                    <label className="form-label did-floating-label">
+                                        Date*
+                                    </label>
+                                </div>
                             </form>
 
                             <div className="text-center">

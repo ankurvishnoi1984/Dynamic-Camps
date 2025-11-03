@@ -191,13 +191,11 @@ const MonthlyCamp = () => {
   // Prepare headers
   const dynamicHeaders = campReportList[0].field_values?.map(fv => fv.field_label) || [];
   const headers = [
-    "Doctor Name",
-    "Speciality",
-    "Garnet Code",
-    "Submitted At",
-    "Status",
+    
+   
     ...dynamicHeaders,
-    "Brands (Prescriptions)"
+     "Submitted At"
+    
   ];
 
   // Map data
@@ -214,21 +212,18 @@ const MonthlyCamp = () => {
       : "-";
 
     return {
-      "Doctor Name": item.doctor_name,
-      "Speciality": item.speciality,
-      "Garnet Code": item.garnet_code,
-      "Submitted At": new Date(item.submitted_at).toLocaleString(),
-      "Status": item.status === "Y" ? "Active" : "Inactive",
+
       ...dynamicValues,
-      "Brands (Prescriptions)": presSummary
+       "Submitted At": new Date(item.submitted_at).toLocaleString()
+    
     };
   });
 
   // Create worksheet and workbook
   const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "MonthlyCampsReport");
-  XLSX.writeFile(wb, "MonthlyCampsReport.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
+  XLSX.writeFile(wb, "CampsReport.xlsx");
 };
 
 
@@ -556,69 +551,86 @@ const MonthlyCamp = () => {
                   </div>
                   <hr />
                   <div className="tbst">
-                    <table className="table table-hover newcss">
-                      <thead>
-                        <tr>
-                          {/* <th scope="col">Doctor Name</th>
-                          <th scope="col">Speciality</th>
-                          <th scope="col">Garnet Code</th> */}
-                           {campReportList.length > 0 &&
-                                        campReportList[0].field_values?.map((fv, idx) => (
-                                            <th key={idx}>{fv.field_label}</th>
-                                        ))}
-                          <th scope="col">Date</th>
-                          <th scope="col">Actions</th>
-                        </tr>
-                      </thead>
-                     <tbody>
-                      {console.log("campReportList",campReportList)}
-                        {campReportList &&
-                          campReportList.length > 0 &&
-                          campReportList
-                            .slice(page * PageCount - PageCount, page * PageCount)
-                            .map((e) => (
-                              <tr key={e.submission_id}>
-                                {/* <td>{e.doctor_name || "N/A"}</td>
-                                <td>{e.speciality || "N/A"}</td>
-                                <td>{e.garnet_code || "N/A"}</td> */}
-                                 {/* Dynamic field values */}
-                                            {e.field_values?.map((fv, idx) => (
-                                                <td key={idx}>
-                                                    {fv.field_type === "image" ? (
-                                                        <span>🖼️ Image</span>
-                                                    ) : (
-                                                        fv.value || "-"
-                                                    )}
-                                                </td>
-                                            ))}
-                                
-                                <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
-                                <td>
-                                 
+                  <table className="table table-hover newcss">
+  {campReportList && campReportList.length > 0 ? (
+    <>
+      <thead>
+        <tr>
+          {campReportList[0].field_values?.map((fv, idx) => (
+            <th key={idx}>{fv.field_label}</th>
+          ))}
+          <th scope="col">Date</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
 
-                                  <div className="action-wrapper">
-                                         <button
-                                           className="btn btn-sm btn-primary btn-circle border-0"
-                                           onClick={(event) => {
-                                             event.stopPropagation();
-                                             setOpenActionId((prev) => (prev === e.submission_id ? null : e.submission_id));
-                                           }}
-                                         >
-                                           <BsThreeDotsVertical />
-                                         </button>
-                                     
-                                         {openActionId === e.submission_id && (
-                                           <div className="action-dropdown">
-                                             <button onClick={() => handelInfo(e.submission_id)}>View Info</button>
-                                           </div>
-                                         )}
-                                       </div>
-                                </td>
-                              </tr>
-                            ))}
-                      </tbody>
+      <tbody>
+        {campReportList
+          .slice(page * PageCount - PageCount, page * PageCount)
+          .map((e) => (
+            <tr key={e.submission_id}>
+              {e.field_values?.map((fv, idx) => (
+                <td key={idx}>
+                  {fv.field_type === "image" ? (
+                    <span>🖼️ Image</span>
+                  ) : (
+                    fv.value || "-"
+                  )}
+                </td>
+              ))}
 
-                    </table>
+              <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
+              <td>
+                <div className="action-wrapper">
+                  <button
+                    className="btn btn-sm btn-primary btn-circle border-0"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenActionId((prev) =>
+                        prev === e.submission_id ? null : e.submission_id
+                      );
+                    }}
+                  >
+                    <BsThreeDotsVertical />
+                  </button>
+
+                  {openActionId === e.submission_id && (
+                    <div className="action-dropdown">
+                      <button onClick={() => handelInfo(e.submission_id)}>
+                        View Info
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+      </tbody>
+    </>
+  ) : (
+    <tbody>
+      <tr>
+        <td colSpan="100%" className="text-center py-5">
+          <div
+            style={{
+              color: "#6c757d",
+              fontSize: "18px",
+              fontWeight: 500,
+              textAlign: "center",
+            }}
+          >
+            🚫 No records found.<br />
+            <span style={{ fontSize: "16px" }}>
+              Click <strong style={{ color: "#0d6efd" }}>“Add Camp Report</strong> to
+              add record.
+            </span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  )}
+</table>
+
                   </div>
 
                   {campReportList && campReportList.length > 0 && (

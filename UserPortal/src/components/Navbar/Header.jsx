@@ -40,7 +40,7 @@ const Header = () => {
             className="bi bi-list toggle-sidebar-btn"
           ></i>
           <Link to={"/dashboard"} className="logo d-flex align-items-center">
-            <img src="/images/logo.png" alt="" />
+            <img src="/images/logo.svg" alt="" />
           </Link>
           {/* <div>Logo</div> */}
         </div>
