@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../../../style/css/sb-admin-2.min.css";
 import axios from "axios";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import { DEPTID, BASEURL2 } from "../constant/constant";
 import { useNavigate } from "react-router-dom";
 import "./login.css"
 
@@ -16,7 +16,7 @@ const Login = () => {
     e.preventDefault();
     console.log(username, password,BASEURL2)
     try {
-      const res = await axios.post(`${BASEURL2}/auth/login`, { empcode: username, password });
+      const res = await axios.post(`${BASEURL2}/auth/login`, { empcode: username, password,deptId:DEPTID });
       const empcode = res.data.responseData.empId;
       const userId = res.data.responseData.user_id;
       const sessionId = res?.data?.responseData?.sessionID;
@@ -29,8 +29,6 @@ const Login = () => {
       sessionStorage.setItem('userId', userId)
       sessionStorage.setItem("sessionId", sessionId);
       sessionStorage.setItem('UserLoggedIn', "true")
-      // sessionStorage.setItem('EmployeeName',name)
-      // console.log(typeof(res.data.errorCode ),res.data.errorCode  === "1",res.data.errorCode  === 1)
       if (Number(role) === 0 && Number(res.data.errorCode) === 1) {
         sessionStorage.setItem("IsAdminLoggedIn", "true")
         navigate("/dashboard")

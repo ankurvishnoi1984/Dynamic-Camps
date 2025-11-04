@@ -4,11 +4,11 @@ const logger = require('../utils/logger')
 
 
 exports.loginWithEmpCode = async (req, res) => {
-  const { empcode, password } = req.body;
-  const query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=?';
+  const { empcode, password,deptId } = req.body;
+  const query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=? and dept_id = ?';
 
   try {
-    db.query(query, [empcode], (err, result) => {
+    db.query(query, [empcode,deptId], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/auth/login: ${err.message}`);
         return res.status(500).json({
@@ -32,8 +32,8 @@ exports.loginWithEmpCode = async (req, res) => {
         const user = result[0];
         if (password == user.password) {
           const loginTime = new Date();
-          const historyQuery = 'insert into user_login_history (user_id, login_datetime) values (?, ?)';
-          db.query(historyQuery, [user.user_id, loginTime], (err, result) => {
+          const historyQuery = 'insert into user_login_history (user_id, login_datetime,dept_id) values (?, ?,?)';
+          db.query(historyQuery, [user.user_id, loginTime,deptId], (err, result) => {
             if (err) {
               logger.error(`Error in /controller/auth/login: ${err.message}`);
               return res.status(500).json({

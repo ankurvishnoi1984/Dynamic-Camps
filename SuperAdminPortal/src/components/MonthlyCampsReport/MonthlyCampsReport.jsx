@@ -12,17 +12,17 @@ const MonthlyCampsReport = () => {
 
     const empcode = sessionStorage.getItem('empcode')
     const userId = sessionStorage.getItem('userId');
-     const [show,setShow]= useState(false);
+    const [show, setShow] = useState(false);
     const [myCampDetails, setMyCampDetails] = useState([]);
 
 
     const [allReportData, setAllReportData] = useState([]);
     const [loading, setLoading] = useState(false)
     const [myCampType, setMyCampType] = useState([]);
-    const [clientList,setClientList] = useState([]);
-  const [clientId,setClientId] = useState("");
-  const [deptList,setDeptList]= useState([]);
-  const [deptId,setDeptId]=useState("");
+    const [clientList, setClientList] = useState([]);
+    const [clientId, setClientId] = useState("");
+    const [deptList, setDeptList] = useState([]);
+    const [deptId, setDeptId] = useState("");
 
     const [filters, setFilters] = useState({
         userId: userId,         // you will probably get this from logged-in user
@@ -46,14 +46,14 @@ const MonthlyCampsReport = () => {
         }));
     };
 
-  const handleOpenModal = (action, crid) => {
+    const handleOpenModal = (action, crid) => {
 
-  setShow(true);
-};
-   const handleCloseModal = () => {
-  setShow(false);
- 
-};
+        setShow(true);
+    };
+    const handleCloseModal = () => {
+        setShow(false);
+
+    };
     useEffect(() => {
         if (filters.searchKeyword) {
             let timer = setTimeout(() => {
@@ -67,14 +67,14 @@ const MonthlyCampsReport = () => {
         }
         GetDetiledData();
         getMyCampsType();
-    }, [filters,deptId])
+    }, [filters, deptId])
 
 
     useEffect(() => {
         if (filters.campId) {
             getMyCampDetailsByEmpcode();
         }
-    }, [filters.campId,deptId]);
+    }, [filters.campId, deptId]);
 
     useEffect(() => {
         getClientList();
@@ -123,7 +123,7 @@ const MonthlyCampsReport = () => {
         const payload = {
             searchKeyword: filters.searchKeyword.trim() || null,
             campId: filters.campId,
-            empcode:empcode,
+            empcode: empcode,
             deptId,
         };
 
@@ -138,11 +138,11 @@ const MonthlyCampsReport = () => {
     }
 
     const getMyCampsType = async () => {
-        if(!deptId)return
+        if (!deptId) return
         setLoading(true);
         try {
             const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampsNavListAdmin`,
-                {deptId}
+                { deptId }
             );
             const camps = res.data.data || [];
             setMyCampType(camps);
@@ -192,13 +192,9 @@ const MonthlyCampsReport = () => {
         // Prepare headers
         const dynamicHeaders = myCampDetails[0].field_values?.map(fv => fv.field_label) || [];
         const headers = [
-            "Doctor Name",
-            "Speciality",
-            "Garnet Code",
-            "Submitted At",
-            "Status",
             ...dynamicHeaders,
-            "Brands (Prescriptions)"
+            "Status",
+            "Submitted At",
         ];
 
         // Map data
@@ -215,21 +211,21 @@ const MonthlyCampsReport = () => {
                 : "-";
 
             return {
-                "Doctor Name": item.doctor_name,
-                "Speciality": item.speciality,
-                "Garnet Code": item.garnet_code,
-                "Submitted At": new Date(item.submitted_at).toLocaleString(),
-                "Status": item.status === "Y" ? "Active" : "Inactive",
+                // "Doctor Name": item.doctor_name,
+                // "Speciality": item.speciality,
+                // "Garnet Code": item.garnet_code,
                 ...dynamicValues,
-                "Brands (Prescriptions)": presSummary
+                "Status": item.status === "Y" ? "Active" : "Inactive",
+                "Submitted At": new Date(item.submitted_at).toLocaleString(),
+                // "Brands (Prescriptions)": presSummary
             };
         });
 
         // Create worksheet and workbook
         const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "MonthlyCampsReport");
-        XLSX.writeFile(wb, "MonthlyCampsReport.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
+        XLSX.writeFile(wb, "CampsReport.xlsx");
     };
 
 
@@ -242,38 +238,38 @@ const MonthlyCampsReport = () => {
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
 
                 <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="clientId"
-              id="clientId"
-              value={clientId}
-              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
-            >
-              {clientList && clientList.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
+                    <select
+                        className="form-control selectStyle selecCamp"
+                        name="clientId"
+                        id="clientId"
+                        value={clientId}
+                        onChange={(e) => { setClientId(e.target.value), getDepartmentList(e.target.value) }}
+                    >
+                        {clientList && clientList.map((e) => (
+                            <option key={e.client_id} value={e.client_id}>
+                                {e.client_name}
+                            </option>
+                        ))}
+                    </select>
 
-          </div>
+                </div>
 
-          <div className="dropdown ml-2">
-            <select
-              className="form-control selectStyle selecCamp"
-              name="deptId"
-              id="deptId"
-              value={deptId}
-              onChange={(e)=>setDeptId(e.target.value)}
-            >
-              {deptList && deptList.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
+                <div className="dropdown ml-2">
+                    <select
+                        className="form-control selectStyle selecCamp"
+                        name="deptId"
+                        id="deptId"
+                        value={deptId}
+                        onChange={(e) => setDeptId(e.target.value)}
+                    >
+                        {deptList && deptList.map((e) => (
+                            <option key={e.dept_id} value={e.dept_id}>
+                                {e.dept_name}
+                            </option>
+                        ))}
+                    </select>
 
-          </div>
+                </div>
 
                 <div className="form-group ml-2">
                     <label htmlFor="searchKeyword" >Doctor Name:</label>
@@ -371,7 +367,7 @@ const MonthlyCampsReport = () => {
                                         myCampDetails[0].field_values?.map((fv, idx) => (
                                             <th key={idx}>{fv.field_label}</th>
                                         ))}
-                                        <th>Submitted At</th>
+                                    <th>Submitted At</th>
 
                                     {/* If you want, you can add prescription info */}
                                     {/* <th>Brands (Prescriptions)</th> */}
