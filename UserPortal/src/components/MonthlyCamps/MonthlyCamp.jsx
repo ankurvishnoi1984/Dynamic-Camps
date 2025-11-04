@@ -227,20 +227,22 @@ const MonthlyCamp = () => {
 };
 
 
-  // useEffect(() => {
-  //   if(searchQuery){
-  //     let timer =setTimeout(()=>{
-  //       getCampReportList();
-  //     },1000)
-      
-  //     return ()=>{
-  //       clearTimeout(timer)
-  //     }
-  //   }
-  //   else{
-  //     getCampReportList();
-  //   }
-  // }, [listCampType, searchQuery]);
+  useEffect(() => {
+    if (searchQuery) {
+      let timer = setTimeout(() => {
+        getCampSubmissionsFull();
+
+      }, 1000)
+
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+    else {
+      getCampSubmissionsFull();
+
+    }
+  }, [searchQuery,campId,addRequestModel]);
 
 
 
@@ -273,7 +275,7 @@ const MonthlyCamp = () => {
   useEffect(() => {
     getBrandList();
     getDoctorList();
-    getCampSubmissionsFull();
+    // getCampSubmissionsFull();
   }, [campId,addRequestModel]);
 
   // for search
@@ -433,6 +435,7 @@ const MonthlyCamp = () => {
       campId: campId,
       userId: userId,
       deptId:DeptId,
+      searchQuery,
     });
 
     if (res.data.errorCode === 1) {
