@@ -65,6 +65,7 @@ const MonthlyCampsReport = () => {
                 clearTimeout(timer);
             };
         }
+        getMyCampDetailsByEmpcode();
         GetDetiledData();
         getMyCampsType();
     }, [filters, deptId])
@@ -211,9 +212,6 @@ const MonthlyCampsReport = () => {
                 : "-";
 
             return {
-                // "Doctor Name": item.doctor_name,
-                // "Speciality": item.speciality,
-                // "Garnet Code": item.garnet_code,
                 ...dynamicValues,
                 "Status": item.status === "Y" ? "Active" : "Inactive",
                 "Submitted At": new Date(item.submitted_at).toLocaleString(),
@@ -274,13 +272,13 @@ const MonthlyCampsReport = () => {
                 </div>
 
                 <div className="form-group ml-2">
-                    <label htmlFor="searchKeyword" >Doctor Name:</label>
+                    <label htmlFor="searchKeyword" >Search:</label>
                     <input
                         type="text"
                         className="form-control"
                         id="searchKeyword"
                         name="searchKeyword"
-                        placeholder="Search by Doctor Name"
+                        placeholder="Enter text to search"
                         value={filters.searchKeyword}
                         onChange={handleChangeDr}
                     />
