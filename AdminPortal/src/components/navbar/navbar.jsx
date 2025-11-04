@@ -1,5 +1,5 @@
 
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../../../style/css/sb-admin-2.min.css"
 
 import "./navbar.css"
@@ -20,6 +20,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
 
       const userName = sessionStorage.getItem('EmployeeName')
       const empcode = sessionStorage.getItem('empcode')
+      const designation = sessionStorage.getItem('designation');
 
       const toggleSidebar = () => {
         setIsSidebarVisible(!isSidebarVisible);
@@ -70,31 +71,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
                     </NavLink>
                 </li>
                 <hr className="sidebar-divider my-0" />
-        {/* {sessionStorage.getItem("role") === "0" && (
-  <li className={`nav-item ${isManageClientsActive ? "active-link" : ""}`}>
-    <button
-      className="nav-link nstbtn collapsed"
-      onClick={() => setIsClientsOpen(!isClientsOpen)}
-    >
-      <i className="fas fa-fw fa-users-cog"></i>
-      <span>Manage Clients</span>
-    </button>
 
-    <div
-      id="collapseClients"
-      className={`collapse ${isClientsOpen ? "show" : ""}`}
-    >
-      <div className="bg-white py-2 collapse-inner rounded">
-        <NavLink to={"/clients"} className="collapse-item">
-          Clients
-        </NavLink>
-        <NavLink to={"/departments"} className="collapse-item">
-          Department
-        </NavLink>
-      </div>
-    </div>
-  </li>
-)} */}
 
 <hr className="sidebar-divider my-0" />
 
@@ -125,7 +102,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
 )}
 
      <hr className="sidebar-divider my-0" />
-                {Number(empcode) === 10000 && <li className="nav-item ">
+                {designation.toLocaleLowerCase() === "admin" && <li className="nav-item ">
                     <NavLink to={"/employee"} className={({isActive})=> isActive? "active-link nav-link" :"nav-link"}>
                          <i className="fas fa-fw fa-user-alt"></i>
                         <span>Employee Management</span>

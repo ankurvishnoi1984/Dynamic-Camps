@@ -170,9 +170,6 @@ const MonthlyCampsReport = () => {
                 : "-";
 
             return {
-                // "Doctor Name": item.doctor_name,
-                // "Speciality": item.speciality,
-                // "Garnet Code": item.garnet_code,
                 ...dynamicValues,
                 "Status": item.status === "Y" ? "Active" : "Inactive",
                 "Submitted At": new Date(item.submitted_at).toLocaleString(),
@@ -197,7 +194,7 @@ const MonthlyCampsReport = () => {
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
 
 
-                <div className="form-group ml-2">
+                {/* <div className="form-group ml-2">
                     <label htmlFor="searchKeyword" >Doctor Name:</label>
                     <input
                         type="text"
@@ -208,7 +205,7 @@ const MonthlyCampsReport = () => {
                         value={filters.searchKeyword}
                         onChange={handleChangeDr}
                     />
-                </div>
+                </div> */}
 
                 <div className="dropdown ml-2">
                     <select
@@ -262,11 +259,11 @@ const MonthlyCampsReport = () => {
                     <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
                         <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
                         
-                    <button onClick={() => {
+                    {/* <button onClick={() => {
                         handleOpenModal();
                     }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
                         <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-                    </button>
+                    </button> */}
                 </div>
 
                 <MonthlyCImgDownload
@@ -284,10 +281,6 @@ const MonthlyCampsReport = () => {
                         >
                             <thead>
                                  <tr>
-                                    {/* <th>Doctor Name</th>
-                                    <th>Speciality</th>
-                                    <th>Garnet Code</th> */}
-                                    {/* <th>Status</th> */}
 
                                     {/* Dynamically render camp-specific fields */}
                                     {myCampDetails.length > 0 &&
