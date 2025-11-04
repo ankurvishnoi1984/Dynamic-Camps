@@ -178,7 +178,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="col-xl-3 col-md-4 mx-auto mb-4">
+        {/* <div className="col-xl-3 col-md-4 mx-auto mb-4">
           <div className="card border-left-primary shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
@@ -194,13 +194,13 @@ function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
       </div>
       <div className="card shadow mb-4">
  <div className="row pt-5">
   {/* Recent Camps Table */}
-  <div className="col-lg-7 mb-4">
+  <div className="col-lg-12 mb-4">
     <div className="card shadow mb-4">
       <div className="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 className="m-0 font-weight-bold text-primary">Recent Camps</h6>
