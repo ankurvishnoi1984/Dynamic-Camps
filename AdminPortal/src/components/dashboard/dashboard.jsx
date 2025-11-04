@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../../style/css/sb-admin-2.min.css"
 import axios from "axios";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import { DEPTID, BASEURL2 } from "../constant/constant";
 import * as XLSX from 'xlsx/xlsx.mjs';
 import { ToastContainer, toast } from 'react-toastify';
 import "./dashboard.css"
@@ -30,13 +30,10 @@ function Dashboard() {
   const [password, SetPassword] = useState("");
   const [role, SetRole] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [recentClients,setRecentClients] = useState([]);
   const [recentCamps,setRecentCamps] = useState([]);
 
 
   const [addUserModel, setAddUserModel] = useState(false)
-
-  const [dashboardSummary, setDashSummary] = useState([]);
 
     const [filters, setFilters] = useState({
       fromDate: "",
@@ -46,10 +43,10 @@ function Dashboard() {
 
 
   const [totals, setTotals] = useState({
-   totalClient:0,
-   totalDept:0,
-   totalEmp:0,
-   totalCamps:0
+   totalEmployees:0,
+   totalCamps:0,
+   activeCamps:0,
+   totalCampsReport:0
   });
 
 
@@ -71,18 +68,6 @@ function Dashboard() {
     setShowConfirmation(false);
   };
 
-    const getRecentClients = async () => {
-    setLoading(true)
-    try {
-      const res = await axios.post(`${BASEURL2}/dashboard/getRecentClientDetails`)
-      setRecentClients(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
-    finally {
-      setLoading(false);
-    }
-  }
 
   const getRecentCamps = async () => {
     setLoading(true)
@@ -101,9 +86,8 @@ function Dashboard() {
   const getTotalCountDetails = async () => {
     setLoading(true)
     try {
-      const res = await axios.post(`${BASEURL2}/dashboard/totalCountDetails`)
+      const res = await axios.post(`${BASEURL2}/dashboard/totalCountDetailsClient`,{deptId:DEPTID})
       setTotals(res.data.data)
-      console.log("res.data.data", res.data)
     } catch (error) {
       console.log(error)
     }
@@ -114,8 +98,6 @@ function Dashboard() {
 
 
   useEffect(() => {
-    getSummaryByActivity();
-    getRecentClients();
     getRecentCamps();
     getTotalCountDetails();
   }, [])
@@ -130,21 +112,7 @@ function Dashboard() {
 };
 
 
-  const getSummaryByActivity = async () => {
-      const payload = {
-      empcode: loginEmpCode,
-      isExecuted: "Y",
-      fromDate: filters.fromDate || null,
-      toDate: filters.toDate || null,
-      campType: filters.campType || null
-    };
-    try {
-      const res = await axios.post(`${BASEURL2}/admin/summaryByActivity`, payload);
-      setDashSummary(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+
 
 
   return (
@@ -156,9 +124,9 @@ function Dashboard() {
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Total Clients
+                    Active Camps
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalClients}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.activeCamps}</div>
                 </div>
                 <div className="col-auto">
                   <i className="fas fa-user fa-2x text-gray-300"></i>
@@ -176,9 +144,9 @@ function Dashboard() {
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Total Departments
+                    Total Camps Report
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalDepartments}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{totals.totalCampsReport}</div>
                 </div>
                 <div className="col-auto">
                   <i className="fas fa-users  fa-2x text-gray-300"></i>
@@ -231,39 +199,6 @@ function Dashboard() {
       </div>
       <div className="card shadow mb-4">
  <div className="row pt-5">
-  {/* Recent Clients Table */}
-  <div className="col-lg-5 mb-4">
-    <div className="card shadow mb-4">
-      <div className="card-header py-3 d-flex justify-content-between align-items-center">
-        <h6 className="m-0 font-weight-bold text-primary">Recent Clients</h6>
-      </div>
-      <div className="card-body">
-        <div className="table-responsive">
-          <table className="table table-bordered" width="100%" cellSpacing="0">
-            <thead>
-              <tr>
-                <th>Client Name</th>
-                <th>Department</th>
-                <th>Contact Person</th>
-                <th>Created Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentClients.map((client, i) => (
-                <tr key={i}>
-                  <td>{client.client_name}</td>
-                  <td>{client.dept_name}</td>
-                  <td>{client.coordinator_name}</td>
-                  <td>{new Date(client.created_date).toLocaleDateString("en-GB")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
   {/* Recent Camps Table */}
   <div className="col-lg-7 mb-4">
     <div className="card shadow mb-4">
@@ -283,7 +218,6 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {console.log("recentCamps : ",recentCamps)}
               {recentCamps.map((camp, i) => (
                 <tr key={i}>
                   <td>{camp.client_name}</td>

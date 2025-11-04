@@ -89,6 +89,94 @@ exports.getRecentCampDetails = (req, res) => {
   }
 };
 
+exports.totalCountDetailsClient = (req, res) => {
+  const {deptId} = req.body;
+  const totalEmployeeQuery = `
+    SELECT COUNT(*) AS totalEmployees
+    FROM user_mst
+    WHERE status = 'Y' 
+    AND dept_id = ?;
+  `;
+
+  const totalCampsQuery = `
+    SELECT COUNT(*) AS totalCamps
+    FROM monthly_camp_mst
+      WHERE status = 'Y'
+      AND dept_id = ?;
+  `;
+  const activeCampsQuery = `
+  SELECT COUNT(*) AS activeCamps
+    FROM monthly_camp_mst
+    WHERE is_active = 'Y'
+      AND status = 'Y'
+      AND dept_id = ?;
+  `
+  const totalCampsReport = `
+  SELECT COUNT(*) as totalCampsReport
+  FROM camp_submissions
+  WHERE status = 'Y'
+  AND dept_id = ?;
+  `
+
+  try {
+    // Execute all queries in parallel for better performance
+    Promise.all([
+      new Promise((resolve, reject) => {
+        db.query(totalEmployeeQuery,[deptId], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0].totalEmployees);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        db.query(totalCampsQuery,[deptId], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0].totalCamps);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        db.query(activeCampsQuery,[deptId], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0].activeCamps);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        db.query(totalCampsReport,[deptId], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0].totalCampsReport);
+        });
+      }),
+    ])
+      .then(([totalEmployees, totalCamps, activeCamps, totalCampsReport]) => {
+        res.status(200).json({
+          message: "Total count details fetched successfully",
+          errorCode: 1,
+          data: {
+            totalEmployees,
+            totalCamps,
+            activeCamps,
+            totalCampsReport,
+          },
+        });
+      })
+      .catch((err) => {
+        logger.error(`Error in /controller/dashboard/totalCountDetails: ${err.message}`);
+        res.status(500).json({
+          errorCode: 0,
+          errorDetail: err.message,
+          responseData: {},
+          details: "Failed to fetch total count details",
+        });
+      });
+  } catch (error) {
+    logger.error(`Error in /controller/dashboard/totalCountDetails (try-catch): ${error.message}`);
+    res.status(500).json({
+      errorCode: 0,
+      errorDetail: error.message,
+      responseData: {},
+      details: "Unexpected error occurred",
+    });
+  }
+};
 exports.totalCountDetails = (req, res) => {
   const totalEmployeeQuery = `
     SELECT COUNT(*) AS totalEmployees
