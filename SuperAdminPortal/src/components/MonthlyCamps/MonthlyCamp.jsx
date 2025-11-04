@@ -204,8 +204,10 @@ const MonthlyCamp = () => {
 
         <div className="d-sm-flex align-items-start justify-content-end mb-4">
           <div className="dropdown ml-2">
+                 <label htmlFor="clientId" >Select Client:</label>
+
             <select
-              className="form-control selectStyle selecCamp"
+              className="form-control selectStyle"
               name="clientId"
               id="clientId"
               value={clientId}
@@ -221,8 +223,10 @@ const MonthlyCamp = () => {
           </div>
 
           <div className="dropdown ml-2">
+            <label htmlFor="deptId" >Select Dept:</label>
+
             <select
-              className="form-control selectStyle selecCamp"
+              className="form-control selectStyle"
               name="deptId"
               id="deptId"
               value={deptId}

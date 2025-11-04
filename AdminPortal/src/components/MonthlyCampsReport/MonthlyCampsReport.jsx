@@ -208,14 +208,15 @@ const MonthlyCampsReport = () => {
                 </div> */}
 
                 <div className="dropdown ml-2">
+                 <label htmlFor="campType" >Select Camp:</label>
+                  
                     <select
-                        className="form-control selectStyle selecCamp"
+                        className="form-control selectStyle"
                         name="campType"
                         id="campType"
                         value={filters.campId}
                         onChange={handleChange}
                     >
-                    {console.log("mycamptype",myCampType)}
                         {myCampType && myCampType.map((e) => (
                             <option key={e.camp_id} value={e.camp_id}>
                                 {e.camp_name}
