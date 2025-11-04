@@ -238,8 +238,9 @@ const MonthlyCampsReport = () => {
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
 
                 <div className="dropdown ml-2">
+                      <label htmlFor="searchKeyword" >Select Client:</label>
                     <select
-                        className="form-control selectStyle selecCamp"
+                        className="form-control selectStyle "
                         name="clientId"
                         id="clientId"
                         value={clientId}
@@ -255,8 +256,9 @@ const MonthlyCampsReport = () => {
                 </div>
 
                 <div className="dropdown ml-2">
+                 <label htmlFor="searchKeyword" >Select Dept:</label>
                     <select
-                        className="form-control selectStyle selecCamp"
+                        className="form-control selectStyle "
                         name="deptId"
                         id="deptId"
                         value={deptId}
@@ -285,8 +287,9 @@ const MonthlyCampsReport = () => {
                 </div>
 
                 <div className="dropdown ml-2">
+                      <label htmlFor="searchKeyword" >Select Camp:</label>
                     <select
-                        className="form-control selectStyle selecCamp"
+                        className="form-control selectStyle "
                         name="campType"
                         id="campType"
                         value={filters.campId}
@@ -349,7 +352,7 @@ const MonthlyCampsReport = () => {
                 />
                 <div className="card-body">
                     <div className="table-responsive">
-                        <table
+                        {/* <table
                             className="table table-bordered"
                             id="dataTable"
                             width="100%"
@@ -357,20 +360,20 @@ const MonthlyCampsReport = () => {
                         >
                             <thead>
                                 <tr>
-                                    {/* <th>Doctor Name</th>
+                                    <th>Doctor Name</th>
                                     <th>Speciality</th>
-                                    <th>Garnet Code</th> */}
-                                    {/* <th>Status</th> */}
+                                    <th>Garnet Code</th>
+                                    <th>Status</th>
 
-                                    {/* Dynamically render camp-specific fields */}
+                              
                                     {myCampDetails.length > 0 &&
                                         myCampDetails[0].field_values?.map((fv, idx) => (
                                             <th key={idx}>{fv.field_label}</th>
                                         ))}
                                     <th>Submitted At</th>
 
-                                    {/* If you want, you can add prescription info */}
-                                    {/* <th>Brands (Prescriptions)</th> */}
+                           
+                                    <th>Brands (Prescriptions)</th>
                                 </tr>
                             </thead>
 
@@ -378,12 +381,12 @@ const MonthlyCampsReport = () => {
                                 {myCampDetails && myCampDetails.length > 0 ? (
                                     myCampDetails.map((e, i) => (
                                         <tr key={i}>
-                                            {/* <td>{e.doctor_name}</td>
+                                            <td>{e.doctor_name}</td>
                                             <td>{e.speciality}</td>
-                                            <td>{e.garnet_code}</td> */}
-                                            {/* <td>{e.status === "Y" ? "Submitted" : "Pending"}</td> */}
+                                            <td>{e.garnet_code}</td>
+                                            <td>{e.status === "Y" ? "Submitted" : "Pending"}</td>
 
-                                            {/* Dynamic field values */}
+                                          
                                             {e.field_values?.map((fv, idx) => (
                                                 <td key={idx}>
                                                     {fv.field_type === "image" ? (
@@ -395,8 +398,8 @@ const MonthlyCampsReport = () => {
                                             ))}
                                             <td>{new Date(e.submitted_at).toLocaleString()}</td>
 
-                                            {/* Prescriptions summary */}
-                                            {/* <td>
+                                      
+                                            <td>
                                                 {e.prescriptions && e.prescriptions.length > 0 ? (
                                                     e.prescriptions.map((p, idx2) => (
                                                         <div key={idx2}>
@@ -406,7 +409,7 @@ const MonthlyCampsReport = () => {
                                                 ) : (
                                                     "-"
                                                 )}
-                                            </td> */}
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
@@ -417,7 +420,62 @@ const MonthlyCampsReport = () => {
                                     </tr>
                                 )}
                             </tbody>
-                        </table>
+                        </table> */}
+
+                        <table
+  className="table table-bordered"
+  id="dataTable"
+  width="100%"
+  cellSpacing="0"
+>
+  {myCampDetails && myCampDetails.length > 0 ? (
+    <>
+      <thead>
+        <tr>
+          {myCampDetails[0].field_values?.map((fv, idx) => (
+            <th key={idx}>{fv.field_label}</th>
+          ))}
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {myCampDetails.map((e, i) => (
+          <tr key={i}>
+            {e.field_values?.map((fv, idx) => (
+              <td key={idx}>
+                {fv.field_type === "image" ? (
+                  <span>🖼️ Image</span>
+                ) : (
+                  fv.value || "-"
+                )}
+              </td>
+            ))}
+            <td>{new Date(e.submitted_at).toLocaleString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </>
+  ) : (
+    <tbody>
+      <tr>
+        <td colSpan="100%" className="text-center py-5">
+          <div
+            style={{
+              color: "#6c757d",
+              fontSize: "18px",
+              fontWeight: 500,
+              textAlign: "center",
+            }}
+          >
+            🚫 No records found for this report.
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  )}
+</table>
+
 
                         {/* <div
                    className="textdiv"
