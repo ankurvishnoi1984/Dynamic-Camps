@@ -63,6 +63,7 @@ const MonthlyCampsReport = () => {
                 clearTimeout(timer);
             };
         }
+        getMyCampDetailsByEmpcode();
         GetDetiledData();
         getMyCampsType();
     }, [filters,deptId])
@@ -194,18 +195,18 @@ const MonthlyCampsReport = () => {
             <div className="d-sm-flex align-items-start justify-content-end mb-4">
 
 
-                {/* <div className="form-group ml-2">
-                    <label htmlFor="searchKeyword" >Doctor Name:</label>
+                <div className="form-group ml-2">
+                    <label htmlFor="searchKeyword" >Search:</label>
                     <input
                         type="text"
                         className="form-control"
                         id="searchKeyword"
                         name="searchKeyword"
-                        placeholder="Search by Doctor Name"
+                        placeholder="Please enter text to search"
                         value={filters.searchKeyword}
                         onChange={handleChangeDr}
                     />
-                </div> */}
+                </div>
 
                 <div className="dropdown ml-2">
                  <label htmlFor="campType" >Select Camp:</label>
