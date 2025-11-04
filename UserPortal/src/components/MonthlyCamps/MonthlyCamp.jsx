@@ -689,7 +689,7 @@ const MonthlyCamp = () => {
                 <div className="modal-body">
                   {/* === Submission Info === */}
                   <form className="row g-3">
-                    <div className="col-md-4 did-floating-label-content">
+                    {/* <div className="col-md-4 did-floating-label-content">
                       <input
                         type="text"
                         className="form-control did-floating-input"
@@ -699,9 +699,9 @@ const MonthlyCamp = () => {
                       <label className="form-label did-floating-label">
                         Doctor Name
                       </label>
-                    </div>
+                    </div> */}
 
-                    <div className="col-md-4 did-floating-label-content">
+                    {/* <div className="col-md-4 did-floating-label-content">
                       <input
                         type="text"
                         className="form-control did-floating-input"
@@ -711,7 +711,20 @@ const MonthlyCamp = () => {
                       <label className="form-label did-floating-label">
                         Speciality
                       </label>
-                    </div>
+                    </div> */}
+                    {infoData.field_values.map((field, idx) => (
+      <div className="col-md-4 did-floating-label-content mb-3" key={idx}>
+        <input
+          type="text"
+          className="form-control did-floating-input"
+          value={field.value || ""}
+          readOnly
+        />
+        <label className="form-label did-floating-label">
+          {field.field_label}
+        </label>
+      </div>
+    ))}
 
                     <div className="col-md-4 did-floating-label-content">
                       <input
@@ -730,96 +743,6 @@ const MonthlyCamp = () => {
                     </div>
                   </form>
 
-                  {/* === Dynamic Field Values Section === */}
-             {infoData.field_values && infoData.field_values.length > 0 && (
-  <div className="row">
-    {infoData.field_values.map((field, idx) => (
-      <div className="col-md-4 did-floating-label-content mb-3" key={idx}>
-        <input
-          type="text"
-          className="form-control did-floating-input"
-          value={field.value || ""}
-          readOnly
-        />
-        <label className="form-label did-floating-label">
-          {field.field_label}
-        </label>
-      </div>
-    ))}
-  </div>
-)}
-
-
-                  {/* === Prescription Images Section === */}
-                  <div className="mt-4">
-                    <h6 className="fw-bold">Prescription Images</h6>
-                    <div className="table-responsive">
-                      <table className="table table-bordered align-middle">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Brand Name</th>
-                            <th>Prescription Count</th>
-                            <th>Images</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {infoData.prescriptions && infoData.prescriptions.length > 0 ? (
-                            infoData.prescriptions.map((p, idx) => (
-                              <tr key={idx}>
-                                <td>{p.brand_name || "-"}</td>
-                                <td>{p.prescription_count}</td>
-                                <td>
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {/* {p.imgpaths ? (
-                                      <img
-                                        src={`${BASEURL2}/uploads/${p.imgpath}`}
-                                        alt={p.brand_name}
-                                        style={{
-                                          width: "70px",
-                                          height: "70px",
-                                          objectFit: "cover",
-                                          cursor: "pointer",
-                                        }}
-                                        onClick={() =>
-                                          setPreviewImg(`${BASEURL2}/uploads/${p.imgpath}`)
-                                        }
-                                      />
-                                    ) : (
-                                      <span>No image</span>
-                                    )} */}
-                                    {p.imgpaths && p.imgpaths.length > 0 ? (
-                                      p.imgpaths.map((img, i) => (
-                                        <img
-                                          key={i}
-                                          src={img}
-                                          alt={p.brand_name}
-                                          style={{
-                                            width: "70px",
-                                            height: "70px",
-                                            objectFit: "cover",
-                                            cursor: "pointer",
-                                          }}
-                                          onClick={() => setPreviewImg(img)}
-                                        />
-                                      ))
-                                    ) : (
-                                      <span>No images</span>
-                                    )}
-                                  </div>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="3" className="text-center">
-                                No prescriptions available.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Preview Image Modal */}
