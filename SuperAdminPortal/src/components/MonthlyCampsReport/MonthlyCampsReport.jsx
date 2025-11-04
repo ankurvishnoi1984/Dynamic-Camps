@@ -334,13 +334,13 @@ const MonthlyCampsReport = () => {
 
                     <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
                         <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
-                    <button onClick={() => {
+                    {/* <button onClick={() => {
 
 
                         handleOpenModal();
                     }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
                         <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-                    </button>
+                    </button> */}
                 </div>
 
                 <MonthlyCImgDownload

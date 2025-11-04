@@ -80,7 +80,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
                     </NavLink>
                 </li>
                 <hr className="sidebar-divider my-0" />
-        {sessionStorage.getItem("role") === "0" && (
+        {sessionStorage.getItem("role") === "100" && (
   <li className={`nav-item ${isManageClientsActive ? "active-link" : ""}`}>
     <button
       className="nav-link nstbtn collapsed"
@@ -108,7 +108,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
 
 <hr className="sidebar-divider my-0" />
 
-{sessionStorage.getItem("role") === "0" && (
+{sessionStorage.getItem("role") === "100" && (
   <li className={`nav-item ${isManageCampsActive ? "active-link" : ""}`}>
     <button
       className="nav-link nstbtn collapsed"
