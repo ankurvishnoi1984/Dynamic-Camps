@@ -69,6 +69,7 @@ exports.getClientDetails = (req, res) => {
      client_name,
      coordinator_name,
      coordinator_contact,
+     logo,
      created_at
 
      FROM client_mst

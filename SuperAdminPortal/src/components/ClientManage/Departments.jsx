@@ -158,7 +158,6 @@ const Departments = () => {
       setLoading(false);
     }
   }
-  console.log("client list", clientList)
 
   useEffect(() => {
     getMonthlyCampDetails();

@@ -147,8 +147,8 @@ const EditDepartmentModal = ({ show, setShow, editData, onSuccess, userId,client
                                     <span>
                                         {logo
                                             ? logo.name
-                                            : editData?.logo
-                                                ? editData.logo
+                                            : editData?.dept_logo
+                                                ? editData.dept_logo
                                                 : "No file chosen"}
                                     </span>
                                 </div>

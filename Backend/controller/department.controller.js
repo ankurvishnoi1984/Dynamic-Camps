@@ -71,6 +71,7 @@ exports.getDepartmentDetails = (req, res) => {
     SELECT 
       c.client_name,
       d.client_id,
+      d.dept_logo,
       d.dept_id,
       d.dept_name,
       d.website_url,
