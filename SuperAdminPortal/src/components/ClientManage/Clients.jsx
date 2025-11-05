@@ -6,6 +6,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { useEffect } from "react";
 import axios from "axios";
 import { BASEURL2, CLIENTID, DEPTID } from "../constant/constant";
+import EditClientModal from "./EditClientModal";
 
 
 const Clients = () => {
@@ -24,55 +25,19 @@ const Clients = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [newStatus, setNewStatus] = useState("Y");
+  const [openActionId, setOpenActionId] = useState(null);
+
 
   const [clientDetails,setClientDetails]= useState([]);
 
-  const handleStatusUpdate = (camp)=>{
-        setSelectedCamp(camp);
-        setNewStatus(camp.is_active === "Y" ? "N" : "Y");
-        setShowConfirmModal(true);
-  }
 
-  const handleStatusConfirm = () => {
-    const payload = {
-      userId,
-      campId: selectedCamp.camp_id,
-      status: newStatus
-    }
-    const endpoint = `${BASEURL2}/monthlyCamps/manageCampStatus`;
-    axios
-      .post(endpoint, payload)
-      .then((res) => {
-        alert(res.data.message || "Status Updated successfully!");
-        setShowConfirmModal(false);
-        getMonthlyCampDetails(); // refresh list
-        setOpenActionId(null);
-      })
-      .catch((err) => {
-        console.error("Error saving camp:", err);
-        alert("Error while saving camp");
-      });
-  }
-
-
-  const handleEditMonthlyCamp = (camp) => {
-    setEditData(camp);
+    const handleEditClient = (client) => {
+    setEditData(client);
     setEditModal(true);
     setOpenActionId(null);
   };
 
 
-    const [campName, setCampName] = useState("");
-    const [campTypeId, setCampTypeId] = useState("");
-    const [fields, setFields] = useState([
-        {
-            label: "",
-            field_type: "text",
-            is_required: "Y",
-            options_json: null,
-            order_index: 1,
-        },
-    ]);
 
     const getMonthlyCampDetails = async () => {
         setLoading(true)
@@ -113,35 +78,6 @@ const Clients = () => {
             setLoading(false);
         }
     }
-
-    const handleFieldChange = (index, key, value) => {
-        const updated = [...fields];
-        updated[index][key] = value;
-
-        // Reset options_json if not dropdown
-        if (key === "field_type" && value !== "dropdown") {
-            updated[index].options_json = null;
-        }
-        setFields(updated);
-    };
-
-    const handleAddField = () => {
-        setFields([
-            ...fields,
-            {
-                label: "",
-                field_type: "text",
-                is_required: "Y",
-                options_json: null,
-                order_index: fields.length + 1,
-            },
-        ]);
-    };
-
-    const handleRemoveField = (index) => {
-        const updated = fields.filter((_, i) => i !== index);
-        setFields(updated);
-    };
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -220,12 +156,13 @@ const handleSubmit = async (e) => {
             <th>Spoke Person Name</th>
             <th>Spoke Person Contact</th>
             <th>Created Date</th>
+                  <th>Action</th>
+
           </tr>
         </thead>
         <tbody>
-          {console.log("client details",clientDetails)}
           {clientDetails.map((e, i) => (
-            <tr key={i}>
+            <tr key={e.client_id}>
               <td>{e.client_name}</td>
               {/* <td>
                 <a
@@ -242,6 +179,31 @@ const handleSubmit = async (e) => {
               <td>
                 {new Date(e.created_at).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
               </td>
+              <td>
+                            <div className="action-wrapper">
+                              <button className="btn btn-sm btn-primary btn-circle border-0"
+                               onClick={(event) => {
+                                        event.stopPropagation();
+                                        setOpenActionId(prev => (prev === e.client_id ? null : e.client_id));
+                                      }}>
+                                <BsThreeDotsVertical />
+                              </button>
+                               {openActionId === e.client_id && (
+                                      <div className="action-dropdown">
+                                        { (
+                                          <button
+                                            className="dropdown-item text-success"
+                                            onClick={() => {
+                                              handleEditClient(e)
+                                            }}
+                                          >
+                                            Edit Client Details
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                            </div>
+                          </td>
             </tr>
           ))}
         </tbody>
@@ -354,7 +316,16 @@ const handleSubmit = async (e) => {
 )}
 
     
-
+                    {showEditModal && (
+                      <EditClientModal
+                        showEditModal={showEditModal}
+                        setEditModal={setEditModal}
+                        editData={editData}
+                        onSuccess={() => getClientDetails()}
+                        userId={userId}
+                        deptId={DEPTID}
+                      />
+                    )}
 
         </div>
     );

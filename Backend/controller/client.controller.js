@@ -104,3 +104,75 @@ exports.getClientDetails = (req, res) => {
     });
   }
 };
+
+// controller/clientController.js
+exports.updateClient = (req, res) => {
+  const { clientId, clientName, coName, coContact, userId } = req.body;
+
+  // Handle file upload (optional)
+  let logoFile = null;
+  if (req.files && req.files.length > 0) {
+    const logo = req.files.find((f) => f.fieldname === "logo");
+    if (logo) {
+      logoFile = logo.filename;
+    }
+  }
+
+  // Build query dynamically (if logo not provided, don’t overwrite)
+  const query = logoFile
+    ? `
+        UPDATE client_mst
+        SET 
+          client_name = ?,
+          coordinator_name = ?,
+          coordinator_contact = ?,
+          logo = ?,
+          modified_by = ?,
+          modified_date = NOW()
+        WHERE client_id = ?
+      `
+    : `
+        UPDATE client_mst
+        SET 
+          client_name = ?,
+          coordinator_name = ?,
+          coordinator_contact = ?,
+          modified_by = ?,
+          modified_date = NOW()
+        WHERE client_id = ?
+      `;
+
+  const params = logoFile
+    ? [clientName, coName, coContact, logoFile, userId, clientId]
+    : [clientName, coName, coContact, userId, clientId];
+
+  try {
+    db.query(query, params, (err, result) => {
+      if (err) {
+        logger.error(
+          `Error in /controller/client/updateClient: ${err.message}`
+        );
+        return res.status(500).json({
+          status: "ERROR",
+          errorCode: 0,
+          errorDetail: err.message,
+          message: "Failed to update client record",
+        });
+      }
+
+      res.status(200).json({
+        message: "Client updated successfully",
+        errorCode: 1,
+        data: result,
+      });
+    });
+  } catch (error) {
+    logger.error(
+      `Error in /controller/client/updateClient (try-catch): ${error.message}`
+    );
+    res.status(500).json({
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
+  }
+};

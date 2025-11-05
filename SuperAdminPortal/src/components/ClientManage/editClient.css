@@ -1,0 +1,90 @@
+.reposerch{
+    width: 300px;
+}
+.selecCamp{
+    width: 150px;
+    margin-top: 32px;
+}
+.textdiv{
+
+    display: flex;
+    justify-content: space-between;
+    padding:0px 10px;
+  
+}
+@media screen and (max-width: 767px) {
+    .selecCamp{
+        width: 100%;
+        
+    }
+    .resdiv{
+        display: flex;
+        width: 0px;
+    }
+    .textdiv{
+        align-items: center;
+    }
+    
+  }
+
+
+  /* Custom modal background */
+.custom-modal {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1050;
+}
+
+/* Smooth scale-in animation */
+.animate-modal {
+  animation: popIn 0.3s ease-in-out;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Field card styling */
+.field-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Improved modal scroll behavior */
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Hide scrollbar (for a cleaner look) */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
+}
+.close:hover {
+    color: #0cd0ff;
+    text-decoration: none;
+}
