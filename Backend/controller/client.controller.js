@@ -63,34 +63,44 @@ exports.addNewClient = (req, res) => {
 
 
 exports.getClientDetails = (req, res) => {
-  const query = `
+  const { searchKeyword } = req.body; // or req.query if using GET method
+
+  let query = `
     SELECT 
-     client_id,
-     client_name,
-     coordinator_name,
-     coordinator_contact,
-     logo,
-     created_at
-
-     FROM client_mst
-
-     WHERE status = 'Y'
+      client_id,
+      client_name,
+      coordinator_name,
+      coordinator_contact,
+      logo,
+      created_at
+    FROM client_mst
+    WHERE status = 'Y'
   `;
 
+  const params = [];
+
+  // Optional search filter
+  if (searchKeyword && searchKeyword.trim() !== "") {
+    query += ` AND client_name LIKE ?`;
+    params.push(`%${searchKeyword.trim()}%`);
+  }
+
+  query += ` ORDER BY client_name ASC`; // Optional sorting
+
   try {
-    db.query(query, (err, results) => {
+    db.query(query, params, (err, results) => {
       if (err) {
         logger.error(`Error in /controller/client/getClientDetails (query): ${err.message}`);
         return res.status(500).json({
           errorCode: 0,
           errorDetail: err.message,
           responseData: {},
-          details: "Failed to fetch client-department details",
+          details: "Failed to fetch client details",
         });
       }
 
       res.status(200).json({
-        message: "Client and department details fetched successfully",
+        message: "Client details fetched successfully",
         errorCode: 1,
         data: results,
       });

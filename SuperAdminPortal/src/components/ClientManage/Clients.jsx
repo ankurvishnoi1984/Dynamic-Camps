@@ -26,6 +26,7 @@ const Clients = () => {
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [newStatus, setNewStatus] = useState("Y");
   const [openActionId, setOpenActionId] = useState(null);
+  const [searchKeyword,setsearchKeyword] = useState("");
 
 
   const [clientDetails,setClientDetails]= useState([]);
@@ -57,7 +58,9 @@ const Clients = () => {
     setLoading(true)
 
     try {
-      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
+      const res = await axios.post(`${BASEURL2}/client/getClientDetails`,
+        {searchKeyword}
+      )
       setClientDetails(res.data.data)
     } catch (error) {
       console.log(error)
@@ -120,11 +123,25 @@ const handleSubmit = async (e) => {
 };
 
 
+    useEffect(() => {
+        if (searchKeyword) {
+            let timer = setTimeout(() => {
+                getClientDetails()
+            }, 1000);
+
+            return () => {
+                clearTimeout(timer);
+            };
+        }
+        getClientDetails()
+        
+    }, [searchKeyword])
+
 
     useEffect(() => {
         getMonthlyCampDetails();
         getCampTypeList();
-        getClientDetails();
+        // getClientDetails();
     }, [])
 
     return loading ? (
@@ -132,6 +149,20 @@ const handleSubmit = async (e) => {
     ) : (
         <div className="container-fluid">
             <div className="card shadow mb-4">
+              <div className="d-sm-flex align-items-start justify-content-end mb-4">
+            <div className="form-group ml-2">
+                    <label htmlFor="searchKeyword" >Search Client:</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="searchKeyword"
+                        name="searchKeyword"
+                        placeholder="Enter text to search"
+                        value={searchKeyword}
+                        onChange={(e)=>setsearchKeyword(e.target.value)}
+                    />
+                </div>
+          </div>
                 <div className="card-header text-right py-3">
                     <button
                         className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
@@ -164,16 +195,6 @@ const handleSubmit = async (e) => {
           {clientDetails.map((e, i) => (
             <tr key={e.client_id}>
               <td>{e.client_name}</td>
-              {/* <td>
-                <a
-                  href={e.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary text-decoration-none"
-                >
-                  {e.website}
-                </a>
-              </td> */}
               <td>{e.coordinator_name}</td>
               <td>{e.coordinator_contact}</td>
               <td>
