@@ -180,30 +180,30 @@ const handleSubmit = async (e) => {
                 {new Date(e.created_at).toLocaleDateString("en-GB")} {/* dd/mm/yyyy */}
               </td>
               <td>
-                            <div className="action-wrapper">
-                              <button className="btn btn-sm btn-primary btn-circle border-0"
-                               onClick={(event) => {
-                                        event.stopPropagation();
-                                        setOpenActionId(prev => (prev === e.client_id ? null : e.client_id));
-                                      }}>
-                                <BsThreeDotsVertical />
-                              </button>
-                               {openActionId === e.client_id && (
-                                      <div className="action-dropdown">
-                                        { (
-                                          <button
-                                            className="dropdown-item text-success"
-                                            onClick={() => {
-                                              handleEditClient(e)
-                                            }}
-                                          >
-                                            Edit Client Details
-                                          </button>
-                                        )}
-                                      </div>
-                                    )}
-                            </div>
-                          </td>
+                <div className="action-wrapper">
+                  <button className="btn btn-sm btn-primary btn-circle border-0"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenActionId(prev => (prev === e.client_id ? null : e.client_id));
+                    }}>
+                    <BsThreeDotsVertical />
+                  </button>
+                  {openActionId === e.client_id && (
+                    <div className="action-dropdown">
+                      {(
+                        <button
+                          className="dropdown-item text-success"
+                          onClick={() => {
+                            handleEditClient(e)
+                          }}
+                        >
+                          Edit Client Details
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

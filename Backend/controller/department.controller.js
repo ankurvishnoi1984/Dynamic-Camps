@@ -70,6 +70,7 @@ exports.getDepartmentDetails = (req, res) => {
   let query = `
     SELECT 
       c.client_name,
+      d.client_id,
       d.dept_id,
       d.dept_name,
       d.website_url,
@@ -117,3 +118,77 @@ exports.getDepartmentDetails = (req, res) => {
     });
   }
 };
+
+// controller/departmentController.js
+exports.updateDepartment = (req, res) => {
+  const { deptId, clientId, deptName, coName, coContact, userId, websiteUrl } = req.body;
+
+  // Handle optional logo upload
+  let logoFile = null;
+  if (req.files && req.files.length > 0) {
+    const logo = req.files.find((f) => f.fieldname === "logo");
+    if (logo) {
+      logoFile = logo.filename;
+    }
+  }
+
+  const query = logoFile
+    ? `
+        UPDATE department_mst
+        SET
+          client_id = ?,
+          dept_name = ?,
+          coordinator_name = ?,
+          coordinator_contact = ?,
+          dept_logo = ?,
+          website_url = ?,
+          modified_by = ?,
+          modified_date = NOW()
+        WHERE dept_id = ?
+      `
+    : `
+        UPDATE department_mst
+        SET
+          client_id = ?,
+          dept_name = ?,
+          coordinator_name = ?,
+          coordinator_contact = ?,
+          website_url = ?,
+          modified_by = ?,
+          modified_date = NOW()
+        WHERE dept_id = ?
+      `;
+
+  const params = logoFile
+    ? [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId, deptId]
+    : [clientId, deptName, coName, coContact, websiteUrl, userId, deptId];
+
+  try {
+    db.query(query, params, (err, result) => {
+      if (err) {
+        logger.error(`Error in /controller/department/updateDepartment: ${err.message}`);
+        return res.status(500).json({
+          status: "ERROR",
+          errorCode: 0,
+          errorDetail: err.message,
+          message: "Failed to update department",
+        });
+      }
+
+      res.status(200).json({
+        message: "Department updated successfully",
+        errorCode: 1,
+        data: result,
+      });
+    });
+  } catch (error) {
+    logger.error(
+      `Error in /controller/department/updateDepartment (try-catch): ${error.message}`
+    );
+    res.status(500).json({
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
+  }
+};
+
