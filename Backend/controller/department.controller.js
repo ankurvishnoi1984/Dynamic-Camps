@@ -64,7 +64,7 @@ exports.addNewDepartment = (req, res) => {
 };
 
 exports.getDepartmentDetails = (req, res) => {
-  const { clientId } = req.body;
+  const { clientId,searchKeyword } = req.body;
 
   // Optional filter: you can restrict by client if needed
   let query = `
@@ -89,6 +89,10 @@ exports.getDepartmentDetails = (req, res) => {
     query += ` AND d.client_id = ?`;
     params.push(clientId);
   }
+   if (searchKeyword && searchKeyword.trim() !== ""){
+    query += ` AND LOWER(d.dept_name) LIKE ?`;
+    params.push(`%${searchKeyword.trim().toLowerCase()}%`);
+   }
 
   query += ` ORDER BY d.created_at DESC`;
 

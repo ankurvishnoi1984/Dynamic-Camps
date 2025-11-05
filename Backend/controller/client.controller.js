@@ -80,9 +80,9 @@ exports.getClientDetails = (req, res) => {
   const params = [];
 
   // Optional search filter
-  if (searchKeyword && searchKeyword.trim() !== "") {
-    query += ` AND client_name LIKE ?`;
-    params.push(`%${searchKeyword.trim()}%`);
+ if (searchKeyword && searchKeyword.trim() !== "") {
+    query += ` AND LOWER(client_name) LIKE ?`;
+    params.push(`%${searchKeyword.trim().toLowerCase()}%`);
   }
 
   query += ` ORDER BY client_name ASC`; // Optional sorting

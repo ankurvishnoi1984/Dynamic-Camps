@@ -30,6 +30,8 @@ const Departments = () => {
   const [deptList, setDeptList] = useState([]);
   const [clientList, setClientList] = useState([]);
   const [openActionId, setOpenActionId] = useState(null);
+  const [searchKeyword,setsearchKeyword] = useState("");
+
 
 
   const handleStatusUpdate = (camp) => {
@@ -96,7 +98,9 @@ const Departments = () => {
     setLoading(true)
 
     try {
-      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`)
+      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
+        {searchKeyword}
+      )
       setDeptList(res.data.data)
     } catch (error) {
       console.log(error)
@@ -159,10 +163,26 @@ const Departments = () => {
     }
   }
 
+    useEffect(() => {
+    if (searchKeyword) {
+      let timer = setTimeout(() => {
+            getDepartmentList();
+
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+        getDepartmentList();
+
+
+  }, [searchKeyword])
+
   useEffect(() => {
     getMonthlyCampDetails();
     getCampTypeList();
-    getDepartmentList();
+    // getDepartmentList();
     getClientList();
   }, [])
 
@@ -172,6 +192,20 @@ const Departments = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
+        <div className="d-sm-flex align-items-start justify-content-end mb-4">
+          <div className="form-group ml-2">
+            <label htmlFor="searchKeyword" >Search Department:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="searchKeyword"
+              name="searchKeyword"
+              placeholder="Enter text to search"
+              value={searchKeyword}
+              onChange={(e) => setsearchKeyword(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="card-header text-right py-3">
           <button
             className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
