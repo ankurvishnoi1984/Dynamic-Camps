@@ -4,11 +4,18 @@ const logger = require('../utils/logger')
 
 
 exports.loginWithEmpCode = async (req, res) => {
-  const { empcode, password,deptId } = req.body;
-  const query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=? and dept_id = ?';
+  const { empcode, password,deptId=0 } = req.body;
+  let query = ""
+  let params = [empcode]
+  if (deptId===0){
+   query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=?';
+  }else{
+    query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=? and dept_id = ?';
+    params.push(deptId)
+  }
 
   try {
-    db.query(query, [empcode,deptId], (err, result) => {
+    db.query(query, params, (err, result) => {
       if (err) {
         logger.error(`Error in /controller/auth/login: ${err.message}`);
         return res.status(500).json({

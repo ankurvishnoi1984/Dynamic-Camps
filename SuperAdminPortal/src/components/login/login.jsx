@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../../../style/css/sb-admin-2.min.css";
 import axios from "axios";
-import { DEPTID, BASEURL2 } from "../constant/constant";
+import { BASEURL2 } from "../constant/constant";
 import { useNavigate } from "react-router-dom";
 import "./login.css"
 
@@ -16,13 +16,12 @@ const Login = () => {
     e.preventDefault();
     console.log(username, password,BASEURL2)
     try {
-      const res = await axios.post(`${BASEURL2}/auth/login`, { empcode: username, password,deptId:DEPTID });
+      const res = await axios.post(`${BASEURL2}/auth/login`, { empcode: username, password });
       const empcode = res.data.responseData.empId;
       const userId = res.data.responseData.user_id;
       const sessionId = res?.data?.responseData?.sessionID;
       const role = res.data.responseData.role;
       const designation = res.data.responseData.designation;
-      // const name = res.data.responseData.name;
       sessionStorage.setItem('empcode', empcode)
       sessionStorage.setItem('role', role)
       sessionStorage.setItem('designation', designation)
