@@ -19,8 +19,8 @@ const EditMonthlyCampModal = ({
   const [campTypeId, setCampTypeId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [isDoctorRequired, setIsDoctorRequired] = useState("N");
-  const [isPrescriptionRequired, setIsPrescriptionRequired] = useState("N");
+  const isDoctorRequired = "N";
+  const isPrescriptionRequired = "N";
 
   // Pre-fill values when editing
   useEffect(() => {
@@ -29,8 +29,8 @@ const EditMonthlyCampModal = ({
       setCampTypeId(editData.camp_type_id || "");
       setStartDate(editData.start_date ? editData.start_date.split("T")[0] : "");
       setEndDate(editData.end_date ? editData.end_date.split("T")[0] : "");
-      setIsDoctorRequired(editData.is_doctor_required || "N");
-      setIsPrescriptionRequired(editData.is_prescription_required || "N");
+      // setIsDoctorRequired(editData.is_doctor_required || "N");
+      // setIsPrescriptionRequired(editData.is_prescription_required || "N");
     }
   }, [editData]);
 
@@ -146,7 +146,7 @@ const EditMonthlyCampModal = ({
               </div>
 
               {/* Flags */}
-              <div className="row g-3 mt-3">
+              {/* <div className="row g-3 mt-3">
                 <div className="col-md-6">
                   <label className="fw-semibold text-secondary">
                     <FaUserDoctor className="me-1" /> Is Doctor Required
@@ -174,7 +174,7 @@ const EditMonthlyCampModal = ({
                     <option value="N">No</option>
                   </select>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Footer */}
