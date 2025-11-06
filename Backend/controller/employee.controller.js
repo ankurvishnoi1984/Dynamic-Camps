@@ -405,12 +405,13 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
     return res.status(400).json({ message: "designation is required" });
   }
 
-  // Optional department condition
-  const deptCondition = deptId ? `AND u.dept_id = ${db.escape(deptId)}` : "";
+  // Separate conditions for each scope
+  const deptConditionBase = deptId ? `AND u.dept_id = ${db.escape(deptId)}` : "";
+  const deptConditionRecursive = deptId ? `AND s.dept_id = ${db.escape(deptId)}` : "";
+  const deptConditionFinal = deptId ? `AND dept_id = ${db.escape(deptId)}` : "";
 
   const query = `
     WITH RECURSIVE senior_hierarchy AS (
-      -- Base: employees with given designation (and dept if provided)
       SELECT 
         u.user_id,
         u.empcode,
@@ -420,11 +421,10 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
       FROM user_mst u
       WHERE u.status = 'Y' 
         AND u.designation = ?
-        ${deptCondition}
+        ${deptConditionBase}
 
       UNION ALL
 
-      -- Recursive: find their seniors (and seniors of seniors)
       SELECT 
         s.user_id,
         s.empcode,
@@ -435,13 +435,12 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
       INNER JOIN senior_hierarchy sh 
         ON sh.reporting = s.empcode
       WHERE s.status = 'Y'
-        ${deptCondition}
+        ${deptConditionRecursive}
     )
-    -- Return only seniors (exclude base employees)
     SELECT DISTINCT empcode, name
     FROM senior_hierarchy
     WHERE empcode NOT IN (
-      SELECT empcode FROM user_mst WHERE designation = ? ${deptCondition}
+      SELECT empcode FROM user_mst WHERE designation = ? ${deptConditionFinal}
     )
     ORDER BY name;
   `;
