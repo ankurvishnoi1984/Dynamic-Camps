@@ -140,7 +140,7 @@ exports.addEmployee = (req, res) => {
     deptId,
   } = req.body;
 
-  if (!name || !empcode || !usernamehq || !designation || !created_by || deptId) {
+  if (!name || !empcode || !usernamehq || !designation || !created_by || !deptId) {
     return res
       .status(400)
       .json({ errorCode: "0", message: "Missing required fields" });

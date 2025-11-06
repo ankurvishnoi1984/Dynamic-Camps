@@ -171,8 +171,6 @@ const MonthlyCamp = () => {
         // optional: clear form
         setCampName("");
         setCampTypeId("");
-        setDoctorRequired("");
-        setPrescRequired("");
         setStartDate("");
         setEndDate("");
       } else {
