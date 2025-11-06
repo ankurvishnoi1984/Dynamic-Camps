@@ -83,7 +83,7 @@ function Employee() {
     try {
       const res = await axios.post(
         `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
-        { designation: formData.designation }
+        { designation: formData.designation,deptId:deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
     } catch (error) {
