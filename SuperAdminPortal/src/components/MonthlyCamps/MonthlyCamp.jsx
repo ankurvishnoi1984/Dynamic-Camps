@@ -15,8 +15,8 @@ const MonthlyCamp = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const userId = sessionStorage.getItem("userId");
-  const [doctorFieldRequired, setDoctorRequired] = useState("")
-  const [prescriptionFieldRequired, setPrescRequired] = useState("");
+  const doctorFieldRequired = "N";
+  const prescriptionFieldRequired= "N"
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [openActionId, setOpenActionId] = useState(null);
@@ -406,7 +406,7 @@ const MonthlyCamp = () => {
                     </select>
                   </div>
                   <div className="row">
-                    <div className="col-md-6 mb-3"> <div className="form-group mb-3">
+                    {/* <div className="col-md-6 mb-3"> <div className="form-group mb-3">
                       <label className="fw-semibold text-secondary">
                         Is Doctor Required?
                       </label>
@@ -419,22 +419,24 @@ const MonthlyCamp = () => {
                         <option value="Y">Yes</option>
                         <option value="N">No</option>
                       </select>
-                    </div></div>
-                    <div className="col-md-6 mb-3">
-                      <div className="form-group mb-3">
-                        <label className="fw-semibold text-secondary">
-                          Is Prescription Required?
-                        </label>
-                        <select
-                          className="form-select form-control rounded-pill"
-                          value={prescriptionFieldRequired}
-                          onChange={(e) => setPrescRequired(e.target.value)}
-                        >
-                          <option value="">Select...</option>
-                          <option value="Y">Yes</option>
-                          <option value="N">No</option>
-                        </select>
-                      </div></div></div>
+                    </div></div> */}
+                      {/* <div className="col-md-6 mb-3">
+                        <div className="form-group mb-3">
+                          <label className="fw-semibold text-secondary">
+                            Is Prescription Required?
+                          </label>
+                          <select
+                            className="form-select form-control rounded-pill"
+                            value={prescriptionFieldRequired}
+                            onChange={(e) => setPrescRequired(e.target.value)}
+                          >
+                            <option value="">Select...</option>
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                          </select>
+                        </div>
+                      </div> */}
+                    </div>
 
 
                   <div className="row">
