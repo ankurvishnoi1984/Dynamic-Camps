@@ -182,44 +182,40 @@ const MonthlyCamp = () => {
 
 
  
-  const handelReportDownload = () => {
+const handelReportDownload = () => {
   if (!campReportList || campReportList.length === 0) {
     alert("No data to export");
     return;
   }
 
-  // Prepare headers
-  const dynamicHeaders = campReportList[0].field_values?.map(fv => fv.field_label) || [];
+  // ✅ Filter out image fields
+  const filteredFields =
+    campReportList[0]?.field_values?.filter((fv) => fv.field_type !== "image") || [];
+
+  // ✅ Prepare headers (exclude image columns)
   const headers = [
-    
-   
-    ...dynamicHeaders,
-     "Submitted At"
-    
+    ...filteredFields.map((fv) => fv.field_label),
+    "Submitted At"
   ];
 
-  // Map data
-  const mappedData = campReportList.map(item => {
-    // Dynamic fields
+  // ✅ Map data excluding image fields
+  const mappedData = campReportList.map((item) => {
     const dynamicValues = {};
-    item.field_values?.forEach(fv => {
-      dynamicValues[fv.field_label] = fv.field_type === "image" ? "🖼️ Image" : fv.value || "-";
+
+    filteredFields.forEach((fv) => {
+      const matchingField = item.field_values?.find(
+        (f) => f.field_label === fv.field_label
+      );
+      dynamicValues[fv.field_label] = matchingField?.value || "-";
     });
 
-    // Prescriptions summary
-    const presSummary = item.prescriptions && item.prescriptions.length > 0
-      ? item.prescriptions.map(p => `${p.brand_name} — ${p.prescription_count}`).join(", ")
-      : "-";
-
     return {
-
       ...dynamicValues,
-       "Submitted At": new Date(item.submitted_at).toLocaleString()
-    
+      "Submitted At": new Date(item.submitted_at).toLocaleString()
     };
   });
 
-  // Create worksheet and workbook
+  // ✅ Create worksheet and workbook
   const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
