@@ -79,7 +79,6 @@ export default function EditEmployeeModal({
     // { label: "State", name: "state", type: "text" },
     { label: "HQ", name: "hq", type: "text" },
     { label: "Region", name: "region", type: "text" },
-    { label: "Username", name: "usernamehq", type: "text" },
     { label: "Password", name: "password", type: "text" },
     { label: "Mobile", name: "mobile", type: "number" },
     { label: "Email", name: "email", type: "email" },

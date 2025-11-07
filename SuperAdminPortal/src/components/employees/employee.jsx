@@ -19,7 +19,6 @@ function Employee() {
     designation: "",
     zone: "",
     region: "",
-    username: "",
     reporting: "",
     mobile: "",
     email: "",
@@ -198,7 +197,6 @@ function Employee() {
       "designation",
       "zone",
       "region",
-      "username",
       "mobile",
       "email",
     ];
@@ -222,7 +220,6 @@ function Employee() {
         joiningDate: formData.joiningDate,
         zone: formData.zone,
         region: formData.region,
-        usernamehq: formData.username, // maps to usernamehq column
         mobile: formData.mobile,
         email: formData.email,
         dob: formData.dateOfBirth,
@@ -253,7 +250,6 @@ function Employee() {
         designation: "",
         zone: "",
         region: "",
-        username: "",
         mobile: "",
         email: "",
       });
@@ -451,7 +447,6 @@ function Employee() {
                       { label: "Employee Code", name: "empcode", type: "number" },
                       { label: "HQ", name: "hq", type: "text" },
                       { label: "Region", name: "region", type: "text" },
-                      { label: "UserName", name: "username", type: "username" },
                       { label: "Mobile", name: "mobile", type: "number" },
                       { label: "Password", name: "password", type: "text" },
                       { label: "Email", name: "email", type: "text" },

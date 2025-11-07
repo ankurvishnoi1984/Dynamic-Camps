@@ -2,7 +2,7 @@ import ConfirmationPopup from "../popup/Popup";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { BASEURL, BASEURL2 } from "../constant/constant";
+import {  BASEURL2 } from "../constant/constant";
 
 export default function EditEmployeeModal({
   setEditUserModel,
@@ -79,7 +79,7 @@ export default function EditEmployeeModal({
     // { label: "State", name: "state", type: "text" },
     { label: "HQ", name: "hq", type: "text" },
     { label: "Region", name: "region", type: "text" },
-    { label: "Username", name: "usernamehq", type: "text" },
+    // { label: "Username", name: "usernamehq", type: "text" },
     { label: "Password", name: "password", type: "text" },
     { label: "Mobile", name: "mobile", type: "number" },
     { label: "Email", name: "email", type: "email" },

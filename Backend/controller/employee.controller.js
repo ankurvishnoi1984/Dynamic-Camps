@@ -133,14 +133,13 @@ exports.addEmployee = (req, res) => {
     designation,
     zone,
     region,
-    usernamehq,
     mobile,
     email,
     created_by,
     deptId,
   } = req.body;
 
-  if (!name || !empcode || !usernamehq || !designation || !created_by || !deptId) {
+  if (!name || !empcode || !designation || !created_by || !deptId) {
     return res
       .status(400)
       .json({ errorCode: "0", message: "Missing required fields" });
@@ -163,26 +162,13 @@ exports.addEmployee = (req, res) => {
   const role = roleMapping[designation] || 5; // Default lowest if not found
 
   // Step 1️⃣ — Check if usernamehq already exists
-  const checkUsernameQuery = "SELECT user_id FROM user_mst WHERE usernamehq = ? AND status = 'Y'";
-  db.query(checkUsernameQuery, [usernamehq], (err, result) => {
-    if (err) {
-      logger.error(err.message);
-      return res.status(500).json({ errorCode: "0", message: err.message });
-    }
-
-    if (result.length > 0) {
-      return res.status(400).json({
-        errorCode: "0",
-        message: "Username already exists. Please choose another.",
-      });
-    }
-
+  // const checkUsernameQuery = "SELECT user_id FROM user_mst WHERE usernamehq = ? AND status = 'Y'";
     // Step 2️⃣ — Insert new employee
     const insertQuery = `
       INSERT INTO user_mst
       (empcode, name, designation, role, zone, region, hq, reporting, 
-       mobile, email, usernamehq, password, status, created_by, created_date,dept_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Y', ?, NOW(),?)
+       mobile, email, password, status, created_by, created_date,dept_id)
+      VALUES (?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, 'Y', ?, NOW(),?)
     `;
 
     const insertValues = [
@@ -196,7 +182,6 @@ exports.addEmployee = (req, res) => {
       reporting,
       mobile,
       email,
-      usernamehq,
       password,
       created_by,
       deptId
@@ -213,7 +198,6 @@ exports.addEmployee = (req, res) => {
         message: "Employee added successfully",
       });
     });
-  });
 };
 
 exports.updateEmp = (req, res) => {
@@ -229,14 +213,13 @@ exports.updateEmp = (req, res) => {
         joiningDate,
         zone,
         region,
-        usernamehq,
         mobile,
         email,
         dob,
         modified_by,
     } = req.body;
 
-    if (!user_id || !name || !empcode || !usernamehq || !designation) {
+    if (!user_id || !name || !empcode || !designation) {
         return res
             .status(400)
             .json({ errorCode: "0", message: "Missing required fields" });
@@ -258,23 +241,7 @@ exports.updateEmp = (req, res) => {
 
     const role = roleMapping[designation] || 5; // default lowest role if not found
 
-    // 🧩 Step 1️⃣ — Check if username is already taken by another employee
-    const checkUsernameQuery =
-        "SELECT user_id FROM user_mst WHERE usernamehq = ? AND user_id != ? AND status = 'Y'";
-    db.query(checkUsernameQuery, [usernamehq, user_id], (err, result) => {
-        if (err) {
-            logger.error(err.message);
-            return res.status(500).json({ errorCode: "0", message: err.message });
-        }
-
-        if (result.length > 0) {
-            return res.status(400).json({
-                errorCode: "0",
-                message: "Username already exists. Please choose another.",
-            });
-        }
-
-        // 🧩 Step 2️⃣ — Perform the update
+      // 🧩 Step 2️⃣ — Perform the update
         const updateQuery = `
       UPDATE user_mst 
       SET 
@@ -289,7 +256,6 @@ exports.updateEmp = (req, res) => {
         reporting = ?, 
         mobile = ?, 
         email = ?, 
-        usernamehq = ?, 
         password = ?, 
         dob = ?, 
         state = ?, 
@@ -310,7 +276,6 @@ exports.updateEmp = (req, res) => {
             reporting,
             mobile,
             email,
-            usernamehq,
             password,
             dob,
             state,
@@ -334,7 +299,6 @@ exports.updateEmp = (req, res) => {
                 .status(200)
                 .json({ errorCode: "1", message: "Employee updated successfully" });
         });
-    });
 };
 
 exports.deleteEmployee = async (req, res) => {
