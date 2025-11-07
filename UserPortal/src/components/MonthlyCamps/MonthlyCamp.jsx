@@ -440,6 +440,8 @@ const MonthlyCamp = () => {
 
     if (res.data.errorCode === 1) {
       setCampReportList(res.data.data);
+      console.log("img data",res.data.data);
+      
     } else {
       toast.error(res.data.message || "No submissions found");
     }
@@ -557,59 +559,61 @@ const MonthlyCamp = () => {
                   <table className="table table-hover newcss">
   {campReportList && campReportList.length > 0 ? (
     <>
-      <thead>
-        <tr>
-          {campReportList[0].field_values?.map((fv, idx) => (
-            <th key={idx}>{fv.field_label}</th>
-          ))}
-          <th scope="col">Date</th>
-          <th scope="col">Actions</th>
-        </tr>
-      </thead>
+  <thead>
+    <tr>
+      {/* Filter out image type fields before rendering headers */}
+      {campReportList[0]?.field_values
+        ?.filter((fv) => fv.field_type !== "image")
+        .map((fv, idx) => (
+          <th key={idx}>{fv.field_label}</th>
+        ))}
 
-      <tbody>
-        {campReportList
-          .slice(page * PageCount - PageCount, page * PageCount)
-          .map((e) => (
-            <tr key={e.submission_id}>
-              {e.field_values?.map((fv, idx) => (
-                <td key={idx}>
-                  {fv.field_type === "image" ? (
-                    <span>🖼️ Image</span>
-                  ) : (
-                    fv.value || "-"
-                  )}
-                </td>
-              ))}
+      <th scope="col">Date</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
 
-              <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
-              <td>
-                <div className="action-wrapper">
-                  <button
-                    className="btn btn-sm btn-primary btn-circle border-0"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setOpenActionId((prev) =>
-                        prev === e.submission_id ? null : e.submission_id
-                      );
-                    }}
-                  >
-                    <BsThreeDotsVertical />
+  <tbody>
+    {campReportList
+      .slice(page * PageCount - PageCount, page * PageCount)
+      .map((e) => (
+        <tr key={e.submission_id}>
+          {/* Filter out image fields before rendering values */}
+          {e.field_values
+            ?.filter((fv) => fv.field_type !== "image")
+            .map((fv, idx) => (
+              <td key={idx}>{fv.value || "-"}</td>
+            ))}
+
+          <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
+          <td>
+            <div className="action-wrapper">
+              <button
+                className="btn btn-sm btn-primary btn-circle border-0"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setOpenActionId((prev) =>
+                    prev === e.submission_id ? null : e.submission_id
+                  );
+                }}
+              >
+                <BsThreeDotsVertical />
+              </button>
+
+              {openActionId === e.submission_id && (
+                <div className="action-dropdown">
+                  <button onClick={() => handelInfo(e.submission_id)}>
+                    View Info
                   </button>
-
-                  {openActionId === e.submission_id && (
-                    <div className="action-dropdown">
-                      <button onClick={() => handelInfo(e.submission_id)}>
-                        View Info
-                      </button>
-                    </div>
-                  )}
                 </div>
-              </td>
-            </tr>
-          ))}
-      </tbody>
-    </>
+              )}
+            </div>
+          </td>
+        </tr>
+      ))}
+  </tbody>
+</>
+
   ) : (
     <tbody>
       <tr>
@@ -675,91 +679,135 @@ const MonthlyCamp = () => {
 
 
 
-      {infoReportModel && infoData && (
-        <div className="addusermodel">
-          <div className="modal fade show" style={{ display: "block" }}>
-            <div className="modal-dialog modal-xl">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Camp Info</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={handelCloseInfoModel}
-                  ></button>
-                </div>
-
-                <div className="modal-body">
-                  {/* === Submission Info === */}
-                  <form className="row g-3">
-                    {/* <div className="col-md-4 did-floating-label-content">
-                      <input
-                        type="text"
-                        className="form-control did-floating-input"
-                        value={infoData.doctor_name || ""}
-                        readOnly
-                      />
-                      <label className="form-label did-floating-label">
-                        Doctor Name
-                      </label>
-                    </div> */}
-
-                    {/* <div className="col-md-4 did-floating-label-content">
-                      <input
-                        type="text"
-                        className="form-control did-floating-input"
-                        value={infoData.speciality || ""}
-                        readOnly
-                      />
-                      <label className="form-label did-floating-label">
-                        Speciality
-                      </label>
-                    </div> */}
-                    {infoData.field_values.map((field, idx) => (
-      <div className="col-md-4 did-floating-label-content mb-3" key={idx}>
-        <input
-          type="text"
-          className="form-control did-floating-input"
-          value={field.value || ""}
-          readOnly
-        />
-        <label className="form-label did-floating-label">
-          {field.field_label}
-        </label>
-      </div>
-    ))}
-
-                    <div className="col-md-4 did-floating-label-content">
-                      <input
-                        type="text"
-                        className="form-control did-floating-input"
-                        value={
-                          infoData.submitted_at
-                            ? new Date(infoData.submitted_at).toLocaleString()
-                            : ""
-                        }
-                        readOnly
-                      />
-                      <label className="form-label did-floating-label">
-                        Submitted At
-                      </label>
-                    </div>
-                  </form>
-
-                </div>
-
-                {/* Preview Image Modal */}
-                {previewImg && (
-                  <div className="image-preview-overlay" onClick={handleClosePreview}>
-                    <span className="close-btn">&times;</span>
-                    <img src={previewImg} alt="Preview" className="preview-img" />
-                  </div>
-                )}
-              </div>
-            </div>
+     {infoReportModel && infoData && (
+  <div className="addusermodel">
+    <div className="modal fade show" style={{ display: "block" }}>
+      <div className="modal-dialog modal-xl">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Camp Info</h5>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={handelCloseInfoModel}
+            ></button>
           </div>
+
+          <div className="modal-body">
+            {/* === Submission Info === */}
+            <form className="row g-3">
+              {infoData.field_values.map((field, idx) => (
+                <div
+                  className="col-md-4 did-floating-label-content mb-3"
+                  key={idx}
+                >
+                  {field.field_type === "image" ? (
+                    <div className="d-flex flex-column align-items-start">
+                      <label className="form-label fw-semibold mb-2">
+                        {field.field_label}
+                      </label>
+                      {field.value ? (
+                        <img
+                         src={`${BASEURL}/uploads/${field.value}`}
+                          alt={field.field_label}
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            border: "1px solid #ccc",
+                          }}
+                          onClick={() => setPreviewImg(field.value)}
+                        />
+                      ) : (
+                        <p className="text-muted small">No image available</p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        className="form-control did-floating-input"
+                        value={field.value || ""}
+                        readOnly
+                      />
+                      <label className="form-label did-floating-label">
+                        {field.field_label}
+                      </label>
+                    </>
+                  )}
+                </div>
+              ))}
+
+              <div className="col-md-4 did-floating-label-content">
+                <input
+                  type="text"
+                  className="form-control did-floating-input"
+                  value={
+                    infoData.submitted_at
+                      ? new Date(infoData.submitted_at).toLocaleString()
+                      : ""
+                  }
+                  readOnly
+                />
+                <label className="form-label did-floating-label">
+                  Submitted At
+                </label>
+              </div>
+            </form>
+          </div>
+
+          {/* === Image Preview Modal === */}
+          {previewImg && (
+            <div
+              className="image-preview-overlay"
+              onClick={handleClosePreview}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0,0,0,0.7)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1050,
+              }}
+            >
+              <span
+                className="close-btn"
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  right: "30px",
+                  fontSize: "2rem",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                &times;
+              </span>
+              <img
+                src={previewImg}
+                alt="Preview"
+                className="preview-img"
+                style={{
+                  maxWidth: "90%",
+                  maxHeight: "90%",
+                  borderRadius: "10px",
+                  boxShadow: "0 0 10px rgba(255,255,255,0.3)",
+                }}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
+
 
 
      

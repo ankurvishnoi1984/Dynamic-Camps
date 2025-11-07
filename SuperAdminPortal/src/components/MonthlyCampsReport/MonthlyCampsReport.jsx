@@ -238,7 +238,7 @@ const MonthlyCampsReport = () => {
                 <div className="dropdown ml-2">
                       <label htmlFor="searchKeyword" >Select Client:</label>
                     <select
-                        className="form-control selectStyle "
+                        className="form-control selectStyle"
                         name="clientId"
                         id="clientId"
                         value={clientId}

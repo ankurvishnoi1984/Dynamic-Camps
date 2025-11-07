@@ -567,21 +567,85 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                                 </div>
                                             );
 
-                                        case "image":
-                                            return (
-                                                <div key={field.field_id} className="form-group col-md-4 did-floating-label-content">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        multiple
-                                                        onChange={(e) => {
-                                                            const files = Array.from(e.target.files);
-                                                            setFormData({ ...formData, [field.field_id]: files });
-                                                        }}
-                                                    />
-                                                    <label className="form-label did-floating-label">{field.label}</label>
-                                                </div>
-                                            );
+                                    
+                                            case "image":
+  return (
+    <div key={field.field_id} className="form-group col-md-4">
+      <label className="form-label fw-bold">Upload Image for {field.label}</label>
+
+      {/* Hidden file input + visible label/button */}
+      <div className="custom-file-input-wrapper">
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          id={`file-${field.field_id}`}
+          className="custom-file-input"
+          onChange={(e) => {
+            const newFiles = Array.from(e.target.files || []);
+
+            // Convert to objects containing file + object URL for preview
+            const newItems = newFiles.map((f) => ({ file: f, url: URL.createObjectURL(f) }));
+
+            const prevItems = formData[field.field_id] || [];
+            // append instead of replace
+            setFormData({ ...formData, [field.field_id]: [...prevItems, ...newItems] });
+
+            // reset so same file can be picked again
+            e.target.value = "";
+          }}
+        />
+
+        <label htmlFor={`file-${field.field_id}`} className="custom-file-label">
+          {formData[field.field_id] && formData[field.field_id].length
+            ? `${formData[field.field_id].length} file(s) selected`
+            : "Choose Images..."}
+        </label>
+      </div>
+
+      {/* Preview area */}
+      <div className="col-md-12 d-flex flex-wrap mt-2">
+        {(formData[field.field_id] || []).map((item, idx) => (
+          <div key={idx} className="preview-container me-2 mb-2" style={{ position: "relative" }}>
+            <img
+              src={item.url}
+              alt="Preview"
+              className="preview-img"
+              style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 6 }}
+            />
+            <button
+              type="button"
+              className="remove-btn"
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                border: "none",
+                background: "rgba(0,0,0,0.6)",
+                color: "#fff",
+                borderRadius: "50%",
+                width: 22,
+                height: 22,
+                lineHeight: "18px",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                const updated = [...(formData[field.field_id] || [])];
+                const [removed] = updated.splice(idx, 1);
+
+                // revoke object URL for memory cleanup
+                if (removed?.url) URL.revokeObjectURL(removed.url);
+
+                setFormData({ ...formData, [field.field_id]: updated });
+              }}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
                                         default:
                                             return null;
