@@ -571,6 +571,7 @@ function Employee() {
           getfun={fetchEmployees}
           setEditUserModel={(val) => setModals((prev) => ({ ...prev, edit: val }))}
           handleInputChange={handleInputChange}
+          deptId={deptId}
         />
       )}
         {modals.info && (

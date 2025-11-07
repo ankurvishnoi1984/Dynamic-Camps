@@ -9,6 +9,7 @@ export default function EditEmployeeModal({
   empData,
   getfun,
   handleInputChange,
+  deptId
 }) {
   const [formData, setFormData] = useState(empData);
 
@@ -32,7 +33,7 @@ export default function EditEmployeeModal({
     try {
       const res = await axios.post(
         `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
-        { designation: formData.designation }
+        { designation: formData.designation,deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
     } catch (error) {
