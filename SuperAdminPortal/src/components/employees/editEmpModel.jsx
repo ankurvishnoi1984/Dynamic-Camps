@@ -50,6 +50,29 @@ export default function EditEmployeeModal({
 
 
   const handleConfirm = async () => {
+    // ✅ Field-specific validation
+    if (!/^\d{5}$/.test(formData.empcode)) {
+      toast.error("Employee code must be exactly 5 digits");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(formData.mobile)) {
+      toast.error("Mobile number must be exactly 10 digits");
+      return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+      toast.error("Name should contain only letters and spaces");
+      return;
+    }
+
+    if (
+      formData.email &&
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
+    ) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     try {
       const updatedData = {
         ...formData,
