@@ -91,6 +91,20 @@ const Clients = () => {
       return;
     }
 
+    // ✅ Validate Spoke Person Name (only alphabets & spaces)
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(spokePersonName)) {
+      alert("Spoke Person Name should contain only letters and spaces");
+      return;
+    }
+
+    // ✅ Validate Spoke Person Contact (Indian 10-digit format)
+    const contactRegex = /^[6-9]\d{9}$/;
+    if (!contactRegex.test(spokePersonContact)) {
+      alert("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
     try {
       // Prepare form data
       const formData = new FormData();
@@ -292,25 +306,31 @@ const Clients = () => {
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label className="fw-semibold text-secondary">Spoke Person Name</label>
-                      <input
-                        type="text"
-                        className="form-control rounded-pill"
-                        value={spokePersonName}
-                        onChange={(e) => setSpokePersonName(e.target.value)}
-                        placeholder="Enter name..."
-                        required
-                      />
+                        <input
+                          type="text"
+                          className="form-control rounded-pill"
+                          value={spokePersonName}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z\s]*$/.test(value)) setSpokePersonName(value);
+                          }}
+                          placeholder="Enter name..."
+                          required
+                        />
                     </div>
                     <div className="col-md-6 mb-3">
                       <label className="fw-semibold text-secondary">Spoke Person Contact</label>
-                      <input
-                        type="tel"
-                        className="form-control rounded-pill"
-                        value={spokePersonContact}
-                        onChange={(e) => setSpokePersonContact(e.target.value)}
-                        placeholder="e.g +91 9876543210"
-                        required
-                      />
+                        <input
+                          type="tel"
+                          className="form-control rounded-pill"
+                          value={spokePersonContact}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                            setSpokePersonContact(value);
+                          }}
+                          placeholder="e.g. 9876543210"
+                          required
+                        />
                     </div>
                   </div>
                 </div>
