@@ -283,7 +283,6 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {console.log("recentCamps : ",recentCamps)}
               {recentCamps.map((camp, i) => (
                 <tr key={i}>
                   <td>{camp.client_name}</td>

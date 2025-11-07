@@ -308,7 +308,7 @@ const MonthlyCamp = () => {
                       <option value="">Select Camp Type</option>
                       {campTypeList.map((e) => (
                         <option key={e.camp_type_id} value={e.camp_type_id}>
-                          {e.camp_type_name} Camp
+                          {e.camp_type_name}
                         </option>
                       ))}
                     </select>
