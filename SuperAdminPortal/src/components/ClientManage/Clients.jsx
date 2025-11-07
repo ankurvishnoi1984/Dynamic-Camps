@@ -274,7 +274,10 @@ const Clients = () => {
                       type="text"
                       className="form-control rounded-pill"
                       value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
+                      onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z\s]*$/.test(value)) setClientName(value);
+                          }}
                       placeholder="Enter client name..."
                       required
                     />

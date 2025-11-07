@@ -117,6 +117,24 @@ const Departments = () => {
       return;
     }
 
+    // ✅ Validate Spoke Person Name (only alphabets & spaces)
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(spokePersonName)) {
+      alert("Spoke Person Name should contain only letters and spaces");
+      return;
+    }
+        if (!nameRegex.test(deptName)) {
+      alert("Department Name should contain only letters and spaces");
+      return;
+    }
+
+    // ✅ Validate Spoke Person Contact (Indian 10-digit format)
+    const contactRegex = /^[6-9]\d{9}$/;
+    if (!contactRegex.test(spokePersonContact)) {
+      alert("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
     try {
       // Prepare form data
       const formData = new FormData();
@@ -330,7 +348,10 @@ const Departments = () => {
                       type="text"
                       className="form-control rounded-pill"
                       value={deptName}
-                      onChange={(e) => setDeptName(e.target.value)}
+                      onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z\s]*$/.test(value)) setDeptName(value);
+                          }}
                       placeholder="Enter department name..."
                       required
                     />
@@ -380,7 +401,10 @@ const Departments = () => {
                         type="text"
                         className="form-control rounded-pill"
                         value={spokePersonName}
-                        onChange={(e) => setSpokePersonName(e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z\s]*$/.test(value)) setSpokePersonName(value);
+                          }}
                         placeholder="Enter name..."
                         required
                       />
@@ -391,7 +415,10 @@ const Departments = () => {
                         type="tel"
                         className="form-control rounded-pill"
                         value={spokePersonContact}
-                        onChange={(e) => setSpokePersonContact(e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                            setSpokePersonContact(value);
+                          }}
                         placeholder="e.g +91 9876543210"
                         required
                       />
