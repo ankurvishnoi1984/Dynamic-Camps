@@ -88,6 +88,47 @@ exports.getRecentCampDetails = (req, res) => {
     });
   }
 };
+exports.getRecentCampDetailsDeptWise = (req, res) => {
+  const {deptId} = req.body;
+  const query = `
+    SELECT 
+      m.camp_name,
+      m.start_date,
+      m.end_date
+    FROM monthly_camp_mst m
+    WHERE m.status = 'Y' 
+     AND m.dept_id = ?
+    ORDER BY m.start_date DESC
+  `;
+
+  try {
+    db.query(query,[deptId], (err, results) => {
+      if (err) {
+        logger.error(`Error in /controller/camps/getRecentCamps (query): ${err.message}`);
+        return res.status(500).json({
+          errorCode: 0,
+          errorDetail: err.message,
+          responseData: {},
+          details: "Failed to fetch recent camps",
+        });
+      }
+
+      res.status(200).json({
+        message: "Recent camps fetched successfully",
+        errorCode: 1,
+        data: results,
+      });
+    });
+  } catch (error) {
+    logger.error(`Error in /controller/camps/getRecentCamps (catch): ${error.message}`);
+    res.status(500).json({
+      errorCode: 0,
+      errorDetail: error.message,
+      responseData: {},
+      details: "Unexpected error occurred",
+    });
+  }
+};
 
 exports.totalCountDetailsClient = (req, res) => {
   const {deptId} = req.body;

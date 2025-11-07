@@ -72,7 +72,7 @@ function Dashboard() {
   const getRecentCamps = async () => {
     setLoading(true)
     try {
-      const res = await axios.post(`${BASEURL2}/dashboard/getRecentCampDetails`)
+      const res = await axios.post(`${BASEURL2}/dashboard/getRecentCampDetailsDeptWise`,{deptId:DEPTID})
       setRecentCamps(res.data.data)
       console.log("res.data.data", res.data)
     } catch (error) {
@@ -210,8 +210,8 @@ function Dashboard() {
           <table className="table table-bordered" width="100%" cellSpacing="0">
             <thead>
               <tr>
-                <th>Client Name</th>
-                <th>Department</th>
+                {/* <th>Client Name</th>
+                <th>Department</th> */}
                 <th>Camp Name</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -220,8 +220,8 @@ function Dashboard() {
             <tbody>
               {recentCamps.map((camp, i) => (
                 <tr key={i}>
-                  <td>{camp.client_name}</td>
-                  <td>{camp.dept_name}</td>
+                  {/* <td>{camp.client_name}</td>
+                  <td>{camp.dept_name}</td> */}
                   <td>{camp.camp_name}</td>
                   <td>{new Date(camp.start_date).toLocaleDateString("en-GB")}</td>
                   <td>{new Date(camp.end_date).toLocaleDateString("en-GB")}</td>
