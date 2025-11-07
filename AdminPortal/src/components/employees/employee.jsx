@@ -141,30 +141,79 @@ function Employee() {
   const handleModalClose = () => setModals({ add: false, edit: false });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const { name, value } = e.target;
+
+  let newValue = value;
+
+  // Field-specific validation
+  if (name === "empcode") {
+    // Allow only digits, max 5
+    newValue = value.replace(/\D/g, "").slice(0, 5);
+  }
+
+  if (name === "mobile") {
+    // Allow only digits, max 10
+    newValue = value.replace(/\D/g, "").slice(0, 10);
+  }
+
+    if (name === "email") {
+    // Convert to lowercase and prevent spaces
+    newValue = value.replace(/\s/g, "").toLowerCase();
+  }
+
+  setFormData((prev) => ({ ...prev, [name]: newValue }));
+};
+
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const requiredFields = ["name",
-      "empcode",
-      "hq",
-      "reporting",
-      "password",
-      "designation",
-      "zone",
-      "region",
-      "mobile",
-      "email",
-    ];
-    const missing = requiredFields.filter((f) => !formData[f]);
-    if (missing.length) {
-      toast.error(`Missing required fields: ${missing.join(", ")}`);
-      return;
-    }
-    setShowConfirmation(true);
-  };
+  e.preventDefault();
+
+  const requiredFields = [
+    "name",
+    "empcode",
+    "hq",
+    "reporting",
+    "password",
+    "designation",
+    "zone",
+    "region",
+    "mobile",
+    "email",
+  ];
+
+  const missing = requiredFields.filter((f) => !formData[f]);
+  if (missing.length) {
+    toast.error(`Missing required fields: ${missing.join(", ")}`);
+    return;
+  }
+
+  // ✅ Field-specific validation
+  if (!/^\d{5}$/.test(formData.empcode)) {
+    toast.error("Employee code must be exactly 5 digits");
+    return;
+  }
+
+  if (!/^\d{10}$/.test(formData.mobile)) {
+    toast.error("Mobile number must be exactly 10 digits");
+    return;
+  }
+
+  if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+    toast.error("Name should contain only letters and spaces");
+    return;
+  }
+
+  if (
+    formData.email &&
+    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
+  ) {
+    toast.error("Please enter a valid email address");
+    return;
+  }
+
+  // ✅ Passed all checks
+  setShowConfirmation(true);
+};
 
   const handleAddConfirm = async () => {
     try {

@@ -1,6 +1,5 @@
 const db = require("../config/db");
 const logger = require("../utils/logger");
-const moment = require('moment');
 
 exports.getAllEmployee = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
