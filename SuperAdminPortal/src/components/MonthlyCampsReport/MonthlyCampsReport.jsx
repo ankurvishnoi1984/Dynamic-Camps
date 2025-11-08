@@ -348,7 +348,9 @@ useEffect(() => {
     <>
       <thead>
         <tr>
-          {myCampDetails[0].field_values?.map((fv, idx) => (
+          {myCampDetails[0].field_values
+          ?.filter((fv) => fv.field_type !== "image")
+          .map((fv, idx) => (
             <th key={idx}>{fv.field_label}</th>
           ))}
           <th>Submitted At</th>
