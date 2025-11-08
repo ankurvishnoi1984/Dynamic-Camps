@@ -83,6 +83,7 @@ exports.getAllEmployee = async (req, res) => {
     ${baseCTE}
     SELECT COUNT(*) AS totalCount
     FROM employee_hierarchy
+    AND dept_id = ${deptId}
     WHERE name LIKE ${db.escape('%' + searchName + '%')};
   `;
 
