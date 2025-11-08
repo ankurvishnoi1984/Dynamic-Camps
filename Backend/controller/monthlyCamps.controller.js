@@ -302,46 +302,63 @@ exports.createMonthlyCamp = (req, res) => {
 }
 
 exports.submitFormAnswers = (req, res) => {
-  const { campId, userId, doctorId=1, status = "Y", values,deptId } = req.body;
+  const { campId, userId, doctorId = 1, status = "Y", values: rawValues, deptId } = req.body;
+
+  // Parse stringified JSON if needed
+  let values = rawValues;
+  if (typeof rawValues === "string") {
+    try {
+      values = JSON.parse(rawValues);
+    } catch (err) {
+      return res.status(400).json({
+        errorCode: 0,
+        errorDetail: "Invalid values JSON",
+      });
+    }
+  }
 
   if (!campId || !userId || !Array.isArray(values) || values.length === 0) {
     return res.status(400).json({
       errorCode: 0,
       errorDetail: "Missing required fields or empty values array",
-      responseData: {},
+    });
+  }
+
+  // ✅ Collect uploaded files
+  const uploadedFiles = {};
+  if (req.files && req.files.length > 0) {
+    req.files.forEach((file) => {
+      // Example: file.fieldname = 'field_12'
+      uploadedFiles[file.fieldname] = file.filename;
     });
   }
 
   db.getConnection((err, connection) => {
     if (err) {
-      logger.error(`Error getting DB connection: ${err.message}`);
       return res.status(500).json({
         errorCode: 0,
         errorDetail: "Database connection failed",
-        responseData: {},
       });
     }
 
     connection.beginTransaction(async (transErr) => {
       if (transErr) {
         connection.release();
-        logger.error(`Error starting transaction: ${transErr.message}`);
         return res.status(500).json({
           errorCode: 0,
           errorDetail: transErr.message,
-          responseData: {},
         });
       }
 
       try {
-        // Step 1️⃣: Insert into camp_submissions
+        // Step 1️⃣: Insert submission
         const insertSubmissionQuery = `
-          INSERT INTO camp_submissions (camp_id, user_id, doctor_id, status,dept_id)
-          VALUES (?, ?, ?, ?,?)
+          INSERT INTO camp_submissions (camp_id, user_id, doctor_id, status, dept_id)
+          VALUES (?, ?, ?, ?, ?)
         `;
 
         const [submissionResult] = await new Promise((resolve, reject) => {
-          connection.query(insertSubmissionQuery, [campId, userId, doctorId, status,deptId], (err, result) => {
+          connection.query(insertSubmissionQuery, [campId, userId, doctorId, status, deptId], (err, result) => {
             if (err) reject(err);
             else resolve([result]);
           });
@@ -349,14 +366,24 @@ exports.submitFormAnswers = (req, res) => {
 
         const submissionId = submissionResult.insertId;
 
-        // Step 2️⃣: Insert multiple values (bulk insert)
+        // Step 2️⃣: Prepare submission values
+        const submissionValues = values.map((v) => {
+          let value = v.value;
+
+          // ✅ If the field type is image, replace value with filename
+          const imageFieldKey = `field_${v.fieldId}`;
+          if (uploadedFiles[imageFieldKey]) {
+            value = uploadedFiles[imageFieldKey];
+          }
+
+          return [submissionId, v.fieldId, value, deptId];
+        });
+
+        // Step 3️⃣: Insert values
         const insertValuesQuery = `
-          INSERT INTO camp_submission_values (submission_id, field_id, value,dept_id)
+          INSERT INTO camp_submission_values (submission_id, field_id, value, dept_id)
           VALUES ?
         `;
-
-        const submissionValues = values.map(v => [submissionId, v.fieldId, v.value,deptId]);
-
         await new Promise((resolve, reject) => {
           connection.query(insertValuesQuery, [submissionValues], (err, result) => {
             if (err) reject(err);
@@ -364,15 +391,13 @@ exports.submitFormAnswers = (req, res) => {
           });
         });
 
-        // Step 3️⃣: Commit transaction
-        connection.commit(commitErr => {
+        // Step 4️⃣: Commit transaction
+        connection.commit((commitErr) => {
           connection.release();
           if (commitErr) {
-            logger.error(`Error committing transaction: ${commitErr.message}`);
             return res.status(500).json({
               errorCode: 0,
               errorDetail: commitErr.message,
-              responseData: {},
             });
           }
 
@@ -382,17 +407,13 @@ exports.submitFormAnswers = (req, res) => {
             data: { submissionId },
           });
         });
-
       } catch (error) {
-        // Rollback on any failure
         connection.rollback(() => {
           connection.release();
-          logger.error(`Transaction rolled back: ${error.message}`);
           res.status(500).json({
             errorCode: 0,
             errorDetail: error.message,
-            responseData: {},
-            details: "Submission failed and rolled back",
+            details: "Transaction rolled back",
           });
         });
       }
