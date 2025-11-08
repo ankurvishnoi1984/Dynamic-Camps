@@ -272,8 +272,13 @@ function Employee() {
   const handlePrevious = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
-  const startingEntry = (currentPage - 1) * entriesPerPage + 1;
-  const endingEntry = Math.min(startingEntry + entriesPerPage - 1, totalCount);
+  
+  const startingEntry =
+    totalCount === 0 ? 0 : (currentPage - 1) * entriesPerPage + 1;
+
+  const endingEntry =
+    totalCount === 0 ? 0 : Math.min(startingEntry + entriesPerPage - 1, totalCount);
+
 
   // ----------------- JSX -----------------
   return (
