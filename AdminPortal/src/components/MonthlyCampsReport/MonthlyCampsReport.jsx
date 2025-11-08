@@ -282,35 +282,32 @@ const MonthlyCampsReport = () => {
   cellSpacing="0"
 >
   {myCampDetails && myCampDetails.length > 0 ? (
-    <>
-      <thead>
-        <tr>
-           {myCampDetails[0].field_values
-          ?.filter((fv) => fv.field_type !== "image")
-          .map((fv, idx) => (
-            <th key={idx}>{fv.field_label}</th>
-          ))}
-          <th>Submitted At</th>
-        </tr>
-      </thead>
+                  <>
+                    <thead>
+                      <tr>
+                        {myCampDetails[0]?.field_values
+                          ?.filter((fv) => fv.field_type !== "image")
+                          .map((fv, idx) => (
+                            <th key={idx}>{fv.field_label}</th>
+                          ))}
+                        <th>Submitted At</th>
+                      </tr>
+                    </thead>
 
-      <tbody>
-        {myCampDetails.map((e, i) => (
-          <tr key={i}>
-            {e.field_values?.map((fv, idx) => (
-              <td key={idx}>
-                {fv.field_type === "image" ? (
-                  <span>Image</span>
-                ) : (
-                  fv.value || "-"
-                )}
-              </td>
-            ))}
-            <td>{new Date(e.submitted_at).toLocaleString()}</td>
-          </tr>
-        ))}
-      </tbody>
-    </>
+                    <tbody>
+                      {myCampDetails.map((e, i) => (
+                        <tr key={i}>
+                          {e.field_values
+                            ?.filter((fv) => fv.field_type !== "image") // ✅ ignore image fields here too
+                            .map((fv, idx) => (
+                              <td key={idx}>{fv.value || "-"}</td>
+                            ))}
+                          <td>{new Date(e.submitted_at).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+
   ) : (
     <tbody>
       <tr>
