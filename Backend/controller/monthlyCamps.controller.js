@@ -310,10 +310,7 @@ exports.submitFormAnswers = (req, res) => {
     try {
       values = JSON.parse(rawValues);
     } catch (err) {
-      return res.status(400).json({
-        errorCode: 0,
-        errorDetail: "Invalid values JSON",
-      });
+      return res.status(400).json({ errorCode: 0, errorDetail: "Invalid values JSON" });
     }
   }
 
@@ -324,39 +321,37 @@ exports.submitFormAnswers = (req, res) => {
     });
   }
 
-  // ✅ Collect uploaded files
+  // ✅ Collect uploaded files (group by field)
   const uploadedFiles = {};
   if (req.files && req.files.length > 0) {
     req.files.forEach((file) => {
-      // Example: file.fieldname = 'field_12'
-      uploadedFiles[file.fieldname] = file.filename;
+      // field_12[], extract 12
+      const match = file.fieldname.match(/field_(\d+)/);
+      if (match) {
+        const fieldId = match[1];
+        if (!uploadedFiles[fieldId]) uploadedFiles[fieldId] = [];
+        uploadedFiles[fieldId].push(file.filename);
+      }
     });
   }
 
   db.getConnection((err, connection) => {
     if (err) {
-      return res.status(500).json({
-        errorCode: 0,
-        errorDetail: "Database connection failed",
-      });
+      return res.status(500).json({ errorCode: 0, errorDetail: "Database connection failed" });
     }
 
     connection.beginTransaction(async (transErr) => {
       if (transErr) {
         connection.release();
-        return res.status(500).json({
-          errorCode: 0,
-          errorDetail: transErr.message,
-        });
+        return res.status(500).json({ errorCode: 0, errorDetail: transErr.message });
       }
 
       try {
-        // Step 1️⃣: Insert submission
+        // Step 1️⃣ Insert submission
         const insertSubmissionQuery = `
           INSERT INTO camp_submissions (camp_id, user_id, doctor_id, status, dept_id)
           VALUES (?, ?, ?, ?, ?)
         `;
-
         const [submissionResult] = await new Promise((resolve, reject) => {
           connection.query(insertSubmissionQuery, [campId, userId, doctorId, status, deptId], (err, result) => {
             if (err) reject(err);
@@ -366,20 +361,16 @@ exports.submitFormAnswers = (req, res) => {
 
         const submissionId = submissionResult.insertId;
 
-        // Step 2️⃣: Prepare submission values
-        const submissionValues = values.map((v) => {
+        // Step 2️⃣ Build final values including image filenames
+        const submissionValues = values.map(v => {
           let value = v.value;
-
-          // ✅ If the field type is image, replace value with filename
-          const imageFieldKey = `field_${v.fieldId}`;
-          if (uploadedFiles[imageFieldKey]) {
-            value = uploadedFiles[imageFieldKey];
+          if (uploadedFiles[v.fieldId]) {
+            value = uploadedFiles[v.fieldId].join(","); // save multiple filenames as CSV
           }
-
           return [submissionId, v.fieldId, value, deptId];
         });
 
-        // Step 3️⃣: Insert values
+        // Step 3️⃣ Insert values
         const insertValuesQuery = `
           INSERT INTO camp_submission_values (submission_id, field_id, value, dept_id)
           VALUES ?
@@ -391,16 +382,9 @@ exports.submitFormAnswers = (req, res) => {
           });
         });
 
-        // Step 4️⃣: Commit transaction
-        connection.commit((commitErr) => {
+        // Step 4️⃣ Commit
+        connection.commit(() => {
           connection.release();
-          if (commitErr) {
-            return res.status(500).json({
-              errorCode: 0,
-              errorDetail: commitErr.message,
-            });
-          }
-
           res.status(200).json({
             message: "Camp submission saved successfully",
             errorCode: 1,
