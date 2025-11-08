@@ -54,28 +54,26 @@ const MonthlyCampsReport = () => {
         setShow(false);
 
     };
-    useEffect(() => {
-        if (filters.searchKeyword) {
-            let timer = setTimeout(() => {
-                getMyCampDetailsByEmpcode();
-                GetDetiledData();
-            }, 1000);
+  useEffect(() => {
+  // run when searchKeyword changes or when deptId changes
+  if (filters.searchKeyword) {
+    let timer = setTimeout(() => {
+      getMyCampDetailsByEmpcode();
+      GetDetiledData();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }
+  getMyCampDetailsByEmpcode();
+  GetDetiledData();
+  getMyCampsType();
+}, [filters.searchKeyword, deptId]);
 
-            return () => {
-                clearTimeout(timer);
-            };
-        }
-        getMyCampDetailsByEmpcode();
-        GetDetiledData();
-        getMyCampsType();
-    }, [filters, deptId])
-
-
-    useEffect(() => {
-        if (filters.campId) {
-            getMyCampDetailsByEmpcode();
-        }
-    }, [filters.campId, deptId]);
+// separate effect to run when campId changes
+useEffect(() => {
+  if (filters.campId) {
+    getMyCampDetailsByEmpcode();
+  }
+}, [filters.campId]);
 
     useEffect(() => {
         getClientList();
@@ -103,19 +101,27 @@ const MonthlyCampsReport = () => {
     }
 
     const getDepartmentList = async (clientId) => {
-        setLoading(true)
-        try {
-            const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
-                { clientId }
-            )
-            setDeptList(res.data.data)
-            setDeptId(res.data.data[0].dept_id)
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false);
-        }
+  setLoading(true)
+  try {
+    const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
+      { clientId }
+    )
+    const departments = res.data.data || [];
+    setDeptList(departments);
+
+    if (departments.length > 0) {
+      const newDeptId = departments[0].dept_id;
+      setDeptId(newDeptId);
+
+      // Clear previous camp selection so the camp list can set the correct one
+      setFilters(prev => ({ ...prev, campId: "" }));
     }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    setLoading(false);
+  }
+}
 
 
 
@@ -138,29 +144,33 @@ const MonthlyCampsReport = () => {
         }
     }
 
-    const getMyCampsType = async () => {
-        if (!deptId) return
-        setLoading(true);
-        try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampsNavListAdmin`,
-                { deptId }
-            );
-            const camps = res.data.data || [];
-            setMyCampType(camps);
+ const getMyCampsType = async () => {
+  if (!deptId) return;
+  setLoading(true);
+  try {
+    const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampsNavListAdmin`,
+      { deptId }
+    );
+    const camps = res.data.data || [];
+    setMyCampType(camps);
 
-            // ✅ Automatically set the first campId (if not already set)
-            if (camps.length > 0 && !filters.campId) {
-                setFilters((prev) => ({
-                    ...prev,
-                    campId: camps[0].camp_id, // or camps[0].id based on your DB field name
-                }));
-            }
-        } catch (error) {
-            console.error("Error fetching camps:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Always set campId to first camp of the new dept (if exists)
+    if (camps.length > 0) {
+      setFilters(prev => ({
+        ...prev,
+        campId: camps[0].camp_id
+      }));
+    } else {
+      // no camps for this dept
+      setFilters(prev => ({ ...prev, campId: "" }));
+    }
+  } catch (error) {
+    console.error("Error fetching camps:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
 
@@ -302,31 +312,7 @@ const MonthlyCampsReport = () => {
 
                 </div>
 
-                {/* <div className="form-group ml-2">
-                    <label htmlFor="fromDate">From Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        id="fromDate"
-                        name="fromDate"   // ✅ added
-                        placeholder="Select From Date"
-                        value={filters.fromDate}
-                        onChange={handleChange}
-                    />
-                </div>
-
-                <div className="form-group ml-2">
-                    <label htmlFor="toDate">To Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        id="toDate"
-                        name="toDate"    // ✅ added
-                        placeholder="Select To Date"
-                        value={filters.toDate}
-                        onChange={handleChange}
-                    />
-                </div> */}
+               
 
             </div>
             {/* Content Row */}
@@ -350,75 +336,7 @@ const MonthlyCampsReport = () => {
                 />
                 <div className="card-body">
                     <div className="table-responsive">
-                        {/* <table
-                            className="table table-bordered"
-                            id="dataTable"
-                            width="100%"
-                            cellSpacing="0"
-                        >
-                            <thead>
-                                <tr>
-                                    <th>Doctor Name</th>
-                                    <th>Speciality</th>
-                                    <th>Garnet Code</th>
-                                    <th>Status</th>
-
-                              
-                                    {myCampDetails.length > 0 &&
-                                        myCampDetails[0].field_values?.map((fv, idx) => (
-                                            <th key={idx}>{fv.field_label}</th>
-                                        ))}
-                                    <th>Submitted At</th>
-
-                           
-                                    <th>Brands (Prescriptions)</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {myCampDetails && myCampDetails.length > 0 ? (
-                                    myCampDetails.map((e, i) => (
-                                        <tr key={i}>
-                                            <td>{e.doctor_name}</td>
-                                            <td>{e.speciality}</td>
-                                            <td>{e.garnet_code}</td>
-                                            <td>{e.status === "Y" ? "Submitted" : "Pending"}</td>
-
-                                          
-                                            {e.field_values?.map((fv, idx) => (
-                                                <td key={idx}>
-                                                    {fv.field_type === "image" ? (
-                                                        <span>🖼️ Image</span>
-                                                    ) : (
-                                                        fv.value || "-"
-                                                    )}
-                                                </td>
-                                            ))}
-                                            <td>{new Date(e.submitted_at).toLocaleString()}</td>
-
-                                      
-                                            <td>
-                                                {e.prescriptions && e.prescriptions.length > 0 ? (
-                                                    e.prescriptions.map((p, idx2) => (
-                                                        <div key={idx2}>
-                                                            <strong>{p.brand_name}</strong> — {p.prescription_count}
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    "-"
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="10" className="text-center">
-                                            No records found.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table> */}
+                    
 
                         <table
   className="table table-bordered"
@@ -473,28 +391,7 @@ const MonthlyCampsReport = () => {
     </tbody>
   )}
 </table>
-
-
-                        {/* <div
-                   className="textdiv"
-                  >
-                    <div>
-                      {" "}
-                      Showing {startingEntry} to {endingEntry} of {reportData && pagelength}{" "}
-                      entries
-                    </div>
-                    <div className="resdiv">
-                      <button className="btn btn-light pag-but" onClick={handelPrevious}>
-                        Previous
-                      </button>
-                      <button className="btn btn-light pag-but pag-but-bg">
-                        {currentPage}
-                      </button>
-                      <button className="btn btn-light pag-but" onClick={handelNext}>
-                        Next
-                      </button>
-                    </div>
-                  </div> */}
+            
                     </div>
                 </div>
             </div>
