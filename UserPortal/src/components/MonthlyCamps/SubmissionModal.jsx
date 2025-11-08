@@ -119,10 +119,10 @@ const SubmissionModal = ({ handelCloseModel }) => {
             return;
         }
 
-        // Prepare field values (for text, dropdown etc.)
+        // Prepare text / number / dropdown field values (image handled via files)
         const values = fieldDetails.map((f) => ({
             fieldId: f.field_id,
-            value: f.field_type === "image" ? "" : formData[f.field_id] || ""
+            value: f.field_type === "image" ? "" : (formData[f.field_id] || "")
         }));
 
         const formDataPayload = new FormData();
@@ -133,11 +133,12 @@ const SubmissionModal = ({ handelCloseModel }) => {
         formDataPayload.append("deptId", DeptId);
         formDataPayload.append("values", JSON.stringify(values));
 
-        // ✅ Add images to FormData using correct keys
+        // ✅ Append real files (not preview objects)
         fieldDetails.forEach((f) => {
             if (f.field_type === "image" && formData[f.field_id]?.length > 0) {
-                formData[f.field_id].forEach((file) => {
-                    formDataPayload.append(`field_${f.field_id}[]`, file);
+                formData[f.field_id].forEach((item) => {
+                    // item = { file: File, url: previewURL }
+                    formDataPayload.append(`field_${f.field_id}[]`, item.file);
                 });
             }
         });
@@ -157,6 +158,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
             setPopup({ type: "success", message: "Camp submission saved successfully!" });
 
         } catch (err) {
+            console.error(err);
             setPopup({ type: "error", message: "Something went wrong while submitting camp" });
         }
     };
