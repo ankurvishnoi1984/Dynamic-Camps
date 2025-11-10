@@ -472,6 +472,10 @@ exports.bulkUploadUsers = async (req, res) => {
     if (!createdBy) {
       return res.status(400).json({ errorCode: "0", message: "created_by is required" });
     }
+    const deptId = req.body.deptId;
+    if(!deptId){
+      return res.status(400).json({ errorCode: "0", message: "deptId is required" });
+    }
 
     // Convert CSV to JSON
     const users = await csv().fromFile(req.file.path);
@@ -481,7 +485,6 @@ exports.bulkUploadUsers = async (req, res) => {
       "empcode",
       "name",
       "designation",
-      "dept_id",
       "reporting",
       "mobile",
       "email",
@@ -538,7 +541,7 @@ exports.bulkUploadUsers = async (req, res) => {
       u.password,
       "Y",
       createdBy,
-      u.dept_id,
+      deptId,
     ]);
 
     const insertQuery = `
