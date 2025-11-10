@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const csv = require("csvtojson");
 const logger = require("../utils/logger");
 
 exports.getAllEmployee = async (req, res) => {
@@ -439,5 +440,124 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
       message: "Error fetching senior empcodes",
       error: error.message,
     });
+  }
+};
+
+exports.bulkUploadUsers = async (req, res) => {
+  // Role mapping based on designation
+  const roleMapping = {
+    "MARKETING EXECUTIVE": 5,
+    "AREA BUSINESS MANAGER": 4,
+    "SENIOR AREA BUSINESS MANAGER": 4,
+    "REGIONAL MANAGER": 3,
+    "SENIOR REGIONAL MANAGER": 3,
+    "DIVISIONAL SALES MANAGER": 2,
+    "ZONAL SALES MANAGER": 2,
+    "SALES MANAGER": 2,
+    "Associate General Manager - Sales - Sale": 1,
+    "NATIONAL SALES MANAGER": 1,
+  };
+  try {
+    // 1️⃣ Validate file exists
+    if (!req.file) {
+      return res.status(400).json({ errorCode: "0", message: "CSV file is required" });
+    }
+
+    // 2️⃣ Validate CSV MIME type
+    if (req.file.mimetype !== "text/csv") {
+      return res.status(400).json({ errorCode: "0", message: "Only CSV file is allowed" });
+    }
+
+    const createdBy = req.body.created_by;
+    if (!createdBy) {
+      return res.status(400).json({ errorCode: "0", message: "created_by is required" });
+    }
+
+    // Convert CSV to JSON
+    const users = await csv().fromFile(req.file.path);
+
+    // 3️⃣ Validate required columns
+    const requiredColumns = [
+      "empcode",
+      "name",
+      "designation",
+      "dept_id",
+      "reporting",
+      "mobile",
+      "email",
+      "password",
+    ];
+
+    const missingColumns = requiredColumns.filter(
+      (col) => !Object.keys(users[0]).includes(col)
+    );
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: `Missing columns: ${missingColumns.join(", ")}`,
+      });
+    }
+
+    // 4️⃣ Check duplicate empcode inside CSV
+    const fileEmpcodes = users.map((u) => u.empcode);
+    const uniqueEmpcodes = new Set(fileEmpcodes);
+    if (fileEmpcodes.length !== uniqueEmpcodes.size) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: "Duplicate empcode found inside CSV file",
+      });
+    }
+
+    // 5️⃣ Check duplicate empcode in DB
+    const placeholders = fileEmpcodes.map(() => "?").join(",");
+    const checkQuery = `SELECT empcode FROM user_mst WHERE empcode IN (${placeholders})`;
+    const [existing] = await db.promise().query(checkQuery, fileEmpcodes);
+
+    if (existing.length > 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: `Following empcodes already exist: ${existing
+          .map((e) => e.empcode)
+          .join(", ")}`,
+      });
+    }
+
+    // 6️⃣ Prepare bulk insert dataset
+    const insertValues = users.map((u) => [
+      u.empcode,
+      u.name,
+      u.designation,
+      roleMapping[u.designation] || 5,
+      u.zone || null,
+      u.region || null,
+      u.hq || null,
+      u.reporting,
+      u.mobile,
+      u.email,
+      u.password,
+      "Y",
+      createdBy,
+      u.dept_id,
+    ]);
+
+    const insertQuery = `
+      INSERT INTO user_mst
+      (empcode, name, designation, role, zone, region, hq, reporting, 
+       mobile, email, password, status, created_by, dept_id)
+      VALUES ?
+    `;
+
+    // 7️⃣ Execute bulk insert
+    await db.promise().query(insertQuery, [insertValues]);
+
+    return res.status(200).json({
+      errorCode: "1",
+      message: "Users uploaded successfully",
+      totalInserted: insertValues.length,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ errorCode: "0", message: err.message });
   }
 };
