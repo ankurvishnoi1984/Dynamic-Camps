@@ -47,7 +47,7 @@ export default function InfoEmpModal({ setInfoUserModel, empData }) {
     { label: "Employee Code", name: "empcode" },
     { label: "HQ", name: "hq" },
     { label: "Region", name: "region" },
-    { label: "Username", name: "usernamehq" },
+    // { label: "Username", name: "usernamehq" },
     { label: "Password", name: "password" },
     { label: "Mobile", name: "mobile" },
     { label: "Email", name: "email" },

@@ -444,7 +444,6 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
 };
 
 exports.bulkUploadUsers = async (req, res) => {
-  // Role mapping based on designation
   const roleMapping = {
     "MARKETING EXECUTIVE": 5,
     "AREA BUSINESS MANAGER": 4,
@@ -457,76 +456,90 @@ exports.bulkUploadUsers = async (req, res) => {
     "Associate General Manager - Sales - Sale": 1,
     "NATIONAL SALES MANAGER": 1,
   };
-  try {
-    // 1️⃣ Validate file exists
-    if (!req.file) {
-      return res.status(400).json({ errorCode: "0", message: "CSV file is required" });
-    }
 
-    // 2️⃣ Validate CSV MIME type
-    if (req.file.mimetype !== "text/csv") {
+  try {
+    if (!req.file)
+      return res.status(400).json({ errorCode: "0", message: "CSV file is required" });
+
+    if (req.file.mimetype !== "text/csv")
       return res.status(400).json({ errorCode: "0", message: "Only CSV file is allowed" });
-    }
 
     const createdBy = req.body.created_by;
-    if (!createdBy) {
-      return res.status(400).json({ errorCode: "0", message: "created_by is required" });
-    }
     const deptId = req.body.deptId;
-    if(!deptId){
-      return res.status(400).json({ errorCode: "0", message: "deptId is required" });
-    }
 
-    // Convert CSV to JSON
+    if (!createdBy)
+      return res.status(400).json({ errorCode: "0", message: "created_by is required" });
+
+    if (!deptId)
+      return res.status(400).json({ errorCode: "0", message: "deptId is required" });
+
     const users = await csv().fromFile(req.file.path);
 
-    // 3️⃣ Validate required columns
     const requiredColumns = [
-      "empcode",
-      "name",
-      "designation",
-      "reporting",
-      "mobile",
-      "email",
-      "password",
+      "empcode", "name", "designation", "reporting",
+      "mobile", "email", "password",
     ];
 
     const missingColumns = requiredColumns.filter(
       (col) => !Object.keys(users[0]).includes(col)
     );
 
-    if (missingColumns.length > 0) {
+    if (missingColumns.length > 0)
       return res.status(400).json({
         errorCode: "0",
         message: `Missing columns: ${missingColumns.join(", ")}`,
       });
+
+    // ✅ Extract all reporting empcodes
+    const reportingEmpcodes = [...new Set(users.map(u => u.reporting))];
+
+    // ✅ Validate Reporting Exists in SAME department
+    const placeholders = reportingEmpcodes.map(() => "?").join(",");
+    const checkReportingQuery = `
+      SELECT empcode, dept_id 
+      FROM user_mst 
+      WHERE empcode IN (${placeholders})
+    `;
+    const [reportingUsers] = await db.promise().query(checkReportingQuery, reportingEmpcodes);
+
+    // Create map empcode → dept
+    const reportingDeptMap = {};
+    reportingUsers.forEach(r => reportingDeptMap[r.empcode] = r.dept_id);
+
+    // Find Invalid Reporting References
+    const invalidReportings = reportingEmpcodes.filter(emp =>
+      reportingDeptMap[emp] && reportingDeptMap[emp] != deptId
+    );
+
+    if (invalidReportings.length > 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        // message: `Invalid Reporting: These employees do not belong to selected department (${deptId}): ${invalidReportings.join(", ")}`
+        message: `Invalid Reporting: ${invalidReportings.join(", ")}`
+      });
     }
 
-    // 4️⃣ Check duplicate empcode inside CSV
+    // ✅ Validate duplicate empcodes inside CSV
     const fileEmpcodes = users.map((u) => u.empcode);
     const uniqueEmpcodes = new Set(fileEmpcodes);
-    if (fileEmpcodes.length !== uniqueEmpcodes.size) {
+    if (fileEmpcodes.length !== uniqueEmpcodes.size)
       return res.status(400).json({
         errorCode: "0",
         message: "Duplicate empcode found inside CSV file",
       });
-    }
 
-    // 5️⃣ Check duplicate empcode in DB
-    const placeholders = fileEmpcodes.map(() => "?").join(",");
-    const checkQuery = `SELECT empcode FROM user_mst WHERE empcode IN (${placeholders})`;
+    // ✅ Check duplicate empcodes in DB
+    const placeholders2 = fileEmpcodes.map(() => "?").join(",");
+    const checkQuery = `SELECT empcode FROM user_mst WHERE empcode IN (${placeholders2})`;
     const [existing] = await db.promise().query(checkQuery, fileEmpcodes);
 
-    if (existing.length > 0) {
+    if (existing.length > 0)
       return res.status(400).json({
         errorCode: "0",
-        message: `Following empcodes already exist: ${existing
-          .map((e) => e.empcode)
-          .join(", ")}`,
+        message: `These empcodes already exist: ${existing.map(e => e.empcode).join(", ")}`,
       });
-    }
 
-    // 6️⃣ Prepare bulk insert dataset
+    // ✅ Prepare Insert Values
     const insertValues = users.map((u) => [
       u.empcode,
       u.name,
@@ -547,20 +560,21 @@ exports.bulkUploadUsers = async (req, res) => {
     const insertQuery = `
       INSERT INTO user_mst
       (empcode, name, designation, role, zone, region, hq, reporting, 
-       mobile, email, password, status, created_by, dept_id)
+      mobile, email, password, status, created_by, dept_id)
       VALUES ?
     `;
 
-    // 7️⃣ Execute bulk insert
     await db.promise().query(insertQuery, [insertValues]);
 
     return res.status(200).json({
       errorCode: "1",
-      message: "Users uploaded successfully",
+      message: "Users uploaded successfully ✅",
       totalInserted: insertValues.length,
     });
+
   } catch (err) {
     console.log(err);
     return res.status(500).json({ errorCode: "0", message: err.message });
   }
 };
+
