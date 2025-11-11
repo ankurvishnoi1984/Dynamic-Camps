@@ -5,7 +5,6 @@ import { BASEURL2 } from "../constant/constant";
 
 const UploadCsvModal = ({ closeModal, deptId, getfun,userId }) => {
   const [file, setFile] = useState(null);
-  const empcode = sessionStorage.getItem("empcode")
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -15,7 +14,6 @@ const UploadCsvModal = ({ closeModal, deptId, getfun,userId }) => {
     formData.append("file", file);
     formData.append("deptId", deptId);
     formData.append("created_by", userId);
-    formData.append("empcode", empcode);
 
     try {
       const res = await axios.post(`${BASEURL2}/employee/bulkUpload`, formData, {

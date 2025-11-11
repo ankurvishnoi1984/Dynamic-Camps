@@ -9,6 +9,8 @@ import EditModel from "./editEmpModel";
 import InfoModel from "./infoEmpModal";
 import "./employee.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import UploadCsvModal from "./uploadCsvModal";
+
 
 function Employee() {
   const [formData, setFormData] = useState({
@@ -33,7 +35,9 @@ function Employee() {
   const [modals, setModals] = useState({
     add: false,
     edit: false,
-     info: false,
+    info: false,
+    bulkUpload:false,
+     
   });
 
   const [empData, setEmpData] = useState([]);
@@ -296,6 +300,15 @@ function Employee() {
             <i className="fas fa-search fa-sm"></i>
           </button>
         </div>
+         <button
+          className="btn btn-warning btn-icon-split mt-3 mr-2"
+          onClick={() => setModals((prev) => ({ ...prev, bulkUpload: true }))}
+        >
+          <span className="icon text-white-50">
+            <i className="fas fa-file-upload"></i>
+          </span>
+          <span className="text">Upload CSV</span>
+        </button>
         <button className="btn btn-primary btn-icon-split mt-3" onClick={handleAddUser}>
           <span className="icon text-white-50">
             <i className="fas fa-plus"></i>
@@ -557,6 +570,14 @@ function Employee() {
           getfun={fetchEmployees}
           setInfoUserModel={(val) => setModals((prev) => ({ ...prev, info: val }))}
           handleInputChange={handleInputChange}
+        />
+      )}
+       {modals.bulkUpload && (
+        <UploadCsvModal
+          closeModal={() => setModals((prev) => ({ ...prev, bulkUpload: false }))}
+          deptId={deptId}
+          getfun={fetchEmployees} // same pattern as edit modal
+          userId={userId}
         />
       )}
 

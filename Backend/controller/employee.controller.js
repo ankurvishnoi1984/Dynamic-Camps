@@ -511,11 +511,18 @@ exports.bulkUploadUsers = async (req, res) => {
       reportingDeptMap[emp] && reportingDeptMap[emp] != deptId
     );
 
+    
+
     if (invalidReportings.length > 0) {
+      let msg = "";
+      if (req.body.empcode && empcode === 10000) {
+        msg = `Invalid Reporting: These employees do not belong to selected department (${deptId}): ${invalidReportings.join(", ")}`
+      } else {
+        msg = `Invalid Reporting: ${invalidReportings.join(", ")}`
+      }
       return res.status(400).json({
         errorCode: "0",
-        // message: `Invalid Reporting: These employees do not belong to selected department (${deptId}): ${invalidReportings.join(", ")}`
-        message: `Invalid Reporting: ${invalidReportings.join(", ")}`
+        message: msg,
       });
     }
 
@@ -536,7 +543,7 @@ exports.bulkUploadUsers = async (req, res) => {
     if (existing.length > 0)
       return res.status(400).json({
         errorCode: "0",
-        message: `These empcodes already exist: ${existing.map(e => e.empcode).join(", ")}`,
+        message: `These empcodes are not available: ${existing.map(e => e.empcode).join(", ")}`,
       });
 
     // ✅ Prepare Insert Values
