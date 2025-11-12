@@ -298,6 +298,42 @@ function Employee() {
     }
   };
 
+  const handleDownloadSampleCSV = () => {
+    const requiredColumns = [
+      "empcode",
+      "name",
+      "designation",
+      "reporting",
+      "mobile",
+      "email",
+      "password",
+      "state",
+      "region",
+      "hq",
+    ];
+
+    // Create CSV header row
+    const csvHeader = requiredColumns.join(",") + "\n";
+
+    // Create a Blob from the string
+    const blob = new Blob([csvHeader], { type: "text/csv;charset=utf-8;" });
+
+    // Create temporary link element
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", "sample_employees.csv");
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+
 
   // ----------------- Pagination -----------------
   const handleNext = () => {
@@ -383,6 +419,15 @@ function Employee() {
           <span className="text">Add Employee</span>
         </button>
       </div>
+      <button
+        type="button"
+        className="btn btn-outline-secondary mt-2"
+        onClick={handleDownloadSampleCSV}
+      >
+        <i className="fas fa-download mr-2"></i>
+        Download Sample CSV
+      </button>
+
 
       {/* Table */}
       <div className="card shadow mb-4">
