@@ -168,7 +168,7 @@ function Employee() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const res = await axios.delete(`${BASEURL2}/admin/deleteEmployee/${deleteId}`);
+      const res = await axios.delete(`${BASEURL2}/employee/deleteEmployee/${deleteId}`);
       if (res.data.errorCode === "1") {
         toast.success("Employee deleted successfully");
         fetchEmployees();
