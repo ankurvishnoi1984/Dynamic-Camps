@@ -36,3 +36,56 @@
   
 }
 
+
+.upload-box {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background-color: #fffaf2;
+}
+
+.upload-box:hover {
+  background-color: #fff3cd;
+  transform: scale(1.02);
+}
+
+.upload-box.border-dashed {
+  border-style: dashed !important;
+}
+
+.modal-content {
+  animation: slideDown 0.4s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.btn-upload-employee {
+  background: linear-gradient(to bottom, #0c5cb8, #088fc5);
+ color: #fff;
+  transition: all 0.3s ease;
+
+}
+
+.btn-upload-employee:hover {
+   background: linear-gradient(to top, #0c5cb8, #088fc5);
+    color: #fff;
+  transform: translateY(-2px);
+  /* box-shadow: 0 6px 14px rgba(245, 158, 11, 0.4); */
+}
+
+.btn-upload-employee i {
+  transition: transform 0.2s ease;
+}
+
+.btn-upload-employee:hover i {
+  transform: translateY(-2px);
+}
