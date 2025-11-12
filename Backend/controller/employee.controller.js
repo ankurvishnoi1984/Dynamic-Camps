@@ -466,6 +466,7 @@ exports.bulkUploadUsers = async (req, res) => {
 
     const createdBy = req.body.created_by;
     const deptId = req.body.deptId;
+    const empcode = req.body.empcode;
 
     if (!createdBy)
       return res.status(400).json({ errorCode: "0", message: "created_by is required" });
@@ -515,7 +516,7 @@ exports.bulkUploadUsers = async (req, res) => {
 
     if (invalidReportings.length > 0) {
       let msg = "";
-      if (req.body.empcode && empcode === 10000) {
+      if (empcode && empcode === 10000) {
         msg = `Invalid Reporting: These employees do not belong to selected department (${deptId}): ${invalidReportings.join(", ")}`
       } else {
         msg = `Invalid Reporting: ${invalidReportings.join(", ")}`
