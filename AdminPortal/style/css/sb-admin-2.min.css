@@ -2585,13 +2585,13 @@ fieldset:disabled a.btn {
   box-shadow: 0 0 0 0.2rem rgba(133, 135, 150, 0.5);
 }
 .btn-outline-success {
-  color: #1cc88a;
-  border-color: #1cc88a;
+  color: #058a3c;
+  border-color: #058a3c;
 }
 .btn-outline-success:hover {
   color: #fff;
-  background-color: #1cc88a;
-  border-color: #1cc88a;
+  background-color: #10bb57;
+  border-color: #058a3c;
 }
 .btn-outline-success.focus,
 .btn-outline-success:focus {

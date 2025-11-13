@@ -336,7 +336,7 @@ function Employee() {
           </button>
         </div>
          <button
-          className="btn btn-warning btn-icon-split mt-3 mr-2"
+          className="btn btn-upload-employee btn-icon-split mt-3 mr-2"
           onClick={() => setModals((prev) => ({ ...prev, bulkUpload: true }))}
         >
           <span className="icon text-white-50">
@@ -351,14 +351,6 @@ function Employee() {
           <span className="text">Add Employee</span>
         </button>
       </div>
-      <button
-        type="button"
-        className="btn btn-outline-secondary mt-2"
-        onClick={handleDownloadSampleCSV}
-      >
-        <i className="fas fa-download mr-2"></i>
-        Download Sample CSV
-      </button>
 
       {/* Table */}
       <div className="card shadow mb-4">
