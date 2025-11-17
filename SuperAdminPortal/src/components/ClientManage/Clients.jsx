@@ -163,28 +163,31 @@ const Clients = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
-        <div className="d-sm-flex align-items-start justify-content-end mb-4">
-          <div className="form-group ml-2">
-            <label htmlFor="searchKeyword" >Search Client:</label>
-            <input
-              type="text"
-              className="form-control"
-              id="searchKeyword"
-              name="searchKeyword"
-              placeholder="Enter text to search"
-              value={searchKeyword}
-              onChange={(e) => setsearchKeyword(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="card-header text-right py-3">
-          <button
-            className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
-            onClick={() => setShowModal(true)}
-          >
-            <i className="fas fa-plus fa-sm text-white-50"></i> Add New Client
-          </button>
-        </div>
+      <div className="card-header d-flex justify-content-between align-items-center py-3">
+    
+    {/* LEFT: Search Box */}
+    <div className="form-group mb-0">
+      <label htmlFor="searchKeyword" className="mr-2">Search Client:</label>
+      <input
+        type="text"
+        className="form-control"
+        id="searchKeyword"
+        name="searchKeyword"
+        placeholder="Enter text to search"
+        value={searchKeyword}
+        onChange={(e) => setsearchKeyword(e.target.value)}
+        style={{ width: "250px" }} // optional for better width
+      />
+    </div>
+
+    {/* RIGHT: Add New Client Button */}
+    <button
+      className="btn btn-sm btn-success shadow-sm ml-2"
+      onClick={() => setShowModal(true)}
+    >
+      <i className="fas fa-plus fa-sm text-white-50"></i> Add New Client
+    </button>
+  </div>
 
         <div className="card-body">
           <div className="table-responsive">

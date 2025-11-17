@@ -210,8 +210,8 @@ const Departments = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
-        <div className="d-sm-flex align-items-start justify-content-end mb-4">
-          <div className="form-group ml-2">
+      <div className="card-header d-flex justify-content-between align-items-center py-3">
+ <div className="form-group mb-0">
             <label htmlFor="searchKeyword" >Search Department:</label>
             <input
               type="text"
@@ -223,15 +223,14 @@ const Departments = () => {
               onChange={(e) => setsearchKeyword(e.target.value)}
             />
           </div>
-        </div>
-        <div className="card-header text-right py-3">
-          <button
-            className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
+ <button
+            className="btn btn-sm btn-success shadow-sm ml-2"
             onClick={() => setShowModal(true)}
           >
             <i className="fas fa-plus fa-sm text-white-50"></i> Add New Department
           </button>
-        </div>
+      </div>
+      
 
         <div className="card-body">
           <div className="table-responsive">

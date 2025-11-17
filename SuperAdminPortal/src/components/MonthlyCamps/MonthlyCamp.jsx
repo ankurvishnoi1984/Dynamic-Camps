@@ -199,9 +199,9 @@ const MonthlyCamp = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
-
-        <div className="d-sm-flex align-items-start justify-content-end mb-4">
-          <div className="dropdown ml-2">
+    <div className="card-header d-flex justify-content-between align-items-center py-3">
+  <div className="d-flex">
+   <div className="form-group mr-3">
                  <label htmlFor="clientId" >Select Client:</label>
 
             <select
@@ -220,7 +220,7 @@ const MonthlyCamp = () => {
 
           </div>
 
-          <div className="dropdown ml-2">
+          <div className="form-group">
             <label htmlFor="deptId" >Select Dept:</label>
 
             <select
@@ -238,16 +238,15 @@ const MonthlyCamp = () => {
             </select>
 
           </div>
-        </div>
-
-        <div className="card-header text-right py-3">
-          <button
-            className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
+  </div>
+<button
+            className="btn btn-sm btn-success shadow-sm"
             onClick={() => setShowModal(true)}
           >
             <i className="fas fa-plus fa-sm text-white-50"></i> Add New Camp
           </button>
-        </div>
+    </div>
+      
 
         <div className="card-body">
           <div className="table-responsive">
