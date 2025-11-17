@@ -163,8 +163,9 @@ const Clients = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
+      <h5 className="m-2 font-weight-bold text-primary">Manage Clients</h5>
       <div className="card-header d-flex justify-content-between align-items-center py-3">
-    
+      
     {/* LEFT: Search Box */}
     <div className="form-group mb-0">
       <label htmlFor="searchKeyword" className="mr-2">Search Client:</label>

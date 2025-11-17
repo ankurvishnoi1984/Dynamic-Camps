@@ -243,92 +243,107 @@ useEffect(() => {
             {/* Content Row */}
 
 
-            <div className="d-sm-flex align-items-start justify-content-end mb-4">
-
-                <div className="dropdown ml-2">
-                      <label htmlFor="searchKeyword" >Select Client:</label>
-                    <select
-                        className="form-control selectStyle"
-                        name="clientId"
-                        id="clientId"
-                        value={clientId}
-                        onChange={(e) => { setClientId(e.target.value), getDepartmentList(e.target.value) }}
-                    >
-                        {clientList && clientList.map((e) => (
-                            <option key={e.client_id} value={e.client_id}>
-                                {e.client_name}
-                            </option>
-                        ))}
-                    </select>
-
-                </div>
-
-                <div className="dropdown ml-2">
-                 <label htmlFor="searchKeyword" >Select Dept:</label>
-                    <select
-                        className="form-control selectStyle "
-                        name="deptId"
-                        id="deptId"
-                        value={deptId}
-                        onChange={(e) => setDeptId(e.target.value)}
-                    >
-                        {deptList && deptList.map((e) => (
-                            <option key={e.dept_id} value={e.dept_id}>
-                                {e.dept_name}
-                            </option>
-                        ))}
-                    </select>
-
-                </div>
-
-                <div className="form-group ml-2">
-                    <label htmlFor="searchKeyword" >Search:</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="searchKeyword"
-                        name="searchKeyword"
-                        placeholder="Enter text to search"
-                        value={filters.searchKeyword}
-                        onChange={handleChangeDr}
-                    />
-                </div>
-
-                <div className="dropdown ml-2">
-                      <label htmlFor="searchKeyword" >Select Camp:</label>
-                    <select
-                        className="form-control selectStyle "
-                        name="campType"
-                        id="campType"
-                        value={filters.campId}
-                        onChange={handleChange}
-                    >
-                        {myCampType && myCampType.map((e) => (
-                            <option key={e.camp_id} value={e.camp_id}>
-                                {e.camp_name}
-                            </option>
-                        ))}
-                    </select>
-
-                </div>
-
-               
-
-            </div>
             {/* Content Row */}
             <div className="card shadow mb-4">
-                <div className="card-header py-3">
+            <h5 className="m-2 font-weight-bold text-primary">Reports</h5>
+              <div className="card-header py-3">
+  <div className="d-flex justify-content-between align-items-center">
 
-                    <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
-                        <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
-                    {/* <button onClick={() => {
+    {/* left side can hold a title if needed (optional) */}
+    <div className="header-left">
+      <div className="mr-3 d-flex align-items-center">
+        <button
+          onClick={handelReportDownloadDetailed}
+          className="btn btn-sm btn-info shadow-sm"
+        >
+          <i className="fas fa-download fa-sm text-white-50 mr-1"></i>
+          Download Report
+        </button>
+      </div>
+    </div>
 
+    {/* RIGHT: controls row */}
+    <div className="d-flex align-items-center flex-wrap">
 
-                        handleOpenModal();
-                    }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
-                        <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-                    </button> */}
-                </div>
+      {/* Download button */}
+   
+
+      {/* Select Client */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="clientId" className="small mb-1">Select Client:</label>
+        <select
+          className="form-control selectStyle"
+          name="clientId"
+          id="clientId"
+          value={clientId}
+          onChange={(e) => {
+            const val = e.target.value;
+            setClientId(val);
+            getDepartmentList(val);
+          }}
+        >
+          {clientList?.map((c) => (
+            <option key={c.client_id} value={c.client_id}>
+              {c.client_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Select Dept */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="deptId" className="small mb-1">Select Dept:</label>
+        <select
+          className="form-control selectStyle"
+          name="deptId"
+          id="deptId"
+          value={deptId}
+          onChange={(e) => setDeptId(e.target.value)}
+        >
+          {deptList?.map((d) => (
+            <option key={d.dept_id} value={d.dept_id}>
+              {d.dept_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Search */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="searchKeyword" className="small mb-1">Search:</label>
+        <input
+          type="text"
+          className="form-control"
+          id="searchKeyword"
+          name="searchKeyword"
+          placeholder="Enter text to search"
+          value={filters.searchKeyword}
+          onChange={handleChangeDr}
+        />
+      </div>
+
+      {/* Select Camp */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="campType" className="small mb-1">Select Camp:</label>
+        <select
+          className="form-control selectStyle"
+          name="campType"
+          id="campType"
+          value={filters.campId}
+          onChange={handleChange}
+        >
+          {myCampType?.map((e) => (
+            <option key={e.camp_id} value={e.camp_id}>
+              {e.camp_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
                 <MonthlyCImgDownload
                     show={show}

@@ -320,77 +320,103 @@ function Employee() {
   return (
     <div className="container-fluid">
       {/* Header */}
-      <div className="d-flex align-items-center justify-content-between mb-2">
-        <div className="d-sm-flex align-items-start justify-content-end mb-2">
-            <div className="dropdown ml-2">
-            <label htmlFor="clientId" >Select Client:</label>
-            <select
-              className="form-control selectStyle"
-              name="clientId"
-              id="clientId"
-              value={clientId}
-              onChange={(e)=>{setClientId(e.target.value),getDepartmentList(e.target.value)}}
-            >
-              {clientList && clientList.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          <div className="dropdown ml-2">
-            <label htmlFor="deptId" >Select Dept:</label>
-            <select
-              className="form-control selectStyle"
-              name="deptId"
-              id="deptId"
-              value={deptId}
-              onChange={(e)=>setDeptId(e.target.value)}
-            >
-              {deptList && deptList.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
-
-          </div>
-          </div>
-        <div className="input-group mb-0 w-50">
-          <input
-            type="text"
-            className="form-control bg-light border-1 small"
-            placeholder="Search employee..."
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button className="btn btn-primary">
-            <i className="fas fa-search fa-sm"></i>
-          </button>
-        </div>
-        <button
-          className="btn btn-upload-employee btn-icon-split mt-3 mr-2"
-          onClick={() => setModals((prev) => ({ ...prev, bulkUpload: true }))}
-        >
-          <span className="icon text-white-50">
-            <i className="fas fa-file-upload"></i>
-          </span>
-          <span className="text">Upload CSV</span>
-        </button>
-
-        <button className="btn btn-primary btn-icon-split mt-3" onClick={handleAddUser}>
-          <span className="icon text-white-50">
-            <i className="fas fa-plus"></i>
-          </span>
-          <span className="text">Add Employee</span>
-        </button>
-      </div>
+      
+       
+    
      
 
 
       {/* Table */}
       <div className="card shadow mb-4">
+      <h5 className="m-2 font-weight-bold text-primary">Manage Employees</h5>
+     <div className="card-header d-flex justify-content-between align-items-center py-3">
+
+  {/* LEFT SIDE – dropdowns + search */}
+  <div className="d-flex align-items-center">
+
+    {/* Client */}
+    <div className="form-group mr-3 mb-0">
+      <label htmlFor="clientId">Select Client:</label>
+      <select
+        className="form-control selectStyle"
+        id="clientId"
+        value={clientId}
+        onChange={(e) => {
+          const val = e.target.value;
+          setClientId(val);
+          getDepartmentList(val);
+        }}
+        style={{ width: "200px" }}
+      >
+        {clientList?.map((e) => (
+          <option key={e.client_id} value={e.client_id}>
+            {e.client_name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Dept */}
+    <div className="form-group mr-3 mb-0">
+      <label htmlFor="deptId">Select Dept:</label>
+      <select
+        className="form-control selectStyle"
+        id="deptId"
+        value={deptId}
+        onChange={(e) => setDeptId(e.target.value)}
+        style={{ width: "200px" }}
+      >
+        {deptList?.map((e) => (
+          <option key={e.dept_id} value={e.dept_id}>
+            {e.dept_name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Search Box (same size as dropdown) */}
+    <div className="form-group mr-3 mb-0">
+      <label>Search:</label>
+      <div className="d-flex">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search employee..."
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ width: "200px" }}
+        />
+        <button className="btn btn-primary ml-2">
+          <i className="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  {/* RIGHT SIDE – Buttons */}
+  <div className="d-flex align-items-center">
+
+    <button
+      className="btn btn-upload-employee btn-icon-split mr-2"
+      onClick={() => setModals((prev) => ({ ...prev, bulkUpload: true }))}
+    >
+      <span className="icon text-white-50">
+        <i className="fas fa-file-upload"></i>
+      </span>
+      <span className="text">Upload CSV</span>
+    </button>
+
+    <button className="btn btn-primary btn-icon-split" onClick={handleAddUser}>
+      <span className="icon text-white-50">
+        <i className="fas fa-plus"></i>
+      </span>
+      <span className="text">Add Employee</span>
+    </button>
+
+  </div>
+
+</div>
+
         <div className="card-body">
           <div className="table-responsive">
             <table className="table table-bordered">

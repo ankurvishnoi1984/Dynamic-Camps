@@ -26,3 +26,35 @@
     }
     
   }
+
+  /* control column fixed width, label above input */
+.control-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* set matching width for selects/inputs */
+.selectStyle,
+#searchKeyword {
+  width: 200px;       /* adjust to taste */
+  min-width: 160px;   /* allow responsive wrap on small screens */
+}
+
+/* label style smaller */
+.card-header .small {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+/* spacing tweak for the download button on small screens */
+@media (max-width: 768px) {
+  .selectStyle,
+  #searchKeyword {
+    width: 100%;      /* stack and take full width on small screens */
+    min-width: 0;
+  }
+  .d-flex.flex-wrap {
+    gap: 0.5rem;
+  }
+}
