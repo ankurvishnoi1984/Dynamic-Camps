@@ -27,7 +27,7 @@ const Clients = () => {
   const [newStatus, setNewStatus] = useState("Y");
   const [openActionId, setOpenActionId] = useState(null);
   const [searchKeyword, setsearchKeyword] = useState("");
-
+const [clientError, setClientError] = useState("");
 
   const [clientDetails, setClientDetails] = useState([]);
 
@@ -84,6 +84,16 @@ const Clients = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+     const isDuplicate = clientDetails.some((client) => {
+    const name = client?.client_name;
+    return name && name.toLowerCase() === clientName.toLowerCase();
+  });
+
+  if (isDuplicate) {
+    alert("Client with this name already exists!");
+    return;
+  }
 
     // Validation (optional)
     if (!clientName || !clientLogo || !spokePersonName || !spokePersonContact) {
@@ -279,12 +289,24 @@ const Clients = () => {
                       className="form-control rounded-pill"
                       value={clientName}
                       onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^[a-zA-Z\s]*$/.test(value)) setClientName(value);
-                          }}
+  const value = e.target.value;
+
+  if (/^[a-zA-Z\s]*$/.test(value)) {
+    setClientName(value);
+
+    const exists = clientDetails.some(
+      (client) => client.client_name.toLowerCase() === value.toLowerCase()
+    );
+
+    exists ? setClientError("Client with this name already exists") : setClientError("");
+  }
+}}
                       placeholder="Enter client name..."
                       required
                     />
+                    {clientError && (
+  <small className="text-danger">{clientError}</small>
+)}
                   </div>
                   {/* Client Logo */}
                   <div className="mb-3">
