@@ -87,7 +87,7 @@ const [isCampsOpen, setIsCampsOpen] = useState(false);
 
     <div
       id="collapseCamps"
-      className={`collapse ${isCampsOpen ? "show" : ""}`}
+    className={`collapse ${isManageCampsActive || isCampsOpen ? "show" : ""}`}
     >
       <div className="bg-white py-2 collapse-inner rounded">
         <NavLink to={"/camptype"} className="collapse-item">

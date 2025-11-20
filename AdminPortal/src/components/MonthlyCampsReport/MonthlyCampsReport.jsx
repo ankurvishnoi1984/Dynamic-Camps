@@ -192,81 +192,65 @@ const MonthlyCampsReport = () => {
             {/* Content Row */}
 
 
-            <div className="d-sm-flex align-items-start justify-content-end mb-4">
-
-
-                <div className="form-group ml-2">
-                    <label htmlFor="searchKeyword" >Search:</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="searchKeyword"
-                        name="searchKeyword"
-                        placeholder="Please enter text to search"
-                        value={filters.searchKeyword}
-                        onChange={handleChangeDr}
-                    />
-                </div>
-
-                <div className="dropdown ml-2">
-                 <label htmlFor="campType" >Select Camp:</label>
-                  
-                    <select
-                        className="form-control selectStyle"
-                        name="campType"
-                        id="campType"
-                        value={filters.campId}
-                        onChange={handleChange}
-                    >
-                        {myCampType && myCampType.map((e) => (
-                            <option key={e.camp_id} value={e.camp_id}>
-                                {e.camp_name}
-                            </option>
-                        ))}
-                    </select>
-
-                </div>
-
-                {/* <div className="form-group ml-2">
-                    <label htmlFor="fromDate">From Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        id="fromDate"
-                        name="fromDate"   // ✅ added
-                        placeholder="Select From Date"
-                        value={filters.fromDate}
-                        onChange={handleChange}
-                    />
-                </div>
-
-                <div className="form-group ml-2">
-                    <label htmlFor="toDate">To Date:</label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        id="toDate"
-                        name="toDate"    // ✅ added
-                        placeholder="Select To Date"
-                        value={filters.toDate}
-                        onChange={handleChange}
-                    />
-                </div> */}
-
-            </div>
+        
             {/* Content Row */}
             <div className="card shadow mb-4">
-                <div className="card-header py-3">
+              <h5 className="m-2 font-weight-bold text-primary">Reports</h5>
+                        <div className="card-header py-3">
+  <div className="d-flex justify-content-between align-items-center">
 
-                    <button onClick={handelReportDownloadDetailed} className="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
-                        <i className="fas fa-download fa-sm text-white-50"></i> Download Report</button>
-                        
-                    {/* <button onClick={() => {
-                        handleOpenModal();
-                    }} className="d-none m-1 d-sm-inline-block btn btn-sm btn-facebook shadow-sm">
-                        <i className="fas fa-images fa-sm text-white-50"></i> Download Images
-                    </button> */}
-                </div>
+    {/* left side can hold a title if needed (optional) */}
+    <div className="header-left">
+      <div className="mr-3 d-flex align-items-center">
+        <button
+          onClick={handelReportDownloadDetailed}
+          className="btn btn-sm btn-info shadow-sm"
+        >
+          <i className="fas fa-download fa-sm text-white-50 mr-1"></i>
+          Download Report
+        </button>
+      </div>
+    </div>
+
+    {/* RIGHT: controls row */}
+    <div className="d-flex align-items-center flex-wrap">
+
+
+      {/* Search */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="searchKeyword" className="small mb-1">Search:</label>
+        <input
+          type="text"
+          className="form-control"
+          id="searchKeyword"
+          name="searchKeyword"
+          placeholder="Enter text to search"
+          value={filters.searchKeyword}
+          onChange={handleChangeDr}
+        />
+      </div>
+
+      {/* Select Camp */}
+      <div className="form-group mr-3 mb-2 control-col">
+        <label htmlFor="campType" className="small mb-1">Select Camp:</label>
+        <select
+          className="form-control selectStyle"
+          name="campType"
+          id="campType"
+          value={filters.campId}
+          onChange={handleChange}
+        >
+          {myCampType?.map((e) => (
+            <option key={e.camp_id} value={e.camp_id}>
+              {e.camp_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+    </div>
+  </div>
+</div>
 
                 <MonthlyCImgDownload
                     show={show}

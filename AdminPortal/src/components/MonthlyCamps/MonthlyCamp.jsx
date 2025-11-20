@@ -149,7 +149,7 @@ const MonthlyCamp = () => {
   ) : (
     <div className="container-fluid">
       <div className="card shadow mb-4">
-
+       <h5 className="m-2 font-weight-bold text-primary">Manage Camps</h5>
         <div className="card-header text-right py-3">
           <button
             className="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2"
