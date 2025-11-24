@@ -143,47 +143,50 @@ const MonthlyCampsReport = () => {
 
 
 
-    const handelReportDownloadDetailed = () => {
-        if (!myCampDetails || myCampDetails.length === 0) {
-            alert("No data to export");
-            return;
-        }
+  const handelReportDownloadDetailed = () => {
+    if (!myCampDetails || myCampDetails.length === 0) {
+        alert("No data to export");
+        return;
+    }
 
-        // Prepare headers
-        const dynamicHeaders = myCampDetails[0].field_values?.map(fv => fv.field_label) || [];
-        const headers = [
-            ...dynamicHeaders,
-            "Status",
-            "Submitted At",
-        ];
+    // Prepare headers (exclude image fields)
+    const dynamicHeaders = myCampDetails[0].field_values
+        ?.filter(fv => fv.field_type !== "image")
+        .map(fv => fv.field_label) || [];
 
-        // Map data
-        const mappedData = myCampDetails.map(item => {
-            // Dynamic fields
-            const dynamicValues = {};
-            item.field_values?.forEach(fv => {
-                dynamicValues[fv.field_label] = fv.field_type === "image" ? "🖼️ Image" : fv.value || "-";
+    const headers = [
+        ...dynamicHeaders,
+        "Submitted At",
+    ];
+
+    // Map data
+    const mappedData = myCampDetails.map(item => {
+        // Dynamic fields excluding images
+        const dynamicValues = {};
+        item.field_values
+            ?.filter(fv => fv.field_type !== "image")
+            .forEach(fv => {
+                dynamicValues[fv.field_label] = fv.value || "-";
             });
 
-            // Prescriptions summary
-            const presSummary = item.prescriptions && item.prescriptions.length > 0
-                ? item.prescriptions.map(p => `${p.brand_name} — ${p.prescription_count}`).join(", ")
-                : "-";
+        // Prescriptions summary (if needed later)
+        const presSummary = item.prescriptions && item.prescriptions.length > 0
+            ? item.prescriptions.map(p => `${p.brand_name} — ${p.prescription_count}`).join(", ")
+            : "-";
 
-            return {
-                ...dynamicValues,
-                "Status": item.status === "Y" ? "Active" : "Inactive",
-                "Submitted At": new Date(item.submitted_at).toLocaleString(),
-                // "Brands (Prescriptions)": presSummary
-            };
-        });
+        return {
+            ...dynamicValues,
+            "Submitted At": new Date(item.submitted_at).toLocaleString(),
+            // "Brands (Prescriptions)": presSummary
+        };
+    });
 
-        // Create worksheet and workbook
-        const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
-        XLSX.writeFile(wb, "CampsReport.xlsx");
-    };
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
+    XLSX.writeFile(wb, "CampsReport.xlsx");
+};
 
 
 
