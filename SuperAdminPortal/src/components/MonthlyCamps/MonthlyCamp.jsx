@@ -276,11 +276,11 @@ const MonthlyCamp = () => {
                     .filter((e) => e.name !== "Admin")
                     .map((e) => {
                       // 🗓️ Convert dates to dd-mm-yyyy
-                      const formatDate = (dateStr) => {
-                        if (!dateStr) return "-";
-                        const date = new Date(dateStr);
-                        return date.toLocaleDateString("en-GB"); // dd/mm/yyyy
-                      };
+                const formatDate = (dateStr) => {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB", { timeZone: "UTC" });
+};
 
                       return (
                         <tr key={e.camp_id}
