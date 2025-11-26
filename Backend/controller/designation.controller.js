@@ -17,12 +17,13 @@ exports.insertDesignations = (req, res) => {
     item.role_id,
     item.designation,
     item.dept_id,
-    item.status || 'Y'  // Default value
+    item.status || 'Y',  // Default value
+    item.reporting,
   ]);
 
   const query = `
       INSERT INTO designation_mst 
-      (role_id, designation, dept_id, status) 
+      (role_id, designation, dept_id, status,reporting) 
       VALUES ?
   `;
 
@@ -82,7 +83,7 @@ exports.getDesignationsDeptWise = (req,res)=>{
       res.status(200).json({
         message: "Designations listed successfully",
         errorCode: 1,
-        insertedCount: result,
+        designationList: result,
       });
     });
   } catch (error) {

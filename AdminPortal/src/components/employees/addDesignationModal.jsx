@@ -4,13 +4,13 @@ import { BASEURL2, DEPTID } from "../constant/constant";
 
 const AddDesignationModal = ({ show, onClose, onSuccess }) => {
   const [designations, setDesignations] = useState([
-    { role_id: "", designation: "", dept_id: DEPTID }
+    { role_id: "", designation: "", dept_id: DEPTID,reporting:"" }
   ]);
 
   const handleAddRow = () => {
     setDesignations([
       ...designations,
-      { role_id: "", designation: "", dept_id: DEPTID }
+      { role_id: "", designation: "", dept_id: DEPTID,reporting:"" }
     ]);
   };
 
@@ -74,7 +74,7 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
                 >
                   <div className="row g-3">
 
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <label className="fw-semibold text-secondary">Role ID</label>
                       <input
                         type="number"
@@ -87,7 +87,7 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
                       />
                     </div>
 
-                    <div className="col-md-6">
+                    <div className="col-md-5">
                       <label className="fw-semibold text-secondary">Designation</label>
                       <input
                         type="text"
@@ -100,15 +100,19 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
                       />
                     </div>
 
-                    {/* <div className="col-md-2">
-                      <label className="fw-semibold text-secondary">Dept ID</label>
+                    <div className="col-md-3">
+                      <label className="fw-semibold text-secondary">Reporting</label>
                       <input
                         type="text"
-                        className="form-control rounded-pill text-center"
-                        value={DEPTID}
-                        disabled
+                        className="form-control rounded-pill"
+                        value={item.reporting}
+                        onChange={(e) =>
+                          handleChange(index, "reporting", e.target.value)
+                        }
+                        
                       />
-                    </div> */}
+                    </div>    
+                    
                   </div>
 
                   <button

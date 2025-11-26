@@ -443,6 +443,101 @@ exports.getSeniorEmpcodesByDesignation = async (req, res) => {
   }
 };
 
+exports.getSeniorEmployees = async (req, res) => {
+  const { designation, deptId } = req.body;
+
+  if (!designation) {
+    return res.status(400).json({
+      success: false,
+      message: "designation is required"
+    });
+  }
+
+  if (!deptId) {
+    return res.status(400).json({
+      success: false,
+      message: "deptId is required"
+    });
+  }
+
+  const query = `
+    WITH RECURSIVE senior_designations AS (
+      -- Level 1: start from given designation
+      SELECT 
+        d.designation COLLATE utf8mb4_general_ci AS designation,
+        d.reporting COLLATE utf8mb4_general_ci AS reporting,
+        d.dept_id
+      FROM designation_mst d
+      WHERE d.designation COLLATE utf8mb4_general_ci = ?
+        AND d.dept_id = ?
+        AND d.status = 'Y'
+
+      UNION ALL
+
+      -- Level 2..n: climb upwards until reporting = NULL
+      SELECT
+        d2.designation COLLATE utf8mb4_general_ci,
+        d2.reporting COLLATE utf8mb4_general_ci,
+        d2.dept_id
+      FROM designation_mst d2
+      INNER JOIN senior_designations sd
+        ON sd.reporting = d2.designation COLLATE utf8mb4_general_ci
+      WHERE d2.status = 'Y'
+        AND d2.dept_id = ?
+    )
+
+    -- Fetch employees that match any *senior* designation (exclude base)
+    SELECT 
+      u.empcode,
+      u.name,
+      u.designation
+    FROM user_mst u
+    WHERE u.dept_id = ?
+      AND u.status = 'Y'
+      AND u.designation COLLATE utf8mb4_general_ci IN (
+          SELECT designation 
+          FROM senior_designations
+          WHERE designation COLLATE utf8mb4_general_ci <> ?   -- exclude same level
+      )
+    ORDER BY u.designation, u.name;
+  `;
+
+  const params = [
+    designation,  // starting designation
+    deptId,       // same department
+    deptId,       // recursive
+    deptId,       // employees filter
+    designation   // exclude same level
+  ];
+
+  try {
+    const rows = await new Promise((resolve, reject) => {
+      db.query(query, params, (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All senior-level employees fetched",
+      input: { designation, deptId },
+      total: rows.length,
+      seniors: rows
+    });
+
+  } catch (error) {
+    logger.error(`Error in getSeniorEmployees: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching senior employees",
+      error: error.message
+    });
+  }
+};
+
+
+
 exports.bulkUploadUsers = async (req, res) => {
   const roleMapping = {
     "MARKETING EXECUTIVE": 5,

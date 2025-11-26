@@ -48,6 +48,7 @@ function Employee() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [seniorEmpcodes, setSeniorEmpcodes] = useState([]);
+  const [designationList,setDesigList] = useState([]);
 
   const entriesPerPage = 20;
   const empCode = sessionStorage.getItem("empcode");
@@ -80,7 +81,7 @@ function Employee() {
   const fetchSeniorEmpList = async () => {
     try {
       const res = await axios.post(
-        `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
+        `${BASEURL2}/employee/getSeniorEmployees`,
         { designation: formData.designation,deptId:deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
@@ -90,13 +91,28 @@ function Employee() {
     }
   };
 
+    const fetchDesignationList = async () => {
+    try {
+      const res = await axios.post(
+        `${BASEURL2}/designation/getDesignationsDeptWise`,
+        {deptId:deptId }
+      );
+      setDesigList(res.data.designationList)
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch seniors list");
+    }
+  };
 
+  useEffect(()=>{
+    fetchDesignationList();
+  },[])
 
   useEffect(() => {
     if (formData.designation) {
       fetchSeniorEmpList();
     }
-  }, [formData])
+  }, [formData.designation])
 
   const fetchEmployeeById = async (id) => {
     try {
@@ -407,12 +423,21 @@ function Employee() {
       <span className="text">Upload CSV</span>
     </button>
 
-    <button className="btn btn-primary btn-icon-split" onClick={handleAddUser}>
+    <button className="btn btn-primary btn-icon-split mr-2" onClick={handleAddUser}>
       <span className="icon text-white-50">
         <i className="fas fa-plus"></i>
       </span>
       <span className="text">Add Employee</span>
     </button>
+
+    <button className="btn btn-primary btn-icon-split" onClick={handleAddDesignation}>
+      <span className="icon text-white-50">
+        <i className="fas fa-plus"></i>
+      </span>
+      <span className="text">Add Designation</span>
+    </button>
+
+    
 
   </div>
 
@@ -584,20 +609,9 @@ function Employee() {
                         onChange={handleInputChange}
                       >
                         <option value="">Select</option>
-                        {[
-                          "MARKETING EXECUTIVE",
-                          "AREA BUSINESS MANAGER",
-                          "SENIOR AREA BUSINESS MANAGER",
-                          "REGIONAL MANAGER",
-                          "SENIOR REGIONAL MANAGER",
-                          "DIVISIONAL SALES MANAGER",
-                          "ZONAL SALES MANAGER",
-                          "SALES MANAGER",
-                          "ASSOCIATE GENERAL MANAGER - SALES",
-                          "NATIONAL SALES MANAGER",
-                        ].map((d) => (
-                          <option key={d} value={d}>
-                            {d}
+                        {designationList.map((d) => (
+                          <option key={d.designation} value={d.designation}>
+                            {d.designation +"-"+ d.role_id}
                           </option>
                         ))}
                       </select>
