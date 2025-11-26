@@ -10,6 +10,7 @@ import InfoModel from "./infoEmpModal";
 import "./employee.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import UploadCsvModal from "./uploadCsvModal";
+import AddDesignationModal from "./addDesignationModal";
 
 
 function Employee() {
@@ -37,6 +38,7 @@ function Employee() {
     edit: false,
     info: false,
     bulkUpload:false,
+    addDesignation:false,
      
   });
 
@@ -108,6 +110,7 @@ function Employee() {
 
   // ----------------- Handlers -----------------
   const handleAddUser = () => setModals((prev) => ({ ...prev, add: true }));
+  const handleAddDesignation = () => setModals((prev) => ({ ...prev, addDesignation: true }));
 
   const handleEdit = async (id) => {
     await fetchEmployeeById(id);
@@ -142,7 +145,7 @@ function Employee() {
     }
   };
 
-  const handleModalClose = () => setModals({ add: false, edit: false });
+  const handleModalClose = () => setModals({ add: false, edit: false,addDesignation:false });
 
   const handleInputChange = (e) => {
   const { name, value } = e.target;
@@ -344,6 +347,14 @@ function Employee() {
           </span>
           <span className="text">Upload CSV</span>
         </button>
+
+        <button className="btn btn-primary btn-icon-split mt-3" onClick={handleAddDesignation}>
+          <span className="icon text-white-50">
+            <i className="fas fa-plus"></i>
+          </span>
+          <span className="text">Set Designation</span>
+        </button>
+
         <button className="btn btn-primary btn-icon-split mt-3" onClick={handleAddUser}>
           <span className="icon text-white-50">
             <i className="fas fa-plus"></i>
@@ -523,7 +534,6 @@ function Employee() {
                       { label: "Employee Code", name: "empcode", type: "number" },
                       { label: "HQ", name: "hq", type: "text" },
                       { label: "Region", name: "region", type: "text" },
-                      // { label: "UserName", name: "username", type: "username" },
                       { label: "Mobile", name: "mobile", type: "number" },
                       { label: "Password", name: "password", type: "text" },
                       { label: "Email", name: "email", type: "text" },
@@ -633,6 +643,14 @@ function Employee() {
           )}
         </div>
       )}
+      
+      <AddDesignationModal
+      show={modals.addDesignation}
+      onClose={handleModalClose}
+      onSuccess={()=>{
+        //
+      }}
+      />
 
       {showConfirmationDel && (
         <ConfirmationPopup

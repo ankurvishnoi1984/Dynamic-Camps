@@ -8,6 +8,7 @@ const deptRoutes = require("./routes/department.route")
 const employeeRoutes = require("./routes/employee.route");
 const drRoutes = require("./routes/doctor.route");
 const basicRoutes = require("./routes/basic.route");
+const designationRoutes = require("./routes/designation.route")
 
 const path = require('path');
 
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 
 //Auth Routes
 app.use("/monthlyCamps",monthlyCampRoutes);
+app.use("/designation",designationRoutes)
 app.use("/department",deptRoutes);
 app.use("/dashboard",dashboardRoutes);
 app.use("/employee",employeeRoutes);

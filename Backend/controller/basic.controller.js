@@ -25,7 +25,7 @@ exports.getBrandsList = async (req, res) => {
                 });
             }
             if (result.length === 0) {
-                return res.status(200).json({ message: "Brands list not found", errorCode: 2 });
+                return res.status(200).json({ message: "Brands list not found", errorCode: 1 });
             }
             res.status(200).json({
                 message: "Brands listed successfully",
