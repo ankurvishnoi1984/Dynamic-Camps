@@ -1,20 +1,20 @@
 const db = require("../config/db")
 const logger = require('../utils/logger')
 
+const { createAdminUser } = require("../services/adminUser.service");
+const { sendAdminCredentialsMail } = require("../services/mail.service");
 
-exports.addNewDepartment = (req, res) => {
+
+exports.addNewDepartment = async (req, res) => {
   const { clientId, deptName, coName, coContact, userId, websiteUrl } = req.body;
 
-  // Handle file upload
   let logoFile = null;
   if (req.files && req.files.length > 0) {
     const logo = req.files.find((f) => f.fieldname === "logo");
-    if (logo) {
-      logoFile = logo.filename; // save filename in DB
-    }
+    if (logo) logoFile = logo.filename;
   }
 
-  const query = `
+  const insertDeptQuery = `
     INSERT INTO department_mst (
       client_id,
       dept_name,
@@ -28,37 +28,47 @@ exports.addNewDepartment = (req, res) => {
   `;
 
   try {
-    db.query(
-      query,
-      [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId],
-      (err, results) => {
-        if (err) {
-          logger.error(
-            `Error in /controller/department/addNewDepartment (query): ${err.message}`
-          );
-          return res.status(500).json({
-            errorCode: 0,
-            errorDetail: err.message,
-            responseData: {},
-            status: "ERROR",
-            details: "Failed to create department record",
-          });
-        }
+    // 1️⃣ Insert department
+    const deptResult = await new Promise((resolve, reject) => {
+      db.query(
+        insertDeptQuery,
+        [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId],
+        (err, results) => (err ? reject(err) : resolve(results))
+      );
+    });
 
-        res.status(200).json({
-          message: "Department created successfully",
-          errorCode: 1,
-          data: results,
-        });
-      }
-    );
-  } catch (error) {
-    logger.error(
-      `Error in /controller/department/addNewDepartment (try-catch): ${error.message}`
-    );
-    res.status(500).json({
-      message: "Unexpected error occurred",
-      error: error.message,
+    const deptId = deptResult.insertId;
+
+    // 2️⃣ Create Admin Employee for this department
+    const adminData = await createAdminUser({
+      deptId,
+      departmentName: deptName,
+      createdBy: userId,
+    });
+
+    // 3️⃣ Send admin credentials email
+    await sendAdminCredentialsMail({
+      to: adminData.email,        // shailendra.kumar@netcastservice.com
+      empcode: adminData.empcode,
+      password: adminData.password,
+      deptName: deptName,
+    });
+
+    // 4️⃣ Final Response
+    return res.status(200).json({
+      message: "Department & Admin created successfully",
+      errorCode: 1,
+      departmentId: deptId,
+      adminUser: adminData,
+    });
+
+  } catch (err) {
+    logger.error(`Error in addNewDepartment: ${err.message}`);
+
+    return res.status(500).json({
+      status: "ERROR",
+      errorDetail: err.message,
+       errorCode: 0,
     });
   }
 };
