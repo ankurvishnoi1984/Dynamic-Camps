@@ -4,7 +4,7 @@ import { BASEURL2, DEPTID } from "../constant/constant";
 
 const AddDesignationModal = ({ show, onClose, onSuccess }) => {
   const [designations, setDesignations] = useState([
-    { role_id: "", designation: "", dept_id: DEPTID,reporting:"" }
+    { role_id: "", designation: "", dept_id: DEPTID,reporting:"",isTop:"" }
   ]);
 
   const handleAddRow = () => {
@@ -111,6 +111,21 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
                         }
                         
                       />
+                    </div> 
+
+                    <div className="col-md-3 mt-3">
+                      <label className="fw-semibold text-secondary">Is Top Hierarchy</label>
+                      <select
+                        className="form-select form-control rounded-pill"
+                        value={item.isTop}
+                        onChange={(e) =>
+                          handleChange(index, "isTop", e.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="Y">Yes</option>
+                        <option value="N">No</option>
+                      </select>
                     </div>    
                     
                   </div>

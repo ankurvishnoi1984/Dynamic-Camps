@@ -146,30 +146,38 @@ exports.addEmployee = (req, res) => {
       .json({ errorCode: "0", message: "Missing required fields" });
   }
 
-  // Role mapping based on designation
-  const roleMapping = {
-    "MARKETING EXECUTIVE": 5,
-    "AREA BUSINESS MANAGER": 4,
-    "SENIOR AREA BUSINESS MANAGER": 4,
-    "REGIONAL MANAGER": 3,
-    "SENIOR REGIONAL MANAGER": 3,
-    "DIVISIONAL SALES MANAGER": 2,
-    "ZONAL SALES MANAGER": 2,
-    "SALES MANAGER": 2,
-    "Associate General Manager - Sales - Sale": 1,
-    "NATIONAL SALES MANAGER": 1,
-  };
+  // 1️⃣ Fetch role_id for the given designation & dept
+  const roleQuery = `
+    SELECT role_id 
+    FROM designation_mst
+    WHERE LOWER(TRIM(designation)) = LOWER(TRIM(?))
+      AND dept_id = ?
+      AND status = 'Y'
+    LIMIT 1;
+  `;
 
-  const role = roleMapping[designation] || 5; // Default lowest if not found
+  db.query(roleQuery, [designation, deptId], (err, roleResult) => {
+    if (err) {
+      logger.error(err.message);
+      return res.status(500).json({ errorCode: "0", message: err.message });
+    }
 
-  // Step 1️⃣ — Check if usernamehq already exists
-  // const checkUsernameQuery = "SELECT user_id FROM user_mst WHERE usernamehq = ? AND status = 'Y'";
-    // Step 2️⃣ — Insert new employee
+    // ❌ If designation not found in DB
+    if (roleResult.length === 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: "Invalid designation for this department",
+      });
+    }
+
+    const role = roleResult[0].role_id;
+
+    // 2️⃣ Insert employee with fetched role
     const insertQuery = `
       INSERT INTO user_mst
       (empcode, name, designation, role, zone, region, hq, reporting, 
-       mobile, email, password, status, created_by, created_date,dept_id)
-      VALUES (?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, 'Y', ?, NOW(),?)
+       mobile, email, password, status, created_by, created_date, dept_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Y', ?, NOW(), ?)
     `;
 
     const insertValues = [
@@ -188,7 +196,7 @@ exports.addEmployee = (req, res) => {
       deptId
     ];
 
-    db.query(insertQuery, insertValues, (err, result2) => {
+    db.query(insertQuery, insertValues, (err, result) => {
       if (err) {
         logger.error(err.message);
         return res.status(500).json({ errorCode: "0", message: err.message });
@@ -199,107 +207,143 @@ exports.addEmployee = (req, res) => {
         message: "Employee added successfully",
       });
     });
+  });
 };
 
 exports.updateEmp = (req, res) => {
-    const {
-        user_id,
+  const {
+    user_id,
+    name,
+    empcode,
+    state,
+    hq,
+    reporting,
+    password,
+    designation,
+    joiningDate,
+    zone,
+    region,
+    mobile,
+    email,
+    dob,
+    modified_by,
+  } = req.body;
+
+  if (!user_id || !name || !empcode || !designation) {
+    return res
+      .status(400)
+      .json({ errorCode: "0", message: "Missing required fields" });
+  }
+
+  // 1️⃣ First fetch user's department (we need deptId for role lookup)
+  const getDeptQuery = `
+      SELECT dept_id 
+      FROM user_mst 
+      WHERE user_id = ?
+      LIMIT 1;
+  `;
+
+  db.query(getDeptQuery, [user_id], (err, deptResult) => {
+    if (err) {
+      logger.error(err.message);
+      return res.status(500).json({ errorCode: "0", message: err.message });
+    }
+
+    if (deptResult.length === 0) {
+      return res.status(404).json({
+        errorCode: "0",
+        message: "Employee not found",
+      });
+    }
+
+    const deptId = deptResult[0].dept_id;
+
+    // 2️⃣ Fetch role_id from designation_mst for the given designation + deptId
+    const roleQuery = `
+        SELECT role_id
+        FROM designation_mst
+        WHERE LOWER(TRIM(designation)) = LOWER(TRIM(?))
+          AND dept_id = ?
+          AND status = 'Y'
+        LIMIT 1;
+    `;
+
+    db.query(roleQuery, [designation, deptId], (err, roleResult) => {
+      if (err) {
+        logger.error(err.message);
+        return res.status(500).json({ errorCode: "0", message: err.message });
+      }
+
+      if (roleResult.length === 0) {
+        return res.status(400).json({
+          errorCode: "0",
+          message: "Invalid designation for this department",
+        });
+      }
+
+      const role = roleResult[0].role_id;
+
+      // 3️⃣ Update employee record
+      const updateQuery = `
+        UPDATE user_mst 
+        SET 
+          name = ?, 
+          empcode = ?, 
+          designation = ?, 
+          role = ?, 
+          doj = ?, 
+          zone = ?, 
+          region = ?, 
+          hq = ?, 
+          reporting = ?, 
+          mobile = ?, 
+          email = ?, 
+          password = ?, 
+          dob = ?, 
+          state = ?, 
+          updated_by = ?, 
+          modified_date = NOW()
+        WHERE user_id = ?
+      `;
+
+      const updateValues = [
         name,
         empcode,
-        state,
-        hq,
-        reporting,
-        password,
         designation,
+        role,
         joiningDate,
         zone,
         region,
+        hq,
+        reporting,
         mobile,
         email,
+        password,
         dob,
+        state,
         modified_by,
-    } = req.body;
+        user_id,
+      ];
 
-    if (!user_id || !name || !empcode || !designation) {
-        return res
-            .status(400)
-            .json({ errorCode: "0", message: "Missing required fields" });
-    }
+      db.query(updateQuery, updateValues, (err, result2) => {
+        if (err) {
+          logger.error(err.message);
+          return res.status(500).json({ errorCode: "0", message: err.message });
+        }
 
-    // 🧭 Role mapping based on designation
-    const roleMapping = {
-        "MARKETING EXECUTIVE": 5,
-        "AREA BUSINESS MANAGER": 4,
-        "SENIOR AREA BUSINESS MANAGER": 4,
-        "REGIONAL MANAGER": 3,
-        "SENIOR REGIONAL MANAGER": 3,
-        "DIVISIONAL SALES MANAGER": 2,
-        "ZONAL SALES MANAGER": 2,
-        "SALES MANAGER": 2,
-        "ASSOCIATE GENERAL MANAGER - SALES": 1,
-        "NATIONAL SALES MANAGER": 1,
-    };
+        if (result2.affectedRows === 0) {
+          return res
+            .status(404)
+            .json({ errorCode: "0", message: "Employee not found" });
+        }
 
-    const role = roleMapping[designation] || 5; // default lowest role if not found
-
-      // 🧩 Step 2️⃣ — Perform the update
-        const updateQuery = `
-      UPDATE user_mst 
-      SET 
-        name = ?, 
-        empcode = ?, 
-        designation = ?, 
-        role = ?, 
-        doj = ?, 
-        zone = ?, 
-        region = ?, 
-        hq = ?, 
-        reporting = ?, 
-        mobile = ?, 
-        email = ?, 
-        password = ?, 
-        dob = ?, 
-        state = ?, 
-        updated_by = ?, 
-        modified_date = NOW()
-      WHERE user_id = ?
-    `;
-
-        const updateValues = [
-            name,
-            empcode,
-            designation,
-            role,
-            joiningDate,
-            zone,
-            region,
-            hq,
-            reporting,
-            mobile,
-            email,
-            password,
-            dob,
-            state,
-            modified_by,
-            user_id,
-        ];
-
-        db.query(updateQuery, updateValues, (err, result2) => {
-            if (err) {
-                logger.error(err.message);
-                return res.status(500).json({ errorCode: "0", message: err.message });
-            }
-
-            if (result2.affectedRows === 0) {
-                return res
-                    .status(404)
-                    .json({ errorCode: "0", message: "Employee not found" });
-            }
-
-            return res
-                .status(200)
-                .json({ errorCode: "1", message: "Employee updated successfully" });
+        return res.status(200).json({
+          errorCode: "1",
+          message: "Employee updated successfully",
         });
+      });
+    });
+  });
 };
 
 exports.deleteEmployee = async (req, res) => {
@@ -449,89 +493,128 @@ exports.getSeniorEmployees = async (req, res) => {
   if (!designation) {
     return res.status(400).json({
       success: false,
-      message: "designation is required"
+      message: "designation is required",
     });
   }
 
   if (!deptId) {
     return res.status(400).json({
       success: false,
-      message: "deptId is required"
+      message: "deptId is required",
     });
   }
 
-  const query = `
-    WITH RECURSIVE senior_designations AS (
-      -- Level 1: start from given designation
-      SELECT 
-        d.designation COLLATE utf8mb4_general_ci AS designation,
-        d.reporting COLLATE utf8mb4_general_ci AS reporting,
-        d.dept_id
-      FROM designation_mst d
-      WHERE d.designation COLLATE utf8mb4_general_ci = ?
-        AND d.dept_id = ?
-        AND d.status = 'Y'
-
-      UNION ALL
-
-      -- Level 2..n: climb upwards until reporting = NULL
-      SELECT
-        d2.designation COLLATE utf8mb4_general_ci,
-        d2.reporting COLLATE utf8mb4_general_ci,
-        d2.dept_id
-      FROM designation_mst d2
-      INNER JOIN senior_designations sd
-        ON sd.reporting = d2.designation COLLATE utf8mb4_general_ci
-      WHERE d2.status = 'Y'
-        AND d2.dept_id = ?
-    )
-
-    -- Fetch employees that match any *senior* designation (exclude base)
-    SELECT 
-      u.empcode,
-      u.name,
-      u.designation
-    FROM user_mst u
-    WHERE u.dept_id = ?
-      AND u.status = 'Y'
-      AND u.designation COLLATE utf8mb4_general_ci IN (
-          SELECT designation 
-          FROM senior_designations
-          WHERE designation COLLATE utf8mb4_general_ci <> ?   -- exclude same level
-      )
-    ORDER BY u.designation, u.name;
-  `;
-
-  const params = [
-    designation,  // starting designation
-    deptId,       // same department
-    deptId,       // recursive
-    deptId,       // employees filter
-    designation   // exclude same level
-  ];
-
   try {
-    const rows = await new Promise((resolve, reject) => {
-      db.query(query, params, (err, results) => {
+    // 1️⃣ Check if designation is top hierarchy
+    const topHierarchyCheckQuery = `
+      SELECT is_top_hierarchy 
+      FROM designation_mst
+      WHERE LOWER(TRIM(designation)) = LOWER(TRIM(?))
+        AND dept_id = ?
+        AND status = 'Y'
+      LIMIT 1;
+    `;
+
+    const topRows = await new Promise((resolve, reject) => {
+      db.query(topHierarchyCheckQuery, [designation, deptId], (err, result) => {
         if (err) return reject(err);
-        resolve(results);
+        resolve(result);
       });
     });
 
-    res.status(200).json({
+    const isTopHierarchy =
+      topRows.length > 0 && topRows[0].is_top_hierarchy === "Y";
+
+    // 2️⃣ If top hierarchy → return Admin (trimmed fields only)
+    if (isTopHierarchy) {
+      const adminQuery = `
+        SELECT 
+          empcode,
+          name,
+          designation
+        FROM user_mst
+        WHERE LOWER(TRIM(designation)) = 'admin'
+          AND dept_id = ?
+          AND status = 'Y'
+        LIMIT 1;
+      `;
+
+      const admin = await new Promise((resolve, reject) => {
+        db.query(adminQuery, [deptId], (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Top hierarchy detected — returning Admin details",
+        input: { designation, deptId },
+        total: admin.length,
+        seniors: admin,
+      });
+    }
+
+    // 3️⃣ ELSE (existing logic for normal hierarchy)
+    const recursiveQuery = `
+      WITH RECURSIVE senior_designations AS (
+        SELECT 
+          LOWER(TRIM(d.designation)) COLLATE utf8mb4_general_ci AS designation,
+          LOWER(TRIM(d.reporting)) COLLATE utf8mb4_general_ci AS reporting
+        FROM designation_mst d
+        WHERE LOWER(TRIM(d.designation)) COLLATE utf8mb4_general_ci = LOWER(TRIM(?)) COLLATE utf8mb4_general_ci
+          AND d.dept_id = ?
+          AND d.status = 'Y'
+
+        UNION ALL
+
+        SELECT
+          LOWER(TRIM(d2.designation)) COLLATE utf8mb4_general_ci,
+          LOWER(TRIM(d2.reporting)) COLLATE utf8mb4_general_ci
+        FROM designation_mst d2
+        INNER JOIN senior_designations sd
+          ON sd.reporting = LOWER(TRIM(d2.designation)) COLLATE utf8mb4_general_ci
+        WHERE d2.status = 'Y'
+      )
+
+      SELECT 
+        u.empcode,
+        u.name,
+        u.designation
+      FROM user_mst u
+      WHERE u.status = 'Y'
+        AND LOWER(TRIM(u.designation)) COLLATE utf8mb4_general_ci IN (
+          SELECT designation 
+          FROM senior_designations
+          WHERE designation <> LOWER(TRIM(?)) COLLATE utf8mb4_general_ci
+        )
+        AND u.dept_id = ?
+      ORDER BY u.designation, u.name;
+    `;
+
+    const params = [designation, deptId, designation, deptId];
+
+    const rows = await new Promise((resolve, reject) => {
+      db.query(recursiveQuery, params, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    return res.status(200).json({
       success: true,
       message: "All senior-level employees fetched",
       input: { designation, deptId },
       total: rows.length,
-      seniors: rows
+      seniors: rows,
     });
 
   } catch (error) {
     logger.error(`Error in getSeniorEmployees: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error fetching senior employees",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -539,19 +622,6 @@ exports.getSeniorEmployees = async (req, res) => {
 
 
 exports.bulkUploadUsers = async (req, res) => {
-  const roleMapping = {
-    "MARKETING EXECUTIVE": 5,
-    "AREA BUSINESS MANAGER": 4,
-    "SENIOR AREA BUSINESS MANAGER": 4,
-    "REGIONAL MANAGER": 3,
-    "SENIOR REGIONAL MANAGER": 3,
-    "DIVISIONAL SALES MANAGER": 2,
-    "ZONAL SALES MANAGER": 2,
-    "SALES MANAGER": 2,
-    "Associate General Manager - Sales - Sale": 1,
-    "NATIONAL SALES MANAGER": 1,
-  };
-
   try {
     if (!req.file)
       return res.status(400).json({ errorCode: "0", message: "CSV file is required" });
@@ -586,10 +656,9 @@ exports.bulkUploadUsers = async (req, res) => {
         message: `Missing columns: ${missingColumns.join(", ")}`,
       });
 
-    // ✅ Extract all reporting empcodes
+    // 1️⃣ Extract reporting empcodes
     const reportingEmpcodes = [...new Set(users.map(u => u.reporting))];
 
-    // ✅ Validate Reporting Exists in SAME department
     const placeholders = reportingEmpcodes.map(() => "?").join(",");
     const checkReportingQuery = `
       SELECT empcode, dept_id 
@@ -598,16 +667,12 @@ exports.bulkUploadUsers = async (req, res) => {
     `;
     const [reportingUsers] = await db.promise().query(checkReportingQuery, reportingEmpcodes);
 
-    // Create map empcode → dept
     const reportingDeptMap = {};
     reportingUsers.forEach(r => reportingDeptMap[r.empcode] = r.dept_id);
 
-    // Find Invalid Reporting References
     const invalidReportings = reportingEmpcodes.filter(emp =>
       reportingDeptMap[emp] && reportingDeptMap[emp] != deptId
     );
-
-    
 
     if (invalidReportings.length > 0) {
       let msg = "";
@@ -622,7 +687,7 @@ exports.bulkUploadUsers = async (req, res) => {
       });
     }
 
-    // ✅ Validate duplicate empcodes inside CSV
+    // 2️⃣ Validate duplicate empcodes inside CSV
     const fileEmpcodes = users.map((u) => u.empcode);
     const uniqueEmpcodes = new Set(fileEmpcodes);
     if (fileEmpcodes.length !== uniqueEmpcodes.size)
@@ -631,7 +696,7 @@ exports.bulkUploadUsers = async (req, res) => {
         message: "Duplicate empcode found inside CSV file",
       });
 
-    // ✅ Check duplicate empcodes in DB
+    // 3️⃣ Check duplicates in DB
     const placeholders2 = fileEmpcodes.map(() => "?").join(",");
     const checkQuery = `SELECT empcode FROM user_mst WHERE empcode IN (${placeholders2})`;
     const [existing] = await db.promise().query(checkQuery, fileEmpcodes);
@@ -642,12 +707,47 @@ exports.bulkUploadUsers = async (req, res) => {
         message: `These empcodes are not available: ${existing.map(e => e.empcode).join(", ")}`,
       });
 
-    // ✅ Prepare Insert Values
-    const insertValues = users.map((u) => [
+    // 4️⃣ Fetch role_id for ALL designations in the CSV (batch fetch)
+    const csvDesignations = [...new Set(users.map(u => u.designation.trim()))];
+    const designationPlaceholders = csvDesignations.map(() => "?").join(",");
+
+    const designationQuery = `
+      SELECT LOWER(TRIM(designation)) AS designation, role_id
+      FROM designation_mst
+      WHERE dept_id = ?
+        AND status = 'Y'
+        AND LOWER(TRIM(designation)) IN (${designationPlaceholders})
+    `;
+
+    const [designationRows] = await db.promise().query(designationQuery, [
+      deptId,
+      ...csvDesignations.map(d => d.toLowerCase())
+    ]);
+
+    // Convert to map: designation → role_id
+    const roleMap = {};
+    designationRows.forEach(d => {
+      roleMap[d.designation] = d.role_id;
+    });
+
+    // ❌ Validate any invalid designation in CSV
+    const invalidDesignations = csvDesignations.filter(
+      d => !roleMap[d.toLowerCase()]
+    );
+
+    if (invalidDesignations.length > 0) {
+      return res.status(400).json({
+        errorCode: "0",
+        message: `Invalid designation(s) for dept ${deptId}: ${invalidDesignations.join(", ")}`
+      });
+    }
+
+    // 5️⃣ Prepare Insert Values using DB role_id
+    const insertValues = users.map((u, index) => [
       u.empcode,
       u.name,
       u.designation,
-      roleMapping[u.designation] || 5,
+      roleMap[u.designation.toLowerCase()],   // ⬅️ using DB role_id
       u.zone || null,
       u.region || null,
       u.hq || null,
@@ -663,7 +763,7 @@ exports.bulkUploadUsers = async (req, res) => {
     const insertQuery = `
       INSERT INTO user_mst
       (empcode, name, designation, role, zone, region, hq, reporting, 
-      mobile, email, password, status, created_by, dept_id)
+       mobile, email, password, status, created_by, dept_id)
       VALUES ?
     `;
 

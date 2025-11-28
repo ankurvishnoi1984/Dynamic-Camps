@@ -199,7 +199,6 @@ const CampType = () => {
                   <th>Action</th>
                 </tr>
               </thead>
-                {console.log("myCampDetails : ",myCampDetails)}
                 <tbody>
                   {/* Repeat this row structure for each table row */}
                   {myCampDetails && myCampDetails
