@@ -10,6 +10,7 @@ import InfoModel from "./infoEmpModal";
 import "./employee.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import UploadCsvModal from "./uploadCsvModal";
+import AddDesignationModal from "./addDesignationModal";
 
 function Employee() {
   const [formData, setFormData] = useState({
@@ -35,6 +36,7 @@ function Employee() {
     edit: false,
     info: false,
     bulkUpload:false,
+    addDesignation:false,
   });
 
   const [empData, setEmpData] = useState([]);
@@ -43,6 +45,8 @@ function Employee() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [seniorEmpcodes, setSeniorEmpcodes] = useState([]);
+  const [designationList,setDesigList] = useState([]);
+
 
   const entriesPerPage = 20;
   const empCode = sessionStorage.getItem("empcode");
@@ -56,6 +60,7 @@ function Employee() {
   // ----------------- Data Fetching -----------------
   useEffect(() => {
     fetchEmployees();
+    fetchDesignationList();
   }, [currentPage, searchQuery,deptId]);
 
   useEffect(() => {
@@ -83,7 +88,7 @@ function Employee() {
   const fetchSeniorEmpList = async () => {
     try {
       const res = await axios.post(
-        `${BASEURL2}/employee/getSeniorEmpcodesByDesignation`,
+        `${BASEURL2}/employee/getSeniorEmployees`,
         { designation: formData.designation,deptId:deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
@@ -92,6 +97,24 @@ function Employee() {
       toast.error("Failed to fetch seniors list");
     }
   };
+
+  const fetchDesignationList = async () => {
+    if(!deptId){
+      return
+    }
+    try {
+      const res = await axios.post(
+        `${BASEURL2}/designation/getDesignationsDeptWise`,
+        { deptId: deptId }
+      );
+      setDesigList(res.data.designationList)
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch seniors list");
+    }
+  };
+
+
 
 
     const getClientList = async () => {
@@ -148,6 +171,8 @@ function Employee() {
 
   // ----------------- Handlers -----------------
   const handleAddUser = () => setModals((prev) => ({ ...prev, add: true }));
+  const handleAddDesignation = () => setModals((prev) => ({ ...prev, addDesignation: true }));
+
 
   const handleEdit = async (id) => {
     await fetchEmployeeById(id);
@@ -182,7 +207,7 @@ function Employee() {
     }
   };
 
-  const handleModalClose = () => setModals({ add: false, edit: false });
+  const handleModalClose = () => setModals({ add: false, edit: false,addDesignation:false });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -413,6 +438,13 @@ function Employee() {
       <span className="text">Add Employee</span>
     </button>
 
+            <button className="btn btn-primary btn-icon-split ml-2" onClick={handleAddDesignation}>
+              <span className="icon text-white-50">
+                <i className="fas fa-plus"></i>
+              </span>
+              <span className="text">Add Designation</span>
+            </button>
+
   </div>
 
 </div>
@@ -584,20 +616,9 @@ function Employee() {
                         onChange={handleInputChange}
                       >
                         <option value="">Select</option>
-                        {[
-                          "MARKETING EXECUTIVE",
-                          "AREA BUSINESS MANAGER",
-                          "SENIOR AREA BUSINESS MANAGER",
-                          "REGIONAL MANAGER",
-                          "SENIOR REGIONAL MANAGER",
-                          "DIVISIONAL SALES MANAGER",
-                          "ZONAL SALES MANAGER",
-                          "SALES MANAGER",
-                          "ASSOCIATE GENERAL MANAGER - SALES",
-                          "NATIONAL SALES MANAGER",
-                        ].map((d) => (
-                          <option key={d} value={d}>
-                            {d}
+                        {designationList.map((d) => (
+                          <option key={d.designation} value={d.designation}>
+                            {d.designation +"-"+ d.role_id}
                           </option>
                         ))}
                       </select>
@@ -643,6 +664,14 @@ function Employee() {
           )}
         </div>
       )}
+      <AddDesignationModal
+        show={modals.addDesignation}
+        onClose={handleModalClose}
+        deptId={deptId}
+        onSuccess={() => {
+          //
+        }}
+      />
 
       {showConfirmationDel && (
         <ConfirmationPopup

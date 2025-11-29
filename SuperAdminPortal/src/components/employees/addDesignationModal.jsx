@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BASEURL2, DEPTID } from "../constant/constant";
+import { BASEURL2 } from "../constant/constant";
 
-const AddDesignationModal = ({ show, onClose, onSuccess }) => {
+const AddDesignationModal = ({ show, onClose, onSuccess,deptId }) => {
   const [designations, setDesignations] = useState([
-    { role_id: "", designation: "", dept_id: DEPTID,reporting:"",isTop:"" }
+    { role_id: "", designation: "", dept_id: deptId,reporting:"",isTop:"" }
   ]);
 
   const handleAddRow = () => {
     setDesignations([
       ...designations,
-      { role_id: "", designation: "", dept_id: DEPTID,reporting:"",isTop:"" }
+      { role_id: "", designation: "", dept_id: deptId,reporting:"",isTop:"" }
     ]);
   };
 
@@ -33,7 +33,7 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
       await axios.post(`${BASEURL2}/designation/insertDesignations`, {
         designations: designations.map((d) => ({
           ...d,
-          dept_id: DEPTID // Just to be safe, force override
+          dept_id: deptId // Just to be safe, force override
         })),
       });
 
