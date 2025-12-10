@@ -434,7 +434,7 @@ function Employee() {
       <span className="icon text-white-50">
         <i className="fas fa-plus"></i>
       </span>
-      <span className="text">Add Designation</span>
+      <span className="text">Manage Designation</span>
     </button>
 
     

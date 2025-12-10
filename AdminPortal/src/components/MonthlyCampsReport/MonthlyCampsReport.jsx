@@ -56,7 +56,7 @@ const MonthlyCampsReport = () => {
         if (filters.searchKeyword) {
             let timer = setTimeout(() => {
                 getMyCampDetailsByEmpcode();
-                GetDetiledData();
+                // GetDetiledData();
             }, 1000);
 
             return () => {
@@ -64,7 +64,7 @@ const MonthlyCampsReport = () => {
             };
         }
         getMyCampDetailsByEmpcode();
-        GetDetiledData();
+        // GetDetiledData();
         getMyCampsType();
     }, [filters,deptId])
 
@@ -78,6 +78,7 @@ const MonthlyCampsReport = () => {
    
 
     const getMyCampDetailsByEmpcode = async () => {
+      // if(!filters.campId){return}
         setLoading(true)
         const payload = {
             searchKeyword: filters.searchKeyword.trim() || null,
@@ -122,23 +123,23 @@ const MonthlyCampsReport = () => {
 
 
 
-    async function GetDetiledData() {
-        // check if deptid needed
-        const payload = {
-            empcode: filters.empcode,
-            searchKeyword: filters.searchKeyword.trim() || null,
-            fromDate: filters.fromDate || null,
-            toDate: filters.toDate || null,
-            campType: filters.campType || null,
-            deptId,
-        };
-        try {
-            const res = await axios.post(`${BASEURL2}/admin/getMyCampsSheetReport`, payload);
-            setAllReportData(res.data.data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    // async function GetDetiledData() {
+    //     // check if deptid needed
+    //     const payload = {
+    //         empcode: filters.empcode,
+    //         searchKeyword: filters.searchKeyword.trim() || null,
+    //         fromDate: filters.fromDate || null,
+    //         toDate: filters.toDate || null,
+    //         campType: filters.campType || null,
+    //         deptId,
+    //     };
+    //     try {
+    //         const res = await axios.post(`${BASEURL2}/admin/getMyCampsSheetReport`, payload);
+    //         setAllReportData(res.data.data)
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
 
 

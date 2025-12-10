@@ -19,11 +19,12 @@ exports.insertDesignations = (req, res) => {
     item.dept_id,
     item.status || 'Y',  // Default value
     item.reporting,
+    item.isTop,
   ]);
 
   const query = `
       INSERT INTO designation_mst 
-      (role_id, designation, dept_id, status,reporting) 
+      (role_id, designation, dept_id, status,reporting,is_top_hierarchy) 
       VALUES ?
   `;
 

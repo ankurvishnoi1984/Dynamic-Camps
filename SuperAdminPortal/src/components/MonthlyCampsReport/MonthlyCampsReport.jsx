@@ -59,12 +59,12 @@ const MonthlyCampsReport = () => {
   if (filters.searchKeyword) {
     let timer = setTimeout(() => {
       getMyCampDetailsByEmpcode();
-      GetDetiledData();
+      // GetDetiledData();
     }, 1000);
     return () => clearTimeout(timer);
   }
   getMyCampDetailsByEmpcode();
-  GetDetiledData();
+  // GetDetiledData();
   getMyCampsType();
 }, [filters.searchKeyword, deptId]);
 
@@ -174,22 +174,22 @@ useEffect(() => {
 
 
 
-    async function GetDetiledData() {
-        // check if deptid needed
-        const payload = {
-            empcode: filters.empcode,
-            searchKeyword: filters.searchKeyword.trim() || null,
-            fromDate: filters.fromDate || null,
-            toDate: filters.toDate || null,
-            campType: filters.campType || null
-        };
-        try {
-            const res = await axios.post(`${BASEURL2}/admin/getMyCampsSheetReport`, payload);
-            setAllReportData(res.data.data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    // async function GetDetiledData() {
+    //     // check if deptid needed
+    //     const payload = {
+    //         empcode: filters.empcode,
+    //         searchKeyword: filters.searchKeyword.trim() || null,
+    //         fromDate: filters.fromDate || null,
+    //         toDate: filters.toDate || null,
+    //         campType: filters.campType || null
+    //     };
+    //     try {
+    //         const res = await axios.post(`${BASEURL2}/admin/getMyCampsSheetReport`, payload);
+    //         setAllReportData(res.data.data)
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
 
 
