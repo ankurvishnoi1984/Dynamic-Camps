@@ -11,6 +11,7 @@ import "./employee.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import UploadCsvModal from "./uploadCsvModal";
 import AddDesignationModal from "./addDesignationModal";
+import UpdateDesignationModal from "./updateDesignationModal";
 
 function Employee() {
   const [formData, setFormData] = useState({
@@ -664,14 +665,19 @@ function Employee() {
           )}
         </div>
       )}
-      <AddDesignationModal
+      {designationList.length > 0 ? <UpdateDesignationModal
+        show={modals.addDesignation}
+        onClose={handleModalClose}
+        deptId={deptId}
+        data={designationList}
+      /> : <AddDesignationModal
         show={modals.addDesignation}
         onClose={handleModalClose}
         deptId={deptId}
         onSuccess={() => {
           //
-        }}
-      />
+        }} />
+      }
 
       {showConfirmationDel && (
         <ConfirmationPopup
