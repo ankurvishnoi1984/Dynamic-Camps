@@ -23,8 +23,22 @@ const AddDesignationModal = ({ show, onClose, onSuccess,deptId }) => {
   const handleChange = (index, field, value) => {
     const updated = [...designations];
     updated[index][field] = value;
+
+    // If top hierarchy selected, force reporting = "Admin"
+    if (field === "isTop" && value === "Y") {
+      updated[index].reporting = "Admin";
+    }
+
+    // If changed back to "N", allow editing reporting again
+    if (field === "isTop" && value === "N") {
+      updated[index].reporting = "";
+    }
+
     setDesignations(updated);
   };
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,18 +114,32 @@ const AddDesignationModal = ({ show, onClose, onSuccess,deptId }) => {
                       />
                     </div>
 
-                    <div className="col-md-3">
-                      <label className="fw-semibold text-secondary">Reporting</label>
-                      <input
-                        type="text"
-                        className="form-control rounded-pill"
-                        value={item.reporting}
-                        onChange={(e) =>
-                          handleChange(index, "reporting", e.target.value)
-                        }
-                        
-                      />
-                    </div> 
+                    {item.isTop !== "Y" && (
+                      <div className="col-md-3">
+                        <label className="fw-semibold text-secondary">Reporting</label>
+                        <input
+                          type="text"
+                          className="form-control rounded-pill"
+                          value={item.reporting}
+                          onChange={(e) =>
+                            handleChange(index, "reporting", e.target.value)
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {/* {item.isTop === "Y" && (
+                      <div className="col-md-3">
+                        <label className="fw-semibold text-secondary">Reporting</label>
+                        <input
+                          type="text"
+                          className="form-control rounded-pill bg-secondary text-white"
+                          value="Admin"
+                          disabled
+                        />
+                      </div>
+                    )} */}
+
 
                     <div className="col-md-3 mt-3">
                       <label className="fw-semibold text-secondary">Is Top Hierarchy</label>
