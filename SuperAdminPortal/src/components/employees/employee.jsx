@@ -47,6 +47,7 @@ function Employee() {
   const [currentPage, setCurrentPage] = useState(1);
   const [seniorEmpcodes, setSeniorEmpcodes] = useState([]);
   const [designationList,setDesigList] = useState([]);
+  const [topEmpSelected,setTopEmpSelected] = useState("N");
 
 
   const entriesPerPage = 20;
@@ -93,6 +94,13 @@ function Employee() {
         { designation: formData.designation,deptId:deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
+      if(res.data.isTop){
+        console.log("insided top condition",res.data.isTop)
+        setTopEmpSelected(res.data.isTop)
+      }else{
+        setTopEmpSelected("N")
+
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch seniors list");
@@ -229,6 +237,11 @@ function Employee() {
       // Convert to lowercase and prevent spaces
       newValue = value.replace(/\s/g, "").toLowerCase();
     }
+     // BLOCK USER FROM CHANGING REPORTING WHEN TOP EMPLOYEE
+    if (name === "reporting" && topEmpSelected === "Y") {
+      return; // do nothing
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -325,6 +338,21 @@ function Employee() {
   };
 
  
+useEffect(() => {
+  if (topEmpSelected === "Y") {
+    setFormData((prev) => ({
+      ...prev,
+      reporting: seniorEmpcodes.length > 0 ? seniorEmpcodes[0].empcode : ""
+    }));
+  }
+
+  if (topEmpSelected === "N") {
+    setFormData((prev) => ({
+      ...prev,
+      reporting: ""
+    }));
+  }
+}, [topEmpSelected]);
 
 
 
@@ -624,8 +652,10 @@ function Employee() {
                         ))}
                       </select>
                     </div>
+                    { console.log("senior emp codes , ",seniorEmpcodes)}
+                    { console.log("formdata , ",formData)}
 
-                    <div className="form-group col-md-4">
+                    {topEmpSelected==="N"?<div className="form-group col-md-4">
                       <label htmlFor="zone">Reporting</label>
                       <select
                         id="reporting"
@@ -641,7 +671,27 @@ function Employee() {
                           </option>
                         ))}
                       </select>
+                    </div>:
+                    <div className="form-group col-md-4">
+                      <label htmlFor="zone">Reporting</label>
+                      <select
+                        id="reporting"
+                        name="reporting"
+                        className="form-control"
+                        value={"Default"} 
+                        // onChange={handleInputChange}
+                        disabled
+                      >
+                        {/* <option value="">Select</option>
+                        {seniorEmpcodes.map((d) => (
+                          <option key={d.empcode} value={d.empcode}>
+                            {d.name + " - " + d.empcode}
+                          </option>
+                        ))} */}
+                        <option value="Default">Default</option>
+                      </select>
                     </div>
+                    }
 
 
                   </div>

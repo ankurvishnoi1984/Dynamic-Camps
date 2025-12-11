@@ -492,6 +492,7 @@ exports.getSeniorEmployees = async (req, res) => {
 
   if (!designation) {
     return res.status(400).json({
+      errorCode:0,
       success: false,
       message: "designation is required",
     });
@@ -499,6 +500,7 @@ exports.getSeniorEmployees = async (req, res) => {
 
   if (!deptId) {
     return res.status(400).json({
+      errorCode:0,
       success: false,
       message: "deptId is required",
     });
@@ -547,11 +549,13 @@ exports.getSeniorEmployees = async (req, res) => {
       });
 
       return res.status(200).json({
+        errorCode:1,
         success: true,
         message: "Top hierarchy detected — returning Admin details",
         input: { designation, deptId },
         total: admin.length,
         seniors: admin,
+        isTop:"Y",
       });
     }
 
@@ -602,6 +606,7 @@ exports.getSeniorEmployees = async (req, res) => {
     });
 
     return res.status(200).json({
+      errorCode:1,
       success: true,
       message: "All senior-level employees fetched",
       input: { designation, deptId },
@@ -612,6 +617,7 @@ exports.getSeniorEmployees = async (req, res) => {
   } catch (error) {
     logger.error(`Error in getSeniorEmployees: ${error.message}`);
     return res.status(500).json({
+      errorCode:0,
       success: false,
       message: "Error fetching senior employees",
       error: error.message,
