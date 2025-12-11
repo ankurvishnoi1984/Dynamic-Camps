@@ -97,3 +97,43 @@ exports.getDesignationsDeptWise = (req,res)=>{
     });
   }
 }
+
+// UPDATE MULTIPLE DESIGNATIONS
+exports.updateDesignations = async (req, res) => {
+  try {
+    const { designations } = req.body;
+
+    if (!designations || designations.length === 0) {
+      return res.status(400).json({ message: "No data to update" });
+    }
+
+    for (const d of designations) {
+       db.query(
+        `UPDATE designation_mst 
+         SET role_id = ?, 
+             designation = ?, 
+             reporting = ?, 
+             is_top_hierarchy = ?, 
+             status = ?, 
+             dept_id = ?
+         WHERE id = ?`,
+        [
+          d.role_id,
+          d.designation,
+          d.reporting,
+          d.is_top_hierarchy,
+          d.status ?? "Y",
+          d.dept_id,
+          d.id,
+        ]
+      );
+    }
+
+    return res.json({ message: "Designations updated successfully" ,errorCode:1});
+
+  } catch (err) {
+    console.error("Error updating designations:", err);
+    return res.status(500).json({ message: "Server error",errorCode:0,err });
+  }
+};
+

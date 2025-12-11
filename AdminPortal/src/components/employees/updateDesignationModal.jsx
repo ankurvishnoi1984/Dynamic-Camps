@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { BASEURL2 } from "../constant/constant";
 
-const UpdateDesignationModal = ({ show, onClose, onSuccess, data,deptId }) => {
+const UpdateDesignationModal = ({ show, onClose, onSuccess, data }) => {
 
   const [designations, setDesignations] = useState([]);
 
@@ -42,32 +42,32 @@ const UpdateDesignationModal = ({ show, onClose, onSuccess, data,deptId }) => {
     setDesignations(updated);
   };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        try {
-            const res = await axios.put(`${BASEURL2}/designation/updateDesignations`, {
-                designations: designations.map((d) => ({
-                    id: d.id,
-                    role_id: d.role_id,
-                    designation: d.designation,
-                    reporting: d.reporting,
-                    is_top_hierarchy: d.isTop,
-                    status: d.status,
-                    dept_id: d.dept_id
-                }))
-            });
+    try {
+      const res = await axios.put(`${BASEURL2}/designation/updateDesignations`, {
+        designations: designations.map((d) => ({
+          id: d.id,
+          role_id: d.role_id,
+          designation: d.designation,
+          reporting: d.reporting,
+          is_top_hierarchy: d.isTop,
+          status: d.status,
+          dept_id: d.dept_id
+        }))
+      });
 
-            if (Number(res.data.errorCode) === 1) {
-                alert("Updated Successfully")
-            }
-            onClose();
-
-        } catch (error) {
-            alert(error.data.err || "Update failed:")
-            console.error("Update failed:", error);
+        if (Number(res.data.errorCode) === 1) {
+            alert("Updated Successfully")
         }
-    };
+      onClose();
+
+    } catch (error) {
+        alert(error.data.err || "Update failed:")
+        console.error("Update failed:", error);
+    }
+  };
 
   if (!show) return null;
 
@@ -176,4 +176,5 @@ const UpdateDesignationModal = ({ show, onClose, onSuccess, data,deptId }) => {
     </div>
   );
 };
+
 export default UpdateDesignationModal
