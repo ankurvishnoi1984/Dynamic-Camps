@@ -50,6 +50,8 @@ function Employee() {
   const [currentPage, setCurrentPage] = useState(1);
   const [seniorEmpcodes, setSeniorEmpcodes] = useState([]);
   const [designationList,setDesigList] = useState([]);
+  const [topEmpSelected,setTopEmpSelected] = useState("N");
+
 
   const entriesPerPage = 20;
   const empCode = sessionStorage.getItem("empcode");
@@ -83,9 +85,14 @@ function Employee() {
     try {
       const res = await axios.post(
         `${BASEURL2}/employee/getSeniorEmployees`,
-        { designation: formData.designation,deptId:deptId }
+        { designation: formData.designation, deptId: deptId }
       );
       setSeniorEmpcodes(res.data.seniors)
+      if (res.data.isTop) {
+        setTopEmpSelected(res.data.isTop)
+      } else {
+        setTopEmpSelected("N")
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch seniors list");
@@ -165,28 +172,31 @@ function Employee() {
   const handleModalClose = () => setModals({ add: false, edit: false,addDesignation:false });
 
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
+    let newValue = value;
 
-  let newValue = value;
+    // Field-specific validation
+    if (name === "empcode") {
+      // Allow only digits, max 5
+      newValue = value.replace(/\D/g, "").slice(0, 5);
+    }
 
-  // Field-specific validation
-  if (name === "empcode") {
-    // Allow only digits, max 5
-    newValue = value.replace(/\D/g, "").slice(0, 5);
-  }
-
-  if (name === "mobile") {
-    // Allow only digits, max 10
-    newValue = value.replace(/\D/g, "").slice(0, 10);
-  }
+    if (name === "mobile") {
+      // Allow only digits, max 10
+      newValue = value.replace(/\D/g, "").slice(0, 10);
+    }
 
     if (name === "email") {
-    // Convert to lowercase and prevent spaces
-    newValue = value.replace(/\s/g, "").toLowerCase();
-  }
+      // Convert to lowercase and prevent spaces
+      newValue = value.replace(/\s/g, "").toLowerCase();
+    }
+    // BLOCK USER FROM CHANGING REPORTING WHEN TOP EMPLOYEE
+    if (name === "reporting" && topEmpSelected === "Y") {
+      return; // do nothing
+    }
 
-  setFormData((prev) => ({ ...prev, [name]: newValue }));
-};
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
 
   const handleSubmit = (e) => {
@@ -287,6 +297,22 @@ function Employee() {
       });
     }
   };
+
+  useEffect(() => {
+    if (topEmpSelected === "Y") {
+      setFormData((prev) => ({
+        ...prev,
+        reporting: seniorEmpcodes.length > 0 ? seniorEmpcodes[0].empcode : ""
+      }));
+    }
+
+    if (topEmpSelected === "N") {
+      setFormData((prev) => ({
+        ...prev,
+        reporting: ""
+      }));
+    }
+  }, [topEmpSelected]);
 
   const handleDownloadSampleCSV = () => {
     const requiredColumns = [
@@ -618,7 +644,7 @@ function Employee() {
                       </select>
                     </div>
 
-                    <div className="form-group col-md-4">
+                    {topEmpSelected === "N" ? <div className="form-group col-md-4">
                       <label htmlFor="zone">Reporting</label>
                       <select
                         id="reporting"
@@ -634,7 +660,27 @@ function Employee() {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> :
+                      <div className="form-group col-md-4">
+                        <label htmlFor="zone">Reporting</label>
+                        <select
+                          id="reporting"
+                          name="reporting"
+                          className="form-control"
+                          // value={"Default"}
+                          // onChange={handleInputChange}
+                          disabled
+                        >
+                          {/* <option value="">Select</option>
+                        {seniorEmpcodes.map((d) => (
+                          <option key={d.empcode} value={d.empcode}>
+                            {d.name + " - " + d.empcode}
+                          </option>
+                        ))} */}
+                          <option value="Default">Default</option>
+                        </select>
+                      </div>
+                    }
 
 
                   </div>
