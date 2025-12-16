@@ -15,4 +15,8 @@ const storage = multer.diskStorage({
 // accept multiple files with field name "file"
 const upload = multer({ storage });
 
-module.exports = { upload };
+
+const memStorage = multer.memoryStorage();
+const memUpload = multer({ memStorage });
+
+module.exports = { upload,memUpload };
