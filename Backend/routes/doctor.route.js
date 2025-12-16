@@ -1,5 +1,5 @@
 const express = require("express");
-const { getDoctorList, getAllDoctors, updateDoctor, deleteDoctor } = require("../controller/doctor.controller");
+const { getDoctorList, getAllDoctors, updateDoctor, deleteDoctor, doctorCSVUpsert } = require("../controller/doctor.controller");
 const { memUpload } = require("../config/multer");
 const router = express.Router();
 
