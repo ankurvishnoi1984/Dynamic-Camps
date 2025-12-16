@@ -27,7 +27,6 @@ export default function EditDoctorModal({
     const requiredFields = [
       "doctor_name",
       "speciality",
-      "garnet_code",
       "empcode",
       "qualification",
       "subarea",
@@ -69,7 +68,6 @@ export default function EditDoctorModal({
   const fields = [
         { label: "Doctor Name", name: "doctor_name" },
         { label: "Speciality", name: "speciality" },
-        { label: "Garnet Code", name: "garnet_code" },
         { label: "Assigned Employee Code", name: "empcode" },
         { label: "Qualification", name: "qualification" },
         { label: "Subarea", name: "subarea" },

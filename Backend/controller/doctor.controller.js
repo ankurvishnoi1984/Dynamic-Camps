@@ -1,4 +1,5 @@
 const db = require("../config/db")
+const csv = require("csvtojson");
 const logger = require('../utils/logger')
 
 
@@ -399,7 +400,7 @@ exports.doctorCSVUpsert = async (req, res) => {
     const successList = [];
     const failedList = [];
 
-    const required = ["garnet_code", "doctor_name", "empcode", "speciality", "qualification"];
+    const required = ["doctor_name", "empcode", "speciality", "qualification"];
 
     for (const row of rows) {
       let remark = "";
@@ -627,13 +628,6 @@ exports.updateDoctor = async (req, res) => {
       return res.status(400).json({
         errorCode: 0,
         message: "speciality is required",
-      });
-    }
-
-    if (!garnet_code || String(garnet_code).trim() === "") {
-      return res.status(400).json({
-        errorCode: 0,
-        message: "garnet_code is required",
       });
     }
 
