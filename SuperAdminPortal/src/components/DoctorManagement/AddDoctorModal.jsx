@@ -40,7 +40,6 @@ const AddDoctorModal = ({
                 {[
                   { label: "Doctor Name", name: "doctor_name", type: "text" },
                   { label: "Speciality", name: "speciality", type: "text" },
-                  { label: "Garnet Code", name: "garnet_code", type: "text" },
                   { label: "Assigned Employee Code", name: "empcode", type: "text" },
                   { label: "Qualification", name: "qualification", type: "text" },
                   { label: "Subarea", name: "subarea", type: "text" },
@@ -58,36 +57,6 @@ const AddDoctorModal = ({
                     />
                   </div>
                 ))}
-
-                {/* RPS Flag */}
-                {/* <div className="form-group col-md-4">
-                  <label htmlFor="rps_flag">RPS Flag</label>
-                  <select
-                    id="rps_flag"
-                    name="rps_flag"
-                    className="form-control"
-                    value={formData.rps_flag}
-                    onChange={onChange}
-                  >
-                    <option value="RPS">RPS</option>
-                    <option value="Non-RPS">Non-RPS</option>
-                  </select>
-                </div> */}
-
-                {/* Status */}
-                {/* <div className="form-group col-md-4">
-                  <label htmlFor="status">Status</label>
-                  <select
-                    id="status"
-                    name="status"
-                    className="form-control"
-                    value={formData.status}
-                    onChange={onChange}
-                  >
-                    <option value="Y">Active</option>
-                    <option value="N">Inactive</option>
-                  </select>
-                </div> */}
 
               </div>
 

@@ -132,7 +132,7 @@ function DoctorManagement() {
     const requiredFields = [
       "doctor_name",
       "speciality",
-      "garnet_code",
+      // "garnet_code",
       "empcode",
       "qualification",
       "subarea",
@@ -151,13 +151,13 @@ function DoctorManagement() {
       const payload = {
         doctor_name: formData.doctor_name,
         speciality: formData.speciality,
-        garnet_code: formData.garnet_code,
+        // garnet_code: formData.garnet_code,
         empcode: formData.empcode,
         qualification: formData.qualification,
         subarea: formData.subarea,
-        joiningDate: formData.joiningDate,
         grade: formData.grade,
-        userId: userId, // assuming you have userId stored (e.g. from login)
+        userId: userId,
+        deptId:deptId,
       };
 
       const res = await axios.post(`${BASEURL2}/doc/doctorUpsertSingle`, payload);
