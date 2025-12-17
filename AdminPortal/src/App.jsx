@@ -17,6 +17,7 @@ import MonthlyCampPage from './components/Pages/MonthlyCampPage'
 import MonthlyCampsReportPage from './components/Pages/MonthlyCampsReportPage'
 import ClientPage from './components/Pages/ClientPage'
 import DepartmentPage from './components/Pages/DepartmentPage'
+import DoctorPage from './components/Pages/DoctorPage'
 
 
 
@@ -29,6 +30,7 @@ function App() {
         <Route path='/' element={<Login />}></Route>
         <Route path='/camptype' element={<AdminProtectdRoute><CamptypePage /></AdminProtectdRoute>}></Route>
         <Route path='/monthlyCamp' element={<AdminProtectdRoute><MonthlyCampPage /></AdminProtectdRoute>}></Route>
+        <Route path='/doctorManagement' element={<AdminProtectdRoute><DoctorPage /></AdminProtectdRoute>}></Route>
          <Route path='/clients' element={<AdminProtectdRoute><ClientPage /></AdminProtectdRoute>}></Route>
           <Route path='/departments' element={<AdminProtectdRoute><DepartmentPage /></AdminProtectdRoute>}></Route>
         <Route path='/dashboard' element={<AdminProtectdRoute><DashboardPage /></AdminProtectdRoute>}></Route>

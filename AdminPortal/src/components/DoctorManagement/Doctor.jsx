@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../../style/css/sb-admin-2.min.css";
 import axios from "axios";
-import { BASEURL2 } from "../constant/constant";
+import { BASEURL2,DEPTID } from "../constant/constant";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmationPopup from "../popup/Popup";
@@ -39,10 +39,7 @@ function DoctorManagement() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [clientList, setClientList] = useState([]);
-  const [clientId, setClientId] = useState("");
-  const [deptList, setDeptList] = useState([]);
-  const [deptId, setDeptId] = useState("");
+  const deptId=DEPTID
 
   const entriesPerPage = 20;
   const empCode = sessionStorage.getItem("empcode");
@@ -64,9 +61,7 @@ function DoctorManagement() {
   }, [currentPage, searchQuery, deptId])
 
 
-  useEffect(() => {
-    getClientList();
-  }, [])
+
 
 
   const fetchEmployees = async () => {
@@ -201,40 +196,7 @@ function DoctorManagement() {
   const startingEntry = (currentPage - 1) * entriesPerPage + 1;
   const endingEntry = Math.min(startingEntry + entriesPerPage - 1, totalCount);
 
-  const getClientList = async () => {
-    setLoading(true)
 
-    try {
-      const res = await axios.post(`${BASEURL2}/client/getClientDetails`)
-      const clients = res.data.data;
-      setClientList(res.data.data)
-      // Auto-select first client and load its departments
-      if (clients && clients.length > 0) {
-        const firstClientId = clients[0].client_id;
-        setClientId(firstClientId);
-        await getDepartmentList(firstClientId);
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const getDepartmentList = async (clientId) => {
-    setLoading(true)
-    try {
-      const res = await axios.post(`${BASEURL2}/department/getDepartmentDetails`,
-        { clientId }
-      )
-      setDeptList(res.data.data)
-      setDeptId(res.data.data[0].dept_id)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
-  }
 
   // ----------------- JSX -----------------
   return (
@@ -246,46 +208,6 @@ function DoctorManagement() {
 
         {/* LEFT: SEARCH BAR */}
         <div className="d-flex align-items-center">
-
-          {/* Client */}
-          <div className="form-group mr-3 mb-0">
-            <label htmlFor="clientId">Select Client:</label>
-            <select
-              className="form-control selectStyle"
-              id="clientId"
-              value={clientId}
-              onChange={(e) => {
-                const val = e.target.value;
-                setClientId(val);
-                getDepartmentList(val);
-              }}
-              style={{ width: "200px" }}
-            >
-              {clientList?.map((e) => (
-                <option key={e.client_id} value={e.client_id}>
-                  {e.client_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Dept */}
-          <div className="form-group mr-3 mb-0">
-            <label htmlFor="deptId">Select Dept:</label>
-            <select
-              className="form-control selectStyle"
-              id="deptId"
-              value={deptId}
-              onChange={(e) => setDeptId(e.target.value)}
-              style={{ width: "200px" }}
-            >
-              {deptList?.map((e) => (
-                <option key={e.dept_id} value={e.dept_id}>
-                  {e.dept_name}
-                </option>
-              ))}
-            </select>
-          </div>
 
           {/* Search Box (same size as dropdown) */}
           <div className="form-group mr-3 mb-0">
