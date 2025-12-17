@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
 import axios from "axios";
-import { BASEURL2,DeptId } from "../constant/constant";
+import { BASEURL2, DeptId } from "../constant/constant";
 import "./submissionModal.css";
 import Popup from "../Modals/Popup";
 import { useParams } from "react-router-dom";
@@ -24,8 +24,8 @@ const SubmissionModal = ({ handelCloseModel }) => {
     const [fieldDetails, setFieldDetails] = useState([]);
     const { campId } = useParams();
     const [formData, setFormData] = useState({});
-    const [isDoctorFieldReq,setDrFieldReq] = useState("");
-    const [isPrescFieldReq,setPresFieldReq] = useState("");
+    const isDoctorFieldReq = "Y"
+    const [isPrescFieldReq, setPresFieldReq] = useState("");
 
 
 
@@ -36,8 +36,9 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
 
     const getDoctorList = async () => {
+
         try {
-            const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId,deptId:DeptId });
+            const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId, deptId: DeptId });
             setDoctorList(res?.data?.data);
         } catch (error) {
             console.log(error);
@@ -48,11 +49,11 @@ const SubmissionModal = ({ handelCloseModel }) => {
         // setLoading(true)
         console.log("field details triggered")
         try {
-            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampFieldDetails`, { campId,deptId:DeptId })
+            const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampFieldDetails`, { campId, deptId: DeptId })
             setFieldDetails(res.data.data)
-            setDrFieldReq(res?.data.is_doctor_required)
+            // setDrFieldReq(res?.data.is_doctor_required)
             setPresFieldReq(res?.data.is_prescription_required)
-            console.log("Field details data",res.data)
+            console.log("Field details data", res.data)
         } catch (error) {
             console.log(error)
         } finally {
@@ -63,7 +64,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
     const getBrandList = async () => {
         axios
-            .post(`${BASEURL2}/basic/getBrandsList`,{deptId:DeptId}) // this hits your SQL above
+            .post(`${BASEURL2}/basic/getBrandsList`, { deptId: DeptId }) // this hits your SQL above
             .then((res) => {
                 // convert your API result into react-select options
                 const options = (res.data.data || []).map((b) => ({
@@ -128,7 +129,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
         const formDataPayload = new FormData();
         formDataPayload.append("campId", campId);
         formDataPayload.append("userId", userId);
-        formDataPayload.append("doctorId", 0);
+        formDataPayload.append("doctorId", doctorId);
         formDataPayload.append("status", "Y");
         formDataPayload.append("deptId", DeptId);
         formDataPayload.append("values", JSON.stringify(values));
@@ -212,7 +213,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                         <div className="modal-body">
 
                             <form className="row g-3">
-                                {isDoctorFieldReq === "Y"&&<div className="form-group col-md-4 did-floating-label-content">
+                                {isDoctorFieldReq === "Y" && <div className="form-group col-md-4 did-floating-label-content">
                                     <select
                                         className="form-control did-floating-select"
                                         onChange={handelDoctorChange}
@@ -232,7 +233,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                     <label className="form-label did-floating-label">Doctor Name*</label>
                                 </div>}
 
-                               {isDoctorFieldReq === "Y"&& <div className="form-group col-md-4 did-floating-label-content">
+                                {isDoctorFieldReq === "Y" && <div className="form-group col-md-4 did-floating-label-content">
                                     <input
                                         type="text"
                                         className="form-control did-floating-input"
@@ -242,7 +243,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                     />
                                     <label className="form-label did-floating-label">Speciality</label>
                                 </div>}
-                                {isDoctorFieldReq === "Y"&&<div className="form-group col-md-4 did-floating-label-content">
+                                {isDoctorFieldReq === "Y" && <div className="form-group col-md-4 did-floating-label-content">
                                     <input
                                         type="text"
                                         className="form-control did-floating-input"
@@ -253,7 +254,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                     <label className="form-label did-floating-label">Garnet Code</label>
                                 </div>}
 
-                                {isPrescFieldReq === "Y"&&<div className="form-group col-md-4 did-floating-label-content">
+                                {isPrescFieldReq === "Y" && <div className="form-group col-md-4 did-floating-label-content">
                                     <select
                                         className="form-control did-floating-select"
                                         value={isPrescriptionGen}
@@ -267,7 +268,7 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                         Is Prescription Generated*
                                     </label>
                                 </div>}
-                           
+
 
                                 {isPrescriptionGen === "Y" && <div className="form-group col-md-6 did-floating-label-content">
                                     <Select
@@ -436,91 +437,91 @@ const SubmissionModal = ({ handelCloseModel }) => {
                                                 </div>
                                             );
 
-                                    
-                                            case "image":
-  return (
-    <div key={field.field_id} className="form-group col-md-4">
-      <label className="form-label fw-bold">Upload Image for {field.label}</label>
 
-      {/* Hidden file input + visible label/button */}
-      <div className="custom-file-input-wrapper">
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          id={`file-${field.field_id}`}
-          className="custom-file-input"
-          onChange={(e) => {
-            const newFiles = Array.from(e.target.files || []);
+                                        case "image":
+                                            return (
+                                                <div key={field.field_id} className="form-group col-md-4">
+                                                    <label className="form-label fw-bold">Upload Image for {field.label}</label>
 
-            // Convert to objects containing file + object URL for preview
-            const newItems = newFiles.map((f) => ({ file: f, url: URL.createObjectURL(f) }));
+                                                    {/* Hidden file input + visible label/button */}
+                                                    <div className="custom-file-input-wrapper">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            multiple
+                                                            id={`file-${field.field_id}`}
+                                                            className="custom-file-input"
+                                                            onChange={(e) => {
+                                                                const newFiles = Array.from(e.target.files || []);
 
-            const prevItems = formData[field.field_id] || [];
-            // append instead of replace
-            setFormData({ ...formData, [field.field_id]: [...prevItems, ...newItems] });
+                                                                // Convert to objects containing file + object URL for preview
+                                                                const newItems = newFiles.map((f) => ({ file: f, url: URL.createObjectURL(f) }));
 
-            // reset so same file can be picked again
-            e.target.value = "";
-          }}
-        />
+                                                                const prevItems = formData[field.field_id] || [];
+                                                                // append instead of replace
+                                                                setFormData({ ...formData, [field.field_id]: [...prevItems, ...newItems] });
 
-        <label htmlFor={`file-${field.field_id}`} className="custom-file-label">
-          {formData[field.field_id] && formData[field.field_id].length
-            ? `${formData[field.field_id].length} file(s) selected`
-            : "Choose Images..."}
-        </label>
-      </div>
+                                                                // reset so same file can be picked again
+                                                                e.target.value = "";
+                                                            }}
+                                                        />
 
-      {/* Preview area */}
-      <div className="col-md-12 d-flex flex-wrap mt-2">
-        {(formData[field.field_id] || []).map((item, idx) => (
-          <div key={idx} className="preview-container me-2 mb-2" style={{ position: "relative" }}>
-            <img
-              src={item.url}
-              alt="Preview"
-              className="preview-img"
-              style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 6 }}
-            />
-            <button
-              type="button"
-              className="remove-btn"
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                border: "none",
-                background: "rgba(0,0,0,0.6)",
-                color: "#fff",
-                borderRadius: "50%",
-                width: 22,
-                height: 22,
-                lineHeight: "18px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                const updated = [...(formData[field.field_id] || [])];
-                const [removed] = updated.splice(idx, 1);
+                                                        <label htmlFor={`file-${field.field_id}`} className="custom-file-label">
+                                                            {formData[field.field_id] && formData[field.field_id].length
+                                                                ? `${formData[field.field_id].length} file(s) selected`
+                                                                : "Choose Images..."}
+                                                        </label>
+                                                    </div>
 
-                // revoke object URL for memory cleanup
-                if (removed?.url) URL.revokeObjectURL(removed.url);
+                                                    {/* Preview area */}
+                                                    <div className="col-md-12 d-flex flex-wrap mt-2">
+                                                        {(formData[field.field_id] || []).map((item, idx) => (
+                                                            <div key={idx} className="preview-container me-2 mb-2" style={{ position: "relative" }}>
+                                                                <img
+                                                                    src={item.url}
+                                                                    alt="Preview"
+                                                                    className="preview-img"
+                                                                    style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 6 }}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="remove-btn"
+                                                                    style={{
+                                                                        position: "absolute",
+                                                                        top: 0,
+                                                                        right: 0,
+                                                                        border: "none",
+                                                                        background: "rgba(0,0,0,0.6)",
+                                                                        color: "#fff",
+                                                                        borderRadius: "50%",
+                                                                        width: 22,
+                                                                        height: 22,
+                                                                        lineHeight: "18px",
+                                                                        cursor: "pointer",
+                                                                    }}
+                                                                    onClick={() => {
+                                                                        const updated = [...(formData[field.field_id] || [])];
+                                                                        const [removed] = updated.splice(idx, 1);
 
-                setFormData({ ...formData, [field.field_id]: updated });
-              }}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+                                                                        // revoke object URL for memory cleanup
+                                                                        if (removed?.url) URL.revokeObjectURL(removed.url);
+
+                                                                        setFormData({ ...formData, [field.field_id]: updated });
+                                                                    }}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
 
                                         default:
                                             return null;
                                     }
                                 })}
-     <div className="form-group col-md-4 did-floating-label-content">
+                                <div className="form-group col-md-4 did-floating-label-content">
                                     <input
                                         type="date"
                                         className="form-control did-floating-input"
@@ -538,11 +539,11 @@ const SubmissionModal = ({ handelCloseModel }) => {
 
                                         placeholder="Camp Date*"
                                         value={campDate}
-                                        // 🔒 restrict to last 30 days:
-                                        // min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-                                        //     .toISOString()
-                                        //     .split("T")[0]}
-                                        // max={new Date().toISOString().split("T")[0]}
+                                    // 🔒 restrict to last 30 days:
+                                    // min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                                    //     .toISOString()
+                                    //     .split("T")[0]}
+                                    // max={new Date().toISOString().split("T")[0]}
                                     />
                                     <label className="form-label did-floating-label">
                                         Date*

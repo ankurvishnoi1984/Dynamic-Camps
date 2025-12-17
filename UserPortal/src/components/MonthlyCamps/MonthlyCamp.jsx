@@ -624,7 +624,7 @@ const handelReportDownload = () => {
           >
             🚫 No records found.<br />
             <span style={{ fontSize: "16px" }}>
-              Click <strong style={{ color: "#0d6efd" }}>“Add Camp Report</strong> to
+              Click <strong style={{ color: "#0d6efd" }}>“Add Camp Report"</strong> to
               add record.
             </span>
           </div>
