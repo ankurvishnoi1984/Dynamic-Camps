@@ -16,7 +16,7 @@ const MonthlyCamp = () => {
   const userId = sessionStorage.getItem("userId");
   const { campId } = useParams();
 
- const [openActionId, setOpenActionId] = useState(null);
+  const [openActionId, setOpenActionId] = useState(null);
   const [campList] = useCampList();
   const [brandList, setBrandList] = useState([]);
 
@@ -70,29 +70,29 @@ const MonthlyCamp = () => {
   const [delId, setDelId] = useState("");
   const [editId, setEditId] = useState("");
   const [crid, setCrid] = useState("");
-    const [filters, setFilters] = useState({
-      campTypeId: "",
-      searchQuery: "",
-      // filterBy: "",
-      // startDate: "",
-      // endDate: "",
-    });
+  const [filters, setFilters] = useState({
+    campTypeId: "",
+    searchQuery: "",
+    // filterBy: "",
+    // startDate: "",
+    // endDate: "",
+  });
 
 
   // for brand input adding 
-    // brand row adding logic
-    const [brandInputs, setBrandInputs] = useState([
-      { brand: "", sku: "", therapyDay: "" },
-    ]);
-    
+  // brand row adding logic
+  const [brandInputs, setBrandInputs] = useState([
+    { brand: "", sku: "", therapyDay: "" },
+  ]);
+
 
   // for file upload
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
 
-   const [doctorList, setDoctorList] = useState([]);
-   const [doctorId,setDoctorId] =useState('')
+  const [doctorList, setDoctorList] = useState([]);
+  const [doctorId, setDoctorId] = useState('')
   // for camp request data
 
   const [loading, setLoading] = useState(false);
@@ -100,7 +100,7 @@ const MonthlyCamp = () => {
   const handelAddReport = () => {
     setAddRequestModel(true);
   };
- 
+
   const handelCloseModel = async () => {
     setAddRequestModel(false);
     // await getCampReportList();
@@ -121,20 +121,20 @@ const MonthlyCamp = () => {
     setSpeciality("");
     setDoctorId('')
     setBrandInputs([{ brand: "", sku: "", therapyDay: "" },]);
-    
-    
+
+
   };
 
 
 
- const handelInfo = (submissionId) => {
-  const selected = campReportList.find(
-    (s) => s.submission_id === submissionId
-  );
-  setInfoData(selected);
-  setInfoReportModel(true);
-};
- 
+  const handelInfo = (submissionId) => {
+    const selected = campReportList.find(
+      (s) => s.submission_id === submissionId
+    );
+    setInfoData(selected);
+    setInfoReportModel(true);
+  };
+
 
   const handelCloseInfoModel = () => {
     setInfoReportModel(false);
@@ -181,46 +181,50 @@ const MonthlyCamp = () => {
   };
 
 
- 
-const handelReportDownload = () => {
-  if (!campReportList || campReportList.length === 0) {
-    alert("No data to export");
-    return;
-  }
 
-  // ✅ Filter out image fields
-  const filteredFields =
-    campReportList[0]?.field_values?.filter((fv) => fv.field_type !== "image") || [];
+  const handelReportDownload = () => {
+    if (!campReportList || campReportList.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-  // ✅ Prepare headers (exclude image columns)
-  const headers = [
-    ...filteredFields.map((fv) => fv.field_label),
-    "Submitted At"
-  ];
+    // ✅ Filter out image fields
+    const filteredFields =
+      campReportList[0]?.field_values?.filter((fv) => fv.field_type !== "image") || [];
 
-  // ✅ Map data excluding image fields
-  const mappedData = campReportList.map((item) => {
-    const dynamicValues = {};
+    // ✅ Prepare headers (exclude image columns)
+    const headers = [
+      "Doctor Name",
+      "Speciality",
+      ...filteredFields.map((fv) => fv.field_label),
+      "Submitted At",
+    ];
 
-    filteredFields.forEach((fv) => {
-      const matchingField = item.field_values?.find(
-        (f) => f.field_label === fv.field_label
-      );
-      dynamicValues[fv.field_label] = matchingField?.value || "-";
+    // ✅ Map data excluding image fields
+    const mappedData = campReportList.map((item) => {
+      const dynamicValues = {};
+
+      filteredFields.forEach((fv) => {
+        const matchingField = item.field_values?.find(
+          (f) => f.field_label === fv.field_label
+        );
+        dynamicValues[fv.field_label] = matchingField?.value || "-";
+      });
+
+      return {
+        "Doctor Name": item.doctor_name,
+        "Speciality": item.speciality,
+        ...dynamicValues,
+        "Submitted At": new Date(item.submitted_at).toLocaleString(),
+      };
     });
 
-    return {
-      ...dynamicValues,
-      "Submitted At": new Date(item.submitted_at).toLocaleString()
-    };
-  });
-
-  // ✅ Create worksheet and workbook
-  const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
-  XLSX.writeFile(wb, "CampsReport.xlsx");
-};
+    // ✅ Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(mappedData, { header: headers });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "CampsReport");
+    XLSX.writeFile(wb, "CampsReport.xlsx");
+  };
 
 
   useEffect(() => {
@@ -238,33 +242,33 @@ const handelReportDownload = () => {
       getCampSubmissionsFull();
 
     }
-  }, [searchQuery,campId,addRequestModel]);
+  }, [searchQuery, campId, addRequestModel]);
 
 
 
-  const getBrandList = async()=>{
+  const getBrandList = async () => {
     setLoading(true);
     try {
       let res;
-      res = await axios.post(`${BASEURL2}/basic/getBrandsList`,{deptId:DeptId});
-      if(res?.data?.errorCode === 1){
+      res = await axios.post(`${BASEURL2}/basic/getBrandsList`, { deptId: DeptId });
+      if (res?.data?.errorCode === 1) {
         setBrandList(res.data.data)
       }
     } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       setLoading(false);
     }
   }
 
-    const getDoctorList = async () => {
-      try {
-        const res = await axios.post(`${BASEURL2}/doc/getDoctorList`,{empcode:empId,deptId:DeptId});
-        setDoctorList(res?.data?.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const getDoctorList = async () => {
+    try {
+      const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId, deptId: DeptId });
+      setDoctorList(res?.data?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
 
 
@@ -272,7 +276,7 @@ const handelReportDownload = () => {
     getBrandList();
     getDoctorList();
     // getCampSubmissionsFull();
-  }, [campId,addRequestModel]);
+  }, [campId, addRequestModel]);
 
   // for search
 
@@ -370,7 +374,7 @@ const handelReportDownload = () => {
       const endPage = Math.min(totalPages - 1, page + 2);
 
       pageNumbers.push(1); // Always show the first page
-      
+
       if (startPage > 2) {
         pageNumbers.push("..."); // Ellipsis before startPage if there's a gap
       }
@@ -405,75 +409,75 @@ const handelReportDownload = () => {
   };
 
 
-  const handelDoctorChange = (event)=>{
+  const handelDoctorChange = (event) => {
     let docId = event.target.value
-    if(docId){
+    if (docId) {
       setDoctorId(docId)
-      const doctor =  doctorList.find((e)=> e.doctor_id == docId);
-       setSpeciality(doctor.speciality);
-       setCampDate(doctor.camp_date);
-       setCampTime(doctor.camp_time1);
-       setCampVenue(doctor.camp_venue);
+      const doctor = doctorList.find((e) => e.doctor_id == docId);
+      setSpeciality(doctor.speciality);
+      setCampDate(doctor.camp_date);
+      setCampTime(doctor.camp_time1);
+      setCampVenue(doctor.camp_venue);
     }
-    else{
+    else {
       setDoctorId('')
-       setSpeciality('');
-       setCampDate('');
-       setCampTime('');
-       setCampVenue('');
+      setSpeciality('');
+      setCampDate('');
+      setCampTime('');
+      setCampVenue('');
     }
-    
+
   }
 
   const getCampSubmissionsFull = async () => {
-  try {
-    const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampSubmissionsFull`, {
-      campId: campId,
-      userId: userId,
-      deptId:DeptId,
-      searchQuery,
-    });
+    try {
+      const res = await axios.post(`${BASEURL2}/monthlyCamps/getCampSubmissionsFull`, {
+        campId: campId,
+        userId: userId,
+        deptId: DeptId,
+        searchQuery,
+      });
 
-    if (res.data.errorCode === 1) {
-      setCampReportList(res.data.data);
-      console.log("img data",res.data.data);
-      
-    } else {
-      toast.error(res.data.message || "No submissions found");
+      if (res.data.errorCode === 1) {
+        setCampReportList(res.data.data);
+        console.log("img data", res.data.data);
+
+      } else {
+        toast.error(res.data.message || "No submissions found");
+      }
+    } catch (error) {
+      console.error("Error fetching submissions:", error);
+      toast.error("Something went wrong");
     }
-  } catch (error) {
-    console.error("Error fetching submissions:", error);
-    toast.error("Something went wrong");
+  };
+
+
+
+  const handleChange = (index, field, value) => {
+    const updated = [...brandInputs];
+    brandInputs[index][field] = value;
+    setBrandInputs(updated);
   }
-};
 
-
-
-  const handleChange = (index,field,value)=>{
-      const updated = [...brandInputs];
-      brandInputs[index][field] = value;
-      setBrandInputs(updated);
-  }
-  
-  const addBrandSet = ()=>{
-    if(brandInputs.length<6){
-      setBrandInputs([...brandInputs,{ brand: "", sku: "", therapyDay: "" }])
+  const addBrandSet = () => {
+    if (brandInputs.length < 6) {
+      setBrandInputs([...brandInputs, { brand: "", sku: "", therapyDay: "" }])
     }
-    else{
+    else {
       toast.error("Maximum 5 selection allowed.")
     }
   }
   const groupedImages = infoData.images?.reduce((acc, img) => {
-  if (!acc[img.itemName]) {
-    acc[img.itemName] = {
-      itemName: img.itemName,
-      count: img.image_prescription_count,
-      images: [],
-    };
-  }
-  acc[img.itemName].images.push(img.prescriptionImage);
-  return acc;
-}, {});
+    if (!acc[img.itemName]) {
+      acc[img.itemName] = {
+        itemName: img.itemName,
+        count: img.image_prescription_count,
+        images: [],
+      };
+    }
+    acc[img.itemName].images.push(img.prescriptionImage);
+    return acc;
+  }, {});
   const removeBrandSet = () => {
     if (brandInputs.length > 1) {
       setBrandInputs(prevInputs => prevInputs.slice(0, -1));
@@ -485,11 +489,11 @@ const handelReportDownload = () => {
   const removeUpdateBrandSet = async () => {
     if (brandInputs.length > 1) {
       const lastItem = brandInputs[brandInputs.length - 1];
-  
+
       if (lastItem.mappingId) {
         try {
           // Call your backend API to delete this record
-          let res = await axios.post(`${BASEURL}/report/deleteBrandMapping`,{mappingId:lastItem.mappingId});
+          let res = await axios.post(`${BASEURL}/report/deleteBrandMapping`, { mappingId: lastItem.mappingId });
           // After successful deletion from backend, update state
           setBrandInputs(prevInputs => prevInputs.slice(0, -1));
           toast.success("Brand deleted successfully.");
@@ -506,7 +510,7 @@ const handelReportDownload = () => {
     }
   };
 
-  return loading ? <Loader/> : (
+  return loading ? <Loader /> : (
     <>
       <main id="main" className="main">
         <section className="section dashboard">
@@ -533,7 +537,7 @@ const handelReportDownload = () => {
             <div className="col-lg-12">
               <div className="card">
                 <div className="card-body">
-                <small className="msgnote mt-2">*Scroll left for other column of table</small>
+                  <small className="msgnote mt-2">*Scroll left for other column of table</small>
                   <div className="m-3 d-flex justify-content-between align-items-end" >
                     <button
                       type="button"
@@ -552,87 +556,92 @@ const handelReportDownload = () => {
                   </div>
                   <hr />
                   <div className="tbst">
-                  <table className="table table-hover newcss">
-  {campReportList && campReportList.length > 0 ? (
-    <>
-  <thead>
-    <tr>
-      {/* Filter out image type fields before rendering headers */}
-      {campReportList[0]?.field_values
-        ?.filter((fv) => fv.field_type !== "image")
-        .map((fv, idx) => (
-          <th key={idx}>{fv.field_label}</th>
-        ))}
+                    <table className="table table-hover newcss">
+                      {campReportList && campReportList.length > 0 ? (
+                        <>
+                          <thead>
+                            <tr>
 
-      <th scope="col">Date</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
+                              <th scope="col">Doctor Name</th>
+                              <th scope="col">Speciality</th>
+                              {/* Filter out image type fields before rendering headers */}
+                              {campReportList[0]?.field_values
+                                ?.filter((fv) => fv.field_type !== "image")
+                                .map((fv, idx) => (
+                                  <th key={idx}>{fv.field_label}</th>
+                                ))}
 
-  <tbody>
-    {campReportList
-      .slice(page * PageCount - PageCount, page * PageCount)
-      .map((e) => (
-        <tr key={e.submission_id}>
-          {/* Filter out image fields before rendering values */}
-          {e.field_values
-            ?.filter((fv) => fv.field_type !== "image")
-            .map((fv, idx) => (
-              <td key={idx}>{fv.value || "-"}</td>
-            ))}
+                              <th scope="col">Date</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
 
-          <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
-          <td>
-            <div className="action-wrapper">
-              <button
-                className="btn btn-sm btn-primary btn-circle border-0"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setOpenActionId((prev) =>
-                    prev === e.submission_id ? null : e.submission_id
-                  );
-                }}
-              >
-                <BsThreeDotsVertical />
-              </button>
+                          <tbody>
+                            {campReportList
+                              .slice(page * PageCount - PageCount, page * PageCount)
+                              .map((e) => (
+                                <tr key={e.submission_id}>
+                                  {/* Filter out image fields before rendering values */}
+                                  <td>{e.doctor_name}</td>
+                                  <td>{e.speciality}</td>
+                                  {e.field_values
+                                    ?.filter((fv) => fv.field_type !== "image")
+                                    .map((fv, idx) => (
+                                      <td key={idx}>{fv.value || "-"}</td>
+                                    ))}
 
-              {openActionId === e.submission_id && (
-                <div className="action-dropdown">
-                  <button onClick={() => handelInfo(e.submission_id)}>
-                    View Info
-                  </button>
-                </div>
-              )}
-            </div>
-          </td>
-        </tr>
-      ))}
-  </tbody>
-</>
+                                  <td>{new Date(e.submitted_at).toLocaleDateString()}</td>
+                                  <td>
+                                    <div className="action-wrapper">
+                                      <button
+                                        className="btn btn-sm btn-primary btn-circle border-0"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          setOpenActionId((prev) =>
+                                            prev === e.submission_id ? null : e.submission_id
+                                          );
+                                        }}
+                                      >
+                                        <BsThreeDotsVertical />
+                                      </button>
 
-  ) : (
-    <tbody>
-      <tr>
-        <td colSpan="100%" className="text-center py-5">
-          <div
-            style={{
-              color: "#6c757d",
-              fontSize: "18px",
-              fontWeight: 500,
-              textAlign: "center",
-            }}
-          >
-            🚫 No records found.<br />
-            <span style={{ fontSize: "16px" }}>
-              Click <strong style={{ color: "#0d6efd" }}>“Add Camp Report"</strong> to
-              add record.
-            </span>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  )}
-</table>
+                                      {openActionId === e.submission_id && (
+                                        <div className="action-dropdown">
+                                          <button onClick={() => handelInfo(e.submission_id)}>
+                                            View Info
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </>
+
+                      ) : (
+                        <tbody>
+                          <tr>
+                            <td colSpan="100%" className="text-center py-5">
+                              <div
+                                style={{
+                                  color: "#6c757d",
+                                  fontSize: "18px",
+                                  fontWeight: 500,
+                                  textAlign: "center",
+                                }}
+                              >
+                                🚫 No records found.<br />
+                                <span style={{ fontSize: "16px" }}>
+                                  Click <strong style={{ color: "#0d6efd" }}>“Add Camp Report"</strong> to
+                                  add record.
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      )}
+                    </table>
 
                   </div>
 
@@ -652,7 +661,7 @@ const handelReportDownload = () => {
                               </span>
                             </li>
                             {renderPageNumbers()}
-                          
+
                             <li
                               className="page-item"
                               onClick={() => selectPageHandler(page + 1)}
@@ -675,141 +684,141 @@ const handelReportDownload = () => {
 
 
 
-     {infoReportModel && infoData && (
-  <div className="addusermodel">
-    <div className="modal fade show" style={{ display: "block" }}>
-      <div className="modal-dialog modal-xl">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Camp Info</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={handelCloseInfoModel}
-            ></button>
-          </div>
+      {infoReportModel && infoData && (
+        <div className="addusermodel">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-xl">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Camp Info</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handelCloseInfoModel}
+                  ></button>
+                </div>
 
-          <div className="modal-body">
-            {/* === Submission Info === */}
-            <form className="row g-3">
-              {infoData.field_values.map((field, idx) => (
-                <div
-                  className="col-md-4 did-floating-label-content mb-3"
-                  key={idx}
-                >
-                  {field.field_type === "image" ? (
-                    <div className="d-flex flex-column align-items-start">
-                      <label className="form-label fw-semibold mb-2">
-                        {field.field_label}
-                      </label>
-                      {field.value ? (
-                        <img
-                         src={`${BASEURL}/uploads/${field.value}`}
-                          alt={field.field_label}
-                          style={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            border: "1px solid #ccc",
-                          }}
-                          onClick={() => setPreviewImg(field.value)}
-                        />
-                      ) : (
-                        <p className="text-muted small">No image available</p>
-                      )}
-                    </div>
-                  ) : (
-                    <>
+                <div className="modal-body">
+                  {/* === Submission Info === */}
+                  <form className="row g-3">
+                    {infoData.field_values.map((field, idx) => (
+                      <div
+                        className="col-md-4 did-floating-label-content mb-3"
+                        key={idx}
+                      >
+                        {field.field_type === "image" ? (
+                          <div className="d-flex flex-column align-items-start">
+                            <label className="form-label fw-semibold mb-2">
+                              {field.field_label}
+                            </label>
+                            {field.value ? (
+                              <img
+                                src={`${BASEURL}/uploads/${field.value}`}
+                                alt={field.field_label}
+                                style={{
+                                  width: "80px",
+                                  height: "80px",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  border: "1px solid #ccc",
+                                }}
+                                onClick={() => setPreviewImg(field.value)}
+                              />
+                            ) : (
+                              <p className="text-muted small">No image available</p>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              className="form-control did-floating-input"
+                              value={field.value || ""}
+                              readOnly
+                            />
+                            <label className="form-label did-floating-label">
+                              {field.field_label}
+                            </label>
+                          </>
+                        )}
+                      </div>
+                    ))}
+
+                    <div className="col-md-4 did-floating-label-content">
                       <input
                         type="text"
                         className="form-control did-floating-input"
-                        value={field.value || ""}
+                        value={
+                          infoData.submitted_at
+                            ? new Date(infoData.submitted_at).toLocaleString()
+                            : ""
+                        }
                         readOnly
                       />
                       <label className="form-label did-floating-label">
-                        {field.field_label}
+                        Submitted At
                       </label>
-                    </>
-                  )}
+                    </div>
+                  </form>
                 </div>
-              ))}
 
-              <div className="col-md-4 did-floating-label-content">
-                <input
-                  type="text"
-                  className="form-control did-floating-input"
-                  value={
-                    infoData.submitted_at
-                      ? new Date(infoData.submitted_at).toLocaleString()
-                      : ""
-                  }
-                  readOnly
-                />
-                <label className="form-label did-floating-label">
-                  Submitted At
-                </label>
+                {/* === Image Preview Modal === */}
+                {previewImg && (
+                  <div
+                    className="image-preview-overlay"
+                    onClick={handleClosePreview}
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      width: "100vw",
+                      height: "100vh",
+                      background: "rgba(0,0,0,0.7)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 1050,
+                    }}
+                  >
+                    <span
+                      className="close-btn"
+                      style={{
+                        position: "absolute",
+                        top: "20px",
+                        right: "30px",
+                        fontSize: "2rem",
+                        color: "#fff",
+                        cursor: "pointer",
+                      }}
+                    >
+                      &times;
+                    </span>
+                    <img
+                      src={previewImg}
+                      alt="Preview"
+                      className="preview-img"
+                      style={{
+                        maxWidth: "90%",
+                        maxHeight: "90%",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 10px rgba(255,255,255,0.3)",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
-            </form>
-          </div>
-
-          {/* === Image Preview Modal === */}
-          {previewImg && (
-            <div
-              className="image-preview-overlay"
-              onClick={handleClosePreview}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                background: "rgba(0,0,0,0.7)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1050,
-              }}
-            >
-              <span
-                className="close-btn"
-                style={{
-                  position: "absolute",
-                  top: "20px",
-                  right: "30px",
-                  fontSize: "2rem",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                &times;
-              </span>
-              <img
-                src={previewImg}
-                alt="Preview"
-                className="preview-img"
-                style={{
-                  maxWidth: "90%",
-                  maxHeight: "90%",
-                  borderRadius: "10px",
-                  boxShadow: "0 0 10px rgba(255,255,255,0.3)",
-                }}
-              />
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
 
 
-     
 
-      {addRequestModel&& <SubmissionModal
-      handelCloseModel={handelCloseModel}/>}
+
+      {addRequestModel && <SubmissionModal
+        handelCloseModel={handelCloseModel} />}
 
 
       {editRequestModel && (
@@ -830,8 +839,8 @@ const handelReportDownload = () => {
                 </div>
                 <div className="modal-body">
                   <form className="row g-3">
-                    
-                  <div className="form-group col-md-4 did-floating-label-content">
+
+                    <div className="form-group col-md-4 did-floating-label-content">
                       <select
                         className="form-control did-floating-select"
                         onChange={(event) => {
@@ -842,15 +851,15 @@ const handelReportDownload = () => {
                         <option value="">Select...</option>
                         {campList.map((e) => (
                           <option
-                          
-                          key={e.basic_id}
-                          value={e.basic_id}
+
+                            key={e.basic_id}
+                            value={e.basic_id}
                           >
                             {e.description}
                           </option>
                         ))}
                       </select>
-                        <label className="form-label did-floating-label">Type of Camp*</label>
+                      <label className="form-label did-floating-label">Type of Camp*</label>
                     </div>
 
                     <div className="form-group col-md-4 did-floating-label-content">
@@ -862,15 +871,15 @@ const handelReportDownload = () => {
                         <option value="">Select...</option>
                         {doctorList.map((e) => (
                           <option
-                          
-                          key={e.doctor_id}
-                          value={e.doctor_id}
+
+                            key={e.doctor_id}
+                            value={e.doctor_id}
                           >
                             {e.doctor_name}
                           </option>
                         ))}
                       </select>
-                        <label className="form-label did-floating-label">Doctor Name*</label>
+                      <label className="form-label did-floating-label">Doctor Name*</label>
                     </div>
 
                     <div className="form-group col-md-4 did-floating-label-content">
@@ -886,174 +895,174 @@ const handelReportDownload = () => {
                       />
                       <label className="form-label did-floating-label">Speciality</label>
                     </div>
-                      
-
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="text"
-                          className="form-control did-floating-input"
-                          // onChange={(e) => {
-                          //   setCampDate(e.target.value);
-                          // }}
-                          placeholder="Camp Date*"
-                          value={campDate}
-                          readOnly
-                        />
-                        <label className="form-label did-floating-label">
-                          Date of Camp*
-                        </label>
-                      </div>
-
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                        
-                          type="text"
-                          className="form-control did-floating-input"
-                          // onChange={(e) => {
-                          //   setCampDate(e.target.value);
-                          // }}
-                          placeholder="Camp Time*"
-                          value={campTime}
-                          readOnly
-                        />
-                        <label className="form-label did-floating-label">
-                          Time of camp*
-                        </label>
-                      </div>
-                     
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="text"
-                          className="form-control did-floating-input"
-                          // onChange={(e) => {
-                          //   setCampVenue(e.target.value);
-                          // }}
-                          placeholder="Address*"
-                          value={campVenue}
-                          readOnly
-                        />
-                        <label className="form-label did-floating-label">
-                          Address*
-                        </label>
-                      </div>
-
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="number"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            setCampPatients(e.target.value);
-                          }}
-                          placeholder="Patients No.*"
-                          value={campPatients}
-                          onKeyDown={(e) => {
-                            if (e.key === '-' || e.key === 'e') {
-                              e.preventDefault(); 
-                            }
-                          }}
-                          min={0}
-                        />
-                        <label className="form-label did-floating-label">
-                          No. of Patients in camp*
-                        </label>
-                      </div>
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="number"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            setScreenedCount(e.target.value);
-                          }}
-                          placeholder="Patients Screened No."
-                          value={screenedCount}
-                          onKeyDown={(e) => {
-                            if (e.key === '-' || e.key === 'e') {
-                              e.preventDefault(); 
-                            }
-                          }}
-                          min={0}
-                        />
-                        <label className="form-label did-floating-label">
-                          No. of Patients Screened*
-                        </label>
-                      </div>
-
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="number"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            setRxCount(e.target.value);
-                          }}
-                          placeholder="Patients Rx No.*"
-                          value={rxCount}
-                          onKeyDown={(e) => {
-                            if (e.key === '-' || e.key === 'e') {
-                              e.preventDefault(); 
-                            }
-                          }}
-                          min={0}
-                        />
-                        <label className="form-label did-floating-label">
-                          No. of Rx generated*
-                        </label>
-                      </div>
 
 
-                      {brandInputs.map((input,index)=>(
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+                        type="text"
+                        className="form-control did-floating-input"
+                        // onChange={(e) => {
+                        //   setCampDate(e.target.value);
+                        // }}
+                        placeholder="Camp Date*"
+                        value={campDate}
+                        readOnly
+                      />
+                      <label className="form-label did-floating-label">
+                        Date of Camp*
+                      </label>
+                    </div>
+
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+
+                        type="text"
+                        className="form-control did-floating-input"
+                        // onChange={(e) => {
+                        //   setCampDate(e.target.value);
+                        // }}
+                        placeholder="Camp Time*"
+                        value={campTime}
+                        readOnly
+                      />
+                      <label className="form-label did-floating-label">
+                        Time of camp*
+                      </label>
+                    </div>
+
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+                        type="text"
+                        className="form-control did-floating-input"
+                        // onChange={(e) => {
+                        //   setCampVenue(e.target.value);
+                        // }}
+                        placeholder="Address*"
+                        value={campVenue}
+                        readOnly
+                      />
+                      <label className="form-label did-floating-label">
+                        Address*
+                      </label>
+                    </div>
+
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+                        type="number"
+                        className="form-control did-floating-input"
+                        onChange={(e) => {
+                          setCampPatients(e.target.value);
+                        }}
+                        placeholder="Patients No.*"
+                        value={campPatients}
+                        onKeyDown={(e) => {
+                          if (e.key === '-' || e.key === 'e') {
+                            e.preventDefault();
+                          }
+                        }}
+                        min={0}
+                      />
+                      <label className="form-label did-floating-label">
+                        No. of Patients in camp*
+                      </label>
+                    </div>
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+                        type="number"
+                        className="form-control did-floating-input"
+                        onChange={(e) => {
+                          setScreenedCount(e.target.value);
+                        }}
+                        placeholder="Patients Screened No."
+                        value={screenedCount}
+                        onKeyDown={(e) => {
+                          if (e.key === '-' || e.key === 'e') {
+                            e.preventDefault();
+                          }
+                        }}
+                        min={0}
+                      />
+                      <label className="form-label did-floating-label">
+                        No. of Patients Screened*
+                      </label>
+                    </div>
+
+                    <div className="form-group col-md-4 did-floating-label-content">
+                      <input
+                        type="number"
+                        className="form-control did-floating-input"
+                        onChange={(e) => {
+                          setRxCount(e.target.value);
+                        }}
+                        placeholder="Patients Rx No.*"
+                        value={rxCount}
+                        onKeyDown={(e) => {
+                          if (e.key === '-' || e.key === 'e') {
+                            e.preventDefault();
+                          }
+                        }}
+                        min={0}
+                      />
+                      <label className="form-label did-floating-label">
+                        No. of Rx generated*
+                      </label>
+                    </div>
+
+
+                    {brandInputs.map((input, index) => (
                       <React.Fragment key={index}>
-                       
-                       <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="text"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            handleChange(index, "brand", e.target.value)
-                          }}
-                          placeholder="Brand"
-                          value={input.brand}
-                        />
-                        <label className="form-label did-floating-label">
-                          Brand*
-                        </label>
-                      </div>
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="text"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            handleChange(index, "sku", e.target.value)
-                          }}
-                          placeholder="SKU"
-                          value={input.sku}
-                        />
-                        <label className="form-label did-floating-label">
-                          SKU*
-                        </label>
-                      </div>
-                      <div className="form-group col-md-4 did-floating-label-content">
-                        <input
-                          type="number"
-                          className="form-control did-floating-input"
-                          onChange={(e) => {
-                            handleChange(index, "therapyDay", e.target.value)
-                          }}
-                          placeholder="Therapy Days"
-                          value={input.therapyDay}
-                          onKeyDown={(e) => {
-                            if (e.key === '-' || e.key === 'e') {
-                              e.preventDefault(); 
-                            }
-                          }}
-                          min={0}
-                        />
-                        <label className="form-label did-floating-label">
-                          Therapy Days*
-                        </label>
 
-                      </div>
-                      
-                      {/* <div className="form-group col-md-2 text-end">
+                        <div className="form-group col-md-4 did-floating-label-content">
+                          <input
+                            type="text"
+                            className="form-control did-floating-input"
+                            onChange={(e) => {
+                              handleChange(index, "brand", e.target.value)
+                            }}
+                            placeholder="Brand"
+                            value={input.brand}
+                          />
+                          <label className="form-label did-floating-label">
+                            Brand*
+                          </label>
+                        </div>
+                        <div className="form-group col-md-4 did-floating-label-content">
+                          <input
+                            type="text"
+                            className="form-control did-floating-input"
+                            onChange={(e) => {
+                              handleChange(index, "sku", e.target.value)
+                            }}
+                            placeholder="SKU"
+                            value={input.sku}
+                          />
+                          <label className="form-label did-floating-label">
+                            SKU*
+                          </label>
+                        </div>
+                        <div className="form-group col-md-4 did-floating-label-content">
+                          <input
+                            type="number"
+                            className="form-control did-floating-input"
+                            onChange={(e) => {
+                              handleChange(index, "therapyDay", e.target.value)
+                            }}
+                            placeholder="Therapy Days"
+                            value={input.therapyDay}
+                            onKeyDown={(e) => {
+                              if (e.key === '-' || e.key === 'e') {
+                                e.preventDefault();
+                              }
+                            }}
+                            min={0}
+                          />
+                          <label className="form-label did-floating-label">
+                            Therapy Days*
+                          </label>
+
+                        </div>
+
+                        {/* <div className="form-group col-md-2 text-end">
         <button
           type="button"
           className="btn btn-danger"
@@ -1062,41 +1071,41 @@ const handelReportDownload = () => {
           ❌
         </button>
                       </div> */}
-                     
+
                       </React.Fragment>
-                     ))}
+                    ))}
 
                     <div className="col-12 mt-3">
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          onClick={addBrandSet}
-                          disabled={brandInputs.length >= 5}
-                        >
-                          Add Brand
-                        </button>
-                        {brandInputs.length>1 && <button
-                          type="button"
-                          className="btn btn-danger m-2"
-                          onClick={removeUpdateBrandSet}
-                          disabled={brandInputs.length == 1}
-                        >
-                          Remove Brand
-                        </button>}
-                        
-                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={addBrandSet}
+                        disabled={brandInputs.length >= 5}
+                      >
+                        Add Brand
+                      </button>
+                      {brandInputs.length > 1 && <button
+                        type="button"
+                        className="btn btn-danger m-2"
+                        onClick={removeUpdateBrandSet}
+                        disabled={brandInputs.length == 1}
+                      >
+                        Remove Brand
+                      </button>}
 
-              
+                    </div>
+
+
                     <div className="form-group col-md-4 did-floating-label-content">
                       <label
                         htmlFor="fileInput"
-                        className={`form-label  ${selectedFiles.length + campImages.length >= ImageLimit ?"custom-file-label1":"custom-file-label"}`}
-                        // style={{
-                        //   pointerEvents:
-                        //     selectedFiles.length + campImages.length >= 3
-                        //       ? "none"
-                        //       : "auto",
-                        // }}
+                        className={`form-label  ${selectedFiles.length + campImages.length >= ImageLimit ? "custom-file-label1" : "custom-file-label"}`}
+                      // style={{
+                      //   pointerEvents:
+                      //     selectedFiles.length + campImages.length >= 3
+                      //       ? "none"
+                      //       : "auto",
+                      // }}
                       >
                         {" "}
                         Upload Camp Images
@@ -1115,7 +1124,7 @@ const handelReportDownload = () => {
                     <div
                       style={{
                         display: "flex",
-                        flexWrap:'wrap',
+                        flexWrap: 'wrap',
                         gap: "10px",
                         marginTop: "10px",
                       }}
