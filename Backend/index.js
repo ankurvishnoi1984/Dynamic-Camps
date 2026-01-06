@@ -10,6 +10,7 @@ const drRoutes = require("./routes/doctor.route");
 const basicRoutes = require("./routes/basic.route");
 const designationRoutes = require("./routes/designation.route")
 const adminRoutes = require("./routes/admin.route")
+const posterRoutes = require("./routes/poster.route")
 
 const path = require('path');
 
@@ -31,11 +32,14 @@ app.use("/designation",designationRoutes)
 app.use("/department",deptRoutes);
 app.use("/dashboard",dashboardRoutes);
 app.use("/employee",employeeRoutes);
+app.use("/poster",posterRoutes)
 app.use("/client",clientRoutes);
 app.use("/admin",adminRoutes)
 app.use("/basic",basicRoutes);
 app.use("/auth", authRoutes);
 app.use("/doc",drRoutes);
+
+
 
 const PORT = process.env.PORT || 8035;
 

@@ -12,11 +12,22 @@ const storage = multer.diskStorage({
   },
 });
 
+const profileStorage =multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../uploads/profile"));
+  },
+  filename: function (req, file, cb) {
+    const uniquePrefix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniquePrefix + "-" + file.originalname);
+  },
+});
+
 // accept multiple files with field name "file"
 const upload = multer({ storage });
+const profileUpload = multer({storage:profileStorage})
 
 
 const memStorage = multer.memoryStorage();
 const memUpload = multer({ memStorage });
 
-module.exports = { upload,memUpload };
+module.exports = { upload,memUpload,profileUpload };
