@@ -1,6 +1,7 @@
 body{
  font-family: "DM Sans", sans-serif;
   font-weight: 600;
+    transform: none !important;
 }
 .ml-1 {
   margin-left: 3px !important;

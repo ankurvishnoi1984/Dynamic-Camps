@@ -28,5 +28,6 @@ export const privateRoutes = [
   { path: "/prescriptionUpload", element: <PrescriptionPage /> },
     { path: "/monthlycamp", element: <DynamicCampPage /> },
   { path: "/incentive", element: <IncentivePage /> },
-   { path: "/camp/:campId", element: <MonthlyCampPage /> }
+   { path: "/camp/:campId", element: <MonthlyCampPage /> },
+     { path: "/poster", element: <PosterPage /> }
 ];

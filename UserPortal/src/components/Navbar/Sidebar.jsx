@@ -64,7 +64,12 @@ const filteredMenuItems =
                 </NavLink>
                 </li>
               ))} */}
-
+  <li className="nav-item">
+                <NavLink to={'/poster'} className={({isActive})=> isActive? "nav-link" :"nav-link collapsed"}>
+                  <i className="bi bi-image"></i>
+                  <span>Poster</span>
+                </NavLink>
+                </li>
           {activeCamps.length > 0 && (
             <>
               <li className="nav-heading mt-3">Active Camps</li>
