@@ -10,13 +10,10 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 
-
-
 exports.addPosterDoctor = async (req, res) => {
   const { userId, doctorName, code, campDate, campVenue, campTime, subCatId, deptId } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
-  //const query = 'CALL AddDoctor(?, ?, ?, ?, ?, ?, ?)'
   const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?);'
   try {
     db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId, deptId], (err, result) => {
@@ -47,7 +44,10 @@ exports.addPosterDoctor = async (req, res) => {
 }
 exports.getAllPosterDoctorsByEmp = async (req, res) => {
   const { userId, subCatId, deptId } = req.body
-  const query = "select doctor_id,doctor_name,code,camp_venue,camp_date,camp_time,doctor_img,doctor_qualification,doctor_city,doctor_state from doctor_mst where user_id = ? and subcat_id = ? and dept_id =? and status = 'Y' ORDER BY doctor_mst.doctor_id DESC"
+  const query = `SELECT doctor_id,doctor_name,code,camp_venue,camp_date,camp_time,doctor_img,doctor_qualification,doctor_city,doctor_state 
+  FROM doctordata 
+  where user_id = ? and subcat_id = ? and dept_id =? and status = 'Y' 
+  ORDER BY doctordata.doctor_id DESC`
   // const query = 'CALL GetDoctorDataWithUserId(?,?)'
   try {
     db.query(query, [userId, subCatId, deptId], (err, result) => {
