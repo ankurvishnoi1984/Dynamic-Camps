@@ -11,7 +11,7 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 exports.addPosterDoctor = async (req, res) => {
-  const { userId, doctorName, code, campDate, campVenue, campTime, subCatId, deptId } = req.body;
+  const { userId, doctorName, code=0, campDate, campVenue, campTime, subCatId=1, deptId } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
   const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?);'
@@ -174,7 +174,7 @@ exports.updatePosterDoctor = async (req, res) => {
 
 exports.AddPoster = async (req, res) => {
 
-  const { docId, lang, subCatId, deptId } = req.body;
+  const { docId, lang="en", subCatId=1, deptId } = req.body;
 
   const query = 'select doctor_name,doctor_img,doctor_qualification,camp_date,camp_time, camp_venue from doctordata where doctor_id = ? and dept_id = ?'
 
@@ -184,7 +184,7 @@ exports.AddPoster = async (req, res) => {
         // Handle the database error
         logger.error("error in addposter1", err.message);
         return res.status(500).json({
-          errorCode: "INTERNAL_SERVER_ERROR",
+          errorCode: "0",
           errorDetail: err,
           responseData: {},
           status: "ERROR",
@@ -204,7 +204,7 @@ exports.AddPoster = async (req, res) => {
             // Handle the database error for retrieving postername
             logger.error("error in addposter2", err.message);
             return res.status(500).json({
-              errorCode: "INTERNAL_SERVER_ERROR",
+              errorCode: "0",
               errorDetail: posterErr,
               responseData: {},
               status: "ERROR",
@@ -239,7 +239,7 @@ exports.AddPoster = async (req, res) => {
                 console.log("insert error", insertErr);
                 logger.error("error in addposter3", insertErr);
                 return res.status(500).json({
-                  errorCode: "INTERNAL_SERVER_ERROR",
+                  errorCode: "0",
                   errorDetail: insertErr,
                   responseData: {},
                   status: "ERROR",
