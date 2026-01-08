@@ -8,7 +8,7 @@ import { DeptId, BASEURL, BASEURL2 } from "../constant/constant"
 import toast from "react-hot-toast";
 import axios from "axios";
 
-export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
+export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
   const cropperRef = useRef(null);
 
   const [imageSrc, setImageSrc] = useState(null);
@@ -17,16 +17,19 @@ export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
   const [originalImage, setOriginalImage] = useState(null);
   const fileInputRef = useRef(null);
   const userId = sessionStorage.getItem("userId");
-  const [loading,setLoading] = useState(false);
-  const [doctorName,setDoctorName] = useState("")
-  const [campDate,setCampDate] = useState("");
-  const [venue,setVenue] = useState("");
-  const [campTime,setCampTime]=useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [doctorName, setDoctorName] = useState("")
+  const [campDate, setCampDate] = useState("");
+  const [venue, setVenue] = useState("");
+  const [campTime, setCampTime] = useState("");
 
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+     setSelectedFile(file); 
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -52,56 +55,49 @@ export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
     setImageSrc(null);
   };
 
-   const handelAddDoctorData = async (event) => {
+  const handelAddDoctorData = async (event) => {
     event.preventDefault();
     // Validate required fields
-    if (!doctorName || !preview || !campDate || !venue ||!campTime) {
+    if (!doctorName || !preview || !campDate || !venue || !campTime) {
       toast.error("Missing Required Field");
       return;
     }
 
-    // const fileSize = img.size / (1024 * 1024);
-    // if (fileSize > IMG_SIZE) {
-    //   toast.error(`File size exceeds ${IMG_SIZE}MB. Please upload a smaller image.`);
-    //   return;
-    // }
+
 
     try {
       const formData = new FormData();
 
       formData.append("doctorName", doctorName);
-      formData.append("image", preview);
+      formData.append("image", selectedFile);
       formData.append("campDate", campDate);
       formData.append("campTime", campTime);
       formData.append("campVenue", venue);
       formData.append("userId", userId);
-      formData.append("deptId",DeptId)
+      formData.append("deptId", DeptId)
       const doctorResponse = await axios.post(
         `${BASEURL}/poster/addPosterDoctor`,
         formData
       );
       if (Number(doctorResponse?.data?.errorCode) === 1) {
-      //  setDoctorName("");
-      //  setPreview(null);
-      //  setCampDate("");
-      //  setCampTime("");
-      //  setVenue("");
+        setDoctorName("");
+        setPreview(null);
+        setCampDate("");
+        setCampTime("");
+        setVenue("");
 
-      const docId = doctorResponse.data.docid;
-      const posterReq = {docId,deptId:DeptId}
-      try {
-        const posterResponse = await axios.post(`${BASEURL}/poster/addPoster`,posterReq)
-        if(Number(posterResponse.data.errorCode===1)){
-          toast.success("Poster Generated");
-        }else{
-          toast.success("Something went wrong while generating poster")
+        const docId = doctorResponse.data.docid;
+        const posterReq = { docId, deptId: DeptId }
+        try {
+          const posterResponse = await axios.post(`${BASEURL}/poster/addPoster`, posterReq)
+          toast.success("Poster generated")
+        } catch (error) {
+          toast.success("Something went wrong while generating poster", error)
         }
-      } catch (error) {
-        toast.success("Something went wrong while generating poster",error)
-      }
 
         toast.success("Doctor added successfully");
         getDoctorList();
+        onClose();
       }
     } catch (error) {
       console.error("Error in adding doctor:", error);
@@ -109,7 +105,7 @@ export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
     }
   };
 
-  
+
 
 
   if (!open) return null;
@@ -170,43 +166,51 @@ export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
                 <ImageCropperModal
                   imageSrc={originalImage}
                   onClose={() => setShowCropper(false)}
-                  onSave={(cropped) => {
+                  /*onSave={(cropped) => {
                     setPreview(cropped);      // update preview
                     setShowCropper(false);
+                  }}*/
+                  onSave={(blob) => {
+                    const file = new File([blob], "doctor.jpg", { type: "image/jpeg" });
+
+                    setSelectedFile(file);          // 🔥 multer upload
+                    setPreview(URL.createObjectURL(blob)); // 🔥 preview
+                    setShowCropper(false);
                   }}
+
                 />
               )}
 
 
               {/* Form */}
               <div className="form-grid">
-                <input placeholder="Doctor Name" 
-                type="text"
-                value={doctorName}
-                onChange={(e)=>{
-                  setDoctorName(e.target.value)
-                }}
+                <input placeholder="Doctor Name"
+                  type="text"
+                  value={doctorName}
+                  onChange={(e) => {
+                    setDoctorName(e.target.value)
+                  }}
                 />
-                <input placeholder="Camp Date" 
-                type="date"
-                value={campDate}
-                onChange={(e)=>{
-                  setCampDate(e.target.value)
-                }}
+                <input placeholder="Camp Date"
+                  type="date"
+                  value={campDate}
+                  onChange={(e) => {
+                    setCampDate(e.target.value)
+                  }}
                 />
 
                 <input placeholder="Camp Venue"
-                type="text"
-                value={venue}
-                onChange={(e)=>{setVenue(e.target.value)}}
+                  type="text"
+                  value={venue}
+                  onChange={(e) => { setVenue(e.target.value) }}
                 />
 
                 <input placeholder="Camp Time"
-                type="time"
-                value={campTime}
-                onChange={(e)=>{setCampTime(e.target.value)}}
+                  type="time"
+                  value={campTime}
+                  onChange={(e) => { setCampTime(e.target.value) }}
                 />
-                
+
               </div>
 
               {/* Actions */}
@@ -215,8 +219,8 @@ export const AddDoctorModal = ({ open, onClose,getDoctorList }) => {
                   Cancel
                 </button>
                 <button className="primary-btn"
-                onClick={handelAddDoctorData}>
-                Save Doctor</button>
+                  onClick={handelAddDoctorData}>
+                  Save Doctor</button>
               </div>
             </div>
           </div>

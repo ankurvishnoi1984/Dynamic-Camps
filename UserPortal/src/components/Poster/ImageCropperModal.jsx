@@ -14,7 +14,15 @@ const ImageCropperModal = ({ imageSrc, onClose, onSave }) => {
       imageSmoothingQuality: "high",
     });
 
-    onSave(canvas.toDataURL("image/jpeg", 0.9));
+    // onSave(canvas.toDataURL("image/jpeg", 0.9));
+    canvas.toBlob(
+      (blob) => {
+        onSave(blob); // 🔥 send Blob instead of Base64
+      },
+      "image/jpeg",
+      0.9
+    );
+
   };
 
   return ReactDOM.createPortal(
