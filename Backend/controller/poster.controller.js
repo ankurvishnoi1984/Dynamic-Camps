@@ -3,6 +3,7 @@ const db = require("../config/db")
 const logger = require('../utils/logger')
 const sharp = require("sharp");
 const path = require("path");
+const fs = require("fs");
 
 
 // Define the uploads path
@@ -127,6 +128,46 @@ exports.getPosterByDoctorId = async (req, res) => {
 
     res.status(500).json({
       errorCode: "0",
+      status: "ERROR",
+    });
+  }
+};
+
+exports.downloadPoster = (req, res) => {
+  console.log("downloadPoster triggered")
+  try {
+    const { filename } = req.params;
+
+    const filePath = path.join(
+      __dirname,
+       "../uploads/poster",
+      filename
+    );
+    console.log("filepath",filePath)
+
+    // Security check
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        errorCode: 0,
+        status: "ERROR",
+        message: "File not found",
+      });
+    }
+
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        logger.error(`Download error: ${err.message}`);
+        res.status(500).json({
+          errorCode: 0,
+          status: "ERROR",
+          message: "Unable to download file",
+        });
+      }
+    });
+  } catch (err) {
+    logger.error(`Download Poster Error: ${err.message}`);
+    res.status(500).json({
+      errorCode: 0,
       status: "ERROR",
     });
   }

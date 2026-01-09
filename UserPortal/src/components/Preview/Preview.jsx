@@ -4,7 +4,7 @@ import "./Preview.css";
 import axios from "axios";
 import Loader from "../utils/Loader";
 import toast from "react-hot-toast";
-import { DeptId,BASEURL } from "../constant/constant";
+import { DeptId, BASEURL } from "../constant/constant";
 //import { toast } from "react-toastify";
 
 const Preview = () => {
@@ -26,14 +26,21 @@ const Preview = () => {
 
     async function GetDoctorById() {
         try {
-            const req = {docId:id,deptId:DeptId,subCatId:1}
-            let response = await axios.post(`${BASEURL}/poster/getPosterByDoctorId`,req);
-            console.log("response, ",response)
+            const req = { docId: id, deptId: DeptId, subCatId: 1 }
+            let response = await axios.post(`${BASEURL}/poster/getPosterByDoctorId`, req);
+            console.log("response, ", response)
             setSinglDocData(response.data.result[0]);
         } catch (error) {
             console.log(error);
         }
     }
+    const handleDownload = (posterName) => {
+        const filename = posterName.split("/").pop();
+        window.open(
+            `${BASEURL}/poster/download-poster/${filename}`,
+            "_blank"
+        );
+    };
 
     return (
         <div>
@@ -99,7 +106,7 @@ const Preview = () => {
                                 <div className="text-center">
                                     <div
                                         onClick={() =>
-                                            handleSave1()
+                                            handleDownload(singalDocData.poster_name)
                                         }
                                         className="btn btn-sm btn-danger"
                                     >
