@@ -3,8 +3,8 @@ import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import "./AddDoctorModal.css";
 import ReactDOM from "react-dom";
-import ImageCropperModal from "./ImageCropperModal";
-import { DeptId, BASEURL, BASEURL2 } from "../constant/constant"
+import ImageCropperModal from "../Cropper/ImageCropperModal";
+import { DeptId, BASEURL, BASEURL2 } from "../../constant/constant"
 import toast from "react-hot-toast";
 import axios from "axios";
 

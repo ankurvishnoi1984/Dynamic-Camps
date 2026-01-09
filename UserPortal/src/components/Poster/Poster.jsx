@@ -1,12 +1,12 @@
 import "./Poster.css";
 import { FiEye, FiInfo, FiEdit, FiPlus } from "react-icons/fi";
-import { AddDoctorModal } from "./AddDoctorModal";
+import { AddDoctorModal } from "./AddDoctor/AddDoctorModal";
 import { useEffect, useState } from "react";
 import { DeptId, BASEURL2 } from "../constant/constant"
 import { Link, useParams } from "react-router-dom";
 
 import axios from "axios";
-import { InfoDoctorModal } from "./InforDoctorModal";
+import { InfoDoctorModal } from "./Info/InforDoctorModal";
 
 
 export const Poster = () => {

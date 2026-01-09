@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "./Preview.css";
 import axios from "axios";
-import Loader from "../utils/Loader";
+import Loader from "../../utils/Loader";
 import toast from "react-hot-toast";
-import { DeptId, BASEURL } from "../constant/constant";
+import { DeptId, BASEURL } from "../../constant/constant";
 //import { toast } from "react-toastify";
 
 const Preview = () => {

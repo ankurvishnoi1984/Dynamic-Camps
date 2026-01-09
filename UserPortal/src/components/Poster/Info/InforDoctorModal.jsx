@@ -1,7 +1,7 @@
 import "cropperjs/dist/cropper.css";
 import "./InfoModal.css";
 import ReactDOM from "react-dom";
-import { BASEURL } from "../constant/constant";
+import { BASEURL } from "../../constant/constant";
 
 export const InfoDoctorModal = ({ open, onClose, infoData }) => {
     if (!open || !infoData) return null;
