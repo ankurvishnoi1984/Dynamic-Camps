@@ -6,6 +6,7 @@ import { DeptId, BASEURL2 } from "../constant/constant"
 import { Link, useParams } from "react-router-dom";
 
 import axios from "axios";
+import { InfoDoctorModal } from "./InforDoctorModal";
 
 
 export const Poster = () => {
@@ -13,6 +14,8 @@ export const Poster = () => {
   const [doctorsList, setDoctorsList] = useState([]);
   const [loading, setLoading] = useState(false);
   const userId = sessionStorage.getItem("userId");
+  const [infoModal, setInfoModal] = useState(false);
+  const [infoData, setInfoData] = useState({});
 
   const getDoctorsList = async () => {
     setLoading(true)
@@ -27,6 +30,11 @@ export const Poster = () => {
     } finally {
       setLoading(false);
     }
+  }
+
+  const handleOpenInfoModal = (doc) => {
+    setInfoData(doc);
+    setInfoModal(true);
   }
 
   useEffect(() => {
@@ -69,11 +77,11 @@ export const Poster = () => {
 
                       <div className="card-actions">
                         <button title="View">
-                      <Link to={`viewPoster/${doc.doctor_id}`} title="View">
-                          <FiEye size={18} />
+                          <Link to={`viewPoster/${doc.doctor_id}`} title="View">
+                            <FiEye size={18} />
                           </Link>
                         </button>
-                        <button title="Info">
+                        <button title="Info" onClick={() => handleOpenInfoModal(doc)}>
                           <FiInfo size={18} />
                         </button>
                         <button title="Edit">
@@ -94,6 +102,12 @@ export const Poster = () => {
         open={openModal}
         getDoctorList={getDoctorsList}
         onClose={() => setOpenModal(false)}
+      />
+      <InfoDoctorModal
+        infoData={infoData}
+        open={infoModal}
+        getDoctorList={getDoctorsList}
+        onClose={() => setInfoModal(false)}
       />
     </>
   );

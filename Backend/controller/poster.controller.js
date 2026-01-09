@@ -134,7 +134,6 @@ exports.getPosterByDoctorId = async (req, res) => {
 };
 
 exports.downloadPoster = (req, res) => {
-  console.log("downloadPoster triggered")
   try {
     const { filename } = req.params;
 
