@@ -11,7 +11,7 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 exports.addPosterDoctor = async (req, res) => {
-  const { userId, doctorName, code=0, campDate, campVenue, campTime, subCatId=1, deptId } = req.body;
+  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
   const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?);'
@@ -80,6 +80,58 @@ exports.getAllPosterDoctorsByEmp = async (req, res) => {
     res.send(error)
   }
 }
+
+exports.getPosterByDoctorId = async (req, res) => {
+  const { docId, subCatId, deptId } = req.body;
+
+  const query = `
+    SELECT 
+      upm.*,
+      d.doctor_id,
+      d.doctor_name,
+      d.doctor_qualification,
+      d.camp_venue,
+      d.camp_date
+    FROM user_poster_mst upm
+    INNER JOIN doctordata d 
+      ON d.doctor_id = upm.doctor_id
+    WHERE upm.doctor_id = ?
+      AND upm.subcat_id = ?
+      AND upm.dept_id = ?
+  `;
+
+  try {
+    db.query(query, [docId, subCatId, deptId], (err, result) => {
+      if (err) {
+        logger.error(
+          `Error in /controller/doctor/getPosterByDoctorId: ${err.message}. SQL query: ${query}`
+        );
+
+        return res.status(500).json({
+          errorCode: "0",
+          status: "ERROR",
+          details: "An internal server error occurred",
+        });
+      }
+
+      res.status(200).json({
+        message: "Poster & Doctor data fetched successfully",
+        errorCode: 1,
+        result,
+      });
+    });
+  } catch (error) {
+    logger.error(
+      `Error in /controller/doctor/getPosterByDoctorId: ${error.message}. SQL query: ${query}`
+    );
+
+    res.status(500).json({
+      errorCode: "0",
+      status: "ERROR",
+    });
+  }
+};
+
 
 exports.getCategory = async (req, res) => {
   const { deptId } = req.body;
@@ -174,7 +226,7 @@ exports.updatePosterDoctor = async (req, res) => {
 
 exports.AddPoster = async (req, res) => {
 
-  const { docId, lang="en", subCatId=1, deptId } = req.body;
+  const { docId, lang = "en", subCatId = 1, deptId } = req.body;
 
   const query = 'select doctor_name,doctor_img,doctor_qualification,camp_date,camp_time, camp_venue from doctordata where doctor_id = ? and dept_id = ?'
 

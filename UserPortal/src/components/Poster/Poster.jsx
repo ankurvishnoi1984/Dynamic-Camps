@@ -3,34 +3,10 @@ import { FiEye, FiInfo, FiEdit, FiPlus } from "react-icons/fi";
 import { AddDoctorModal } from "./AddDoctorModal";
 import { useEffect, useState } from "react";
 import { DeptId, BASEURL2 } from "../constant/constant"
+import { Link, useParams } from "react-router-dom";
+
 import axios from "axios";
-/*const doctors = [
-  {
-    id: 1,
-    name: "Dr. Amit",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    id: 2,
-    name: "Dr. Amit S",
-    image: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    id: 3,
-    name: "Dr. Mohit",
-    image: "https://randomuser.me/api/portraits/men/64.jpg",
-  },
-  {
-    id: 4,
-    name: "Dr. Rajesh",
-    image: "https://randomuser.me/api/portraits/men/12.jpg",
-  },
-  {
-    id: 5,
-    name: "Dr. Rajesh Mishra",
-    image: "https://randomuser.me/api/portraits/men/77.jpg",
-  },
-];*/
+
 
 export const Poster = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -93,7 +69,9 @@ export const Poster = () => {
 
                       <div className="card-actions">
                         <button title="View">
+                      <Link to={`viewPoster/${doc.doctor_id}`} title="View">
                           <FiEye size={18} />
+                          </Link>
                         </button>
                         <button title="Info">
                           <FiInfo size={18} />

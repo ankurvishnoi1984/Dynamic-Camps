@@ -12,6 +12,7 @@ import EmpanormPage from "../Pages/EmpanormPage";
 import DynamicCampPage from "../Pages/DynamicCampPage";
 import MonthlyCampPage from "../Pages/MonthlyCampPage";
 import NotFoundPage from "../Pages/NotFoundPage";
+import PreviewPage from "../Pages/PreviewPage";
 
 export const publicRoutes = [{ path: "/", element: <Login /> }];
 
@@ -29,5 +30,6 @@ export const privateRoutes = [
     { path: "/monthlycamp", element: <DynamicCampPage /> },
   { path: "/incentive", element: <IncentivePage /> },
    { path: "/camp/:campId", element: <MonthlyCampPage /> },
-     { path: "/poster", element: <PosterPage /> }
+     { path: "/poster", element: <PosterPage /> },
+     { path: "/poster/viewPoster/:id", element: <PreviewPage /> }
 ];
