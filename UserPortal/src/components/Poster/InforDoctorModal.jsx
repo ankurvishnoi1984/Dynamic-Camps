@@ -1,86 +1,84 @@
 import "cropperjs/dist/cropper.css";
-import "./AddDoctorModal.css";
+import "./InfoModal.css";
 import ReactDOM from "react-dom";
-import { DeptId, BASEURL, BASEURL2 } from "../constant/constant"
+import { BASEURL } from "../constant/constant";
 
 export const InfoDoctorModal = ({ open, onClose, infoData }) => {
-
-    if (!open) return null;
+    if (!open || !infoData) return null;
 
     return ReactDOM.createPortal(
         <div className="addusermodel">
             <div className="modal fade show" style={{ display: "block" }}>
-                <div className="modal-dialog modal-xl">
+                <div className="modal-dialog modal-xl modal-dialog-centered">
                     <div className="modal-content">
+
+                        {/* HEADER */}
                         <div className="modal-header">
-                            <h5 className="modal-title">Add Doctor</h5>
-                            <button className="btn-close" onClick={onClose}></button>
+                            <h5 className="modal-title">Doctor Details</h5>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                onClick={onClose}
+                            />
                         </div>
 
+                        {/* BODY */}
                         <div className="modal-body">
-                            {/* Image Upload / Preview */}
-                            <div className="image-section">
 
-                                {/* Hidden input ALWAYS present */}
-                                {/* <input
-                                    type="file"
-                                    accept="image/*"
-                                    hidden
-                                    ref={fileInputRef}
-                                /> */}
+                            {/* Doctor Image */}
+                            <div className="image-section">
+                                <label className="section-label">Doctor Photo</label>
 
                                 <div className="image-wrapper">
                                     <img
                                         src={`${BASEURL}/uploads/profile/${infoData.doctor_img}`}
-                                        alt="Doctor"
+                                        alt={infoData.doctor_name || "Doctor"}
                                         className="image-preview"
-
                                     />
+                                </div>
+                            </div>
+
+                            {/* Doctor Info */}
+                            <div className="form-grid read-only-grid">
+
+                                <div className="form-field">
+                                    <label>Doctor Name</label>
+                                    <span>{infoData.doctor_name || "-"}</span>
+                                </div>
+
+                                <div className="form-field">
+                                    <label>Qualification</label>
+                                    <span>{infoData.doctor_qualification || "-"}</span>
+                                </div>
+
+                                <div className="form-field">
+                                    <label>Camp Date</label>
+                                    <span>{infoData.camp_date || "-"}</span>
+                                </div>
+
+                                <div className="form-field">
+                                    <label>Camp Time</label>
+                                    <span>{infoData.camp_time || "-"}</span>
+                                </div>
+
+                                <div className="form-field full-width">
+                                    <label>Camp Venue</label>
+                                    <span>{infoData.camp_venue || "-"}</span>
                                 </div>
 
                             </div>
-
-                            {/* Form */}
-                            <div className="form-grid">
-                                <input placeholder="Doctor Name"
-                                    type="text"
-                                    value={infoData.doctor_name}
-                                    disabled={true}
-                                />
-                                <input placeholder="Camp Date"
-                                    type="date"
-                                    value={infoData.camp_date}
-                                    disabled={true}
-
-                                />
-
-                                <input placeholder="Camp Venue"
-                                    type="text"
-                                    value={infoData.camp_venue}
-                                    disabled={true}
-
-                                />
-
-                                <input placeholder="Camp Time"
-                                    type="time"
-                                    value={infoData.camp_time}
-                                    disabled={true}
-
-                                />
-
-                            </div>
-
-                            {/* Actions */}
-                            <div className="modal-actions">
-                                <button className="secondary-btn" onClick={onClose}>
-                                    Cancel
-                                </button>
-                                <button className="primary-btn"
-                                //   onClick={handelAddDoctorData}
-                                >
-                                    Save Doctor</button>
-                            </div>
                         </div>
+
+                        {/* FOOTER */}
+                        <div className="modal-footer">
+                            <button
+                                className="secondary-btn"
+                                onClick={onClose}
+                            >
+                                Close
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             </div>
