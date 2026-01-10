@@ -211,7 +211,7 @@ exports.getCategory = async (req, res) => {
 }
 
 exports.updatePosterDoctor = async (req, res) => {
-  const { userId, doctorId, doctorName, campDate, campVenue, code, campTime, doctorImg } = req.body;
+  const { userId, doctorId, doctorName, campDate, campVenue, code=0, campTime, doctorImg } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
 
 

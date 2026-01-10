@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../Navbar/Header'
-import Preview from '../Preview/Preview'
+import Preview from '../Poster/Preview/Preview'
 
 
 const PreviewPage = () => {

@@ -43,84 +43,45 @@ const Preview = () => {
     };
 
     return (
-        <div>
-            <div
-                className="content-header"
-                style={{ backgroundColor: "#39a6cf", color: "#fff", height: "50px" }}
-            >
-                <p className="text-center" style={{ fontSize: "25px" }}>
-                    {" "}
-                    <Link to="/dashboard" className=" text-left">
-                        <button type="button" className="btn btn-primary float-left">
-                            <i className="fas fa-arrow-left"></i>
-                        </button>
-                    </Link>{" "}
+        <>
+            <main id="main" className="main">
+                <section className="section dashboard">
+                    <div className="row ">
+                        <div className="col-sm-6 col-md-4 col-lg-3">
 
-                </p>
+                            <div className="card shadow-sm">
 
-                <div className="container-fluid">
-                    <div className="row mb-2">
-                        <div className="col-sm-6"></div>
-                    </div>
-                </div>
-            </div>
-
-
-
-            <section className="content mt-5">
-                <div className="container-fluid">
-                    <div className="row">
-
-                        <div className="card bg-light ml-3">
-                            <div
-                                className="card-body pt-0 poster-image1"
-                                id="pdiv1"
-                                style={{
-                                    backgroundImage: `url(/images/doctor2.jpg)`,
-                                    fontFamily: 'Montserrat, sans-serif'
-
-                                }}
-                            >
-                                <div className="row">
-                                    <div className=" text-center">
-                                        <div className="profile-image1">
-                                            <img
-                                                src={`${BASEURL}/${singalDocData.poster_name}`}
-                                                alt="doctor image"
-                                                className="profile-poster1"
-                                            />
-                                        </div>
-                                        <div className={`namediv1 montserrat-fnt`}>
-                                            {singalDocData.doctor_name}
-                                        </div>
-                                        <div className="therapydiv1 montserrat-fnt">
-                                            {singalDocData.doctor_qualification}
-                                        </div>
-                                        <div className="hospitaldiv1 montserrat-fnt">
-                                            {singalDocData.camp_venue}
-                                        </div>
-                                    </div>
+                                {/* Poster Image Preview */}
+                                <div className="card-body p-2">
+                                    <img
+                                        src={`${BASEURL}/${singalDocData.poster_name}`}
+                                        alt="Doctor Poster"
+                                        className="img-fluid rounded"
+                                        style={{ cursor: "pointer" }}
+                                    />
                                 </div>
-                            </div>
-                            <div className="card-footer">
-                                <div className="text-center">
-                                    <div
-                                        onClick={() =>
-                                            handleDownload(singalDocData.poster_name)
-                                        }
-                                        className="btn btn-sm btn-danger"
+
+                                {/* Download Button */}
+                                <div className="card-footer bg-white border-0 pt-0"
+                                onClick={()=>handleDownload(singalDocData.poster_name)}>
+                                    <a
+                                        // href={`${BASEURL}/download-poster/${singalDocData.poster_name?.split("/").pop()}`}
+                                        className="btn btn-danger btn-sm w-100"
                                     >
-                                        <i className="fas fa-download"></i> Image
-                                    </div>
+                                        <i className="bi bi-download me-1"></i>
+                                        Download Image
+                                    </a>
                                 </div>
+
                             </div>
+
                         </div>
-
-
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </main>
+        </>
+
+
     );
 };
 

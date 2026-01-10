@@ -7,6 +7,7 @@ import { Link, useParams } from "react-router-dom";
 
 import axios from "axios";
 import { InfoDoctorModal } from "./Info/InforDoctorModal";
+import { UpdateDoctorModal } from "./UpdateDoctor/UpdateDoctorModal";
 
 
 export const Poster = () => {
@@ -16,6 +17,7 @@ export const Poster = () => {
   const userId = sessionStorage.getItem("userId");
   const [infoModal, setInfoModal] = useState(false);
   const [infoData, setInfoData] = useState({});
+  const [updateModal,setUpdateModal]=useState(false);
 
   const getDoctorsList = async () => {
     setLoading(true)
@@ -35,6 +37,10 @@ export const Poster = () => {
   const handleOpenInfoModal = (doc) => {
     setInfoData(doc);
     setInfoModal(true);
+  }
+  const handleOpenUpdateModal = (doc)=>{
+    setInfoData(doc);
+    setUpdateModal(true)
   }
 
   useEffect(() => {
@@ -84,7 +90,7 @@ export const Poster = () => {
                         <button title="Info" onClick={() => handleOpenInfoModal(doc)}>
                           <FiInfo size={18} />
                         </button>
-                        <button title="Edit">
+                        <button title="Edit" onClick={()=>handleOpenUpdateModal(doc)}>
                           <FiEdit size={18} />
                         </button>
                       </div>
@@ -109,6 +115,11 @@ export const Poster = () => {
         getDoctorList={getDoctorsList}
         onClose={() => setInfoModal(false)}
       />
+      {/* <UpdateDoctorModal
+      doctorData={infoData}
+      open={updateModal}
+      onClose={()=>setUpdateModal(false)}
+      /> */}
     </>
   );
 };
