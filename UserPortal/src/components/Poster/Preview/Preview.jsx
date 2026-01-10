@@ -13,6 +13,7 @@ const Preview = () => {
     const catId = sessionStorage.getItem("catId");
     const subCatId = sessionStorage.getItem("subCatId")
     const [singalDocData, setSinglDocData] = useState({});
+    const userId = sessionStorage.getItem("userId")
 
     let { id } = useParams();
 
@@ -37,7 +38,7 @@ const Preview = () => {
     const handleDownload = (posterName) => {
         const filename = posterName.split("/").pop();
         window.open(
-            `${BASEURL}/poster/download-poster/${filename}`,
+            `${BASEURL}/poster/download-poster/${filename}?userId=${userId}&deptId=${DeptId}`,
             "_blank"
         );
     };
