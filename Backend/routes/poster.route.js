@@ -11,7 +11,7 @@ router.get(
 );
 
 router.post("/getCategory", getCategory)
-router.patch("/updatePosterDoctor/:id", profileUpload.single("image"), updatePosterDoctor)
+router.post("/updatePosterDoctor", profileUpload.single("image"), updatePosterDoctor)
 router.post("/addPosterDoctor", profileUpload.single("image"), addPosterDoctor)
 router.post("/addPoster",AddPoster)
 

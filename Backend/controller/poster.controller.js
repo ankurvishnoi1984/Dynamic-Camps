@@ -139,10 +139,10 @@ exports.downloadPoster = (req, res) => {
 
     const filePath = path.join(
       __dirname,
-       "../uploads/poster",
+      "../uploads/poster",
       filename
     );
-    console.log("filepath",filePath)
+    console.log("filepath", filePath)
 
     // Security check
     if (!fs.existsSync(filePath)) {
@@ -211,7 +211,7 @@ exports.getCategory = async (req, res) => {
 }
 
 exports.updatePosterDoctor = async (req, res) => {
-  const { userId, doctorId, doctorName, campDate, campVenue, code=0, campTime, doctorImg } = req.body;
+  const { userId, doctorId, doctorName, campDate, campVenue, code = 0, campTime, doctorImg } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
 
 
@@ -234,7 +234,7 @@ exports.updatePosterDoctor = async (req, res) => {
   const query = 'CALL UpdateDoctor(?, ?, ?, ?, ?, ?, ?, ?)'
 
   try {
-    db.query(query, [userId, doctorId, doctorName, filename, formattedCampDate, campTime, campVenue, code], (err, result) => {
+    db.query(query, [userId, doctorId, doctorName, filename, campDate, campTime, campVenue, code], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/updateDoctor: ${err.message}. SQL query: ${query}`);
 
@@ -252,7 +252,8 @@ exports.updatePosterDoctor = async (req, res) => {
         logger.info('Doctor Update Successfully');
 
         res.status(200).json({
-          message: "Doctor Update Successfully", errorCode: "1"
+          message: "Doctor Update Successfully", errorCode: "1",
+          result
         })
       }
     });

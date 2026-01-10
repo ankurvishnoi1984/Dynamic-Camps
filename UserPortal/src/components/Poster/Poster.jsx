@@ -17,7 +17,7 @@ export const Poster = () => {
   const userId = sessionStorage.getItem("userId");
   const [infoModal, setInfoModal] = useState(false);
   const [infoData, setInfoData] = useState({});
-  const [updateModal,setUpdateModal]=useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
 
   const getDoctorsList = async () => {
     setLoading(true)
@@ -38,7 +38,7 @@ export const Poster = () => {
     setInfoData(doc);
     setInfoModal(true);
   }
-  const handleOpenUpdateModal = (doc)=>{
+  const handleOpenUpdateModal = (doc) => {
     setInfoData(doc);
     setUpdateModal(true)
   }
@@ -90,7 +90,7 @@ export const Poster = () => {
                         <button title="Info" onClick={() => handleOpenInfoModal(doc)}>
                           <FiInfo size={18} />
                         </button>
-                        <button title="Edit" onClick={()=>handleOpenUpdateModal(doc)}>
+                        <button title="Edit" onClick={() => handleOpenUpdateModal(doc)}>
                           <FiEdit size={18} />
                         </button>
                       </div>
@@ -115,11 +115,11 @@ export const Poster = () => {
         getDoctorList={getDoctorsList}
         onClose={() => setInfoModal(false)}
       />
-      {/* <UpdateDoctorModal
-      doctorData={infoData}
-      open={updateModal}
-      onClose={()=>setUpdateModal(false)}
-      /> */}
+      <UpdateDoctorModal
+        doctorData={infoData}
+        open={updateModal}
+        onClose={() => setUpdateModal(false)}
+      />
     </>
   );
 };

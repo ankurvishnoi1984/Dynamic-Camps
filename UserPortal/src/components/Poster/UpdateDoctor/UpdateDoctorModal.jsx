@@ -2,7 +2,9 @@ import "cropperjs/dist/cropper.css";
 // import "./AddDoctorModal.css";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { BASEURL } from "../../constant/constant";
+import { BASEURL, DeptId } from "../../constant/constant";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export const UpdateDoctorModal = ({
   open,
@@ -10,23 +12,23 @@ export const UpdateDoctorModal = ({
   doctorData,
 }) => {
   const [formData, setFormData] = useState({
-    doctor_name: "",
-    doctor_qualification: "",
-    camp_date: "",
-    camp_time: "",
-    camp_venue: "",
-    doctor_img: "",
+    doctorName: "",
+    campDate: "",
+    campTime: "",
+    campVenue: "",
+    doctorImg: "",
+    doctorId: "",
   });
 
   useEffect(() => {
     if (doctorData) {
       setFormData({
-        doctor_name: doctorData.doctor_name || "",
-        doctor_qualification: doctorData.doctor_qualification || "",
-        camp_date: doctorData.camp_date || "",
-        camp_time: doctorData.camp_time || "",
-        camp_venue: doctorData.camp_venue || "",
-        doctor_img: doctorData.doctor_img || "",
+        doctorName: doctorData.doctor_name || "",
+        campDate: doctorData.camp_date || "",
+        campTime: doctorData.camp_time || "",
+        campVenue: doctorData.camp_venue || "",
+        doctorImg: doctorData.doctor_img || "",
+        doctorId: doctorData.doctor_id,
       });
     }
   }, [doctorData]);
@@ -38,14 +40,62 @@ export const UpdateDoctorModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    handleUpdate({
-      ...formData,
-      doctor_id: doctorData.doctor_id,
-    });
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Validate required fields
+    if (!formData.doctorName || !formData.doctorImg || !formData.campDate || !formData.campVenue || !formData.campTime) {
+      toast.error("Missing Required Field");
+      return;
+    }
+
+    try {
+      const payload = new FormData();
+      payload.append("doctorName", formData.doctorName);
+      payload.append("campDate", formData.campDate);
+      payload.append("campTime", formData.campTime);
+      payload.append("campVenue", formData.campVenue);
+      payload.append("doctorImg", formData.doctorImg);
+      payload.append("doctorId", formData.doctorId);
+      payload.append("userId", sessionStorage.getItem("userId"));
+      payload.append("deptId", DeptId);
+
+
+
+      const doctorResponse = await axios.post(
+        `${BASEURL}/poster/updatePosterDoctor`,
+        formData
+      );
+      if (Number(doctorResponse?.data?.errorCode) === 1) {
+        setFormData({
+          doctorName: "",
+          campDate: "",
+          campTime: "",
+          campVenue: "",
+          doctorImg: "",
+          doctorId: "",
+          userId: ""
+        })
+
+
+        const posterReq = { docId: doctorData.doctor_id, deptId: DeptId }
+        try {
+          const posterResponse = await axios.post(`${BASEURL}/poster/addPoster`, posterReq)
+          toast.success("Poster generated")
+        } catch (error) {
+          toast.success("Something went wrong while generating poster", error)
+        }
+
+        toast.success("Doctor added successfully");
+        getDoctorList();
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error in adding doctor:", error);
+      toast.error("Error In Adding Doctor");
+    }
   };
 
-  
+
   return ReactDOM.createPortal(
     <div className="addusermodel">
       <div className="modal fade show" style={{ display: "block" }}>
@@ -67,7 +117,7 @@ export const UpdateDoctorModal = ({
 
                 <div className="image-wrapper">
                   <img
-                    src={`${BASEURL}/uploads/profile/${formData.doctor_img}`}
+                    src={`${BASEURL}/uploads/profile/${formData.doctorImg}`}
                     alt="Doctor"
                     className="image-preview"
                   />
@@ -81,13 +131,13 @@ export const UpdateDoctorModal = ({
                   <label>Doctor Name</label>
                   <input
                     type="text"
-                    name="doctor_name"
-                    value={formData.doctor_name}
+                    name="doctorName"
+                    value={formData.doctorName}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-field">
+                {/* <div className="form-field">
                   <label>Qualification</label>
                   <input
                     type="text"
@@ -95,14 +145,14 @@ export const UpdateDoctorModal = ({
                     value={formData.doctor_qualification}
                     onChange={handleChange}
                   />
-                </div>
+                </div> */}
 
                 <div className="form-field">
                   <label>Camp Date</label>
                   <input
                     type="date"
-                    name="camp_date"
-                    value={formData.camp_date}
+                    name="campDate"
+                    value={formData.campDate}
                     onChange={handleChange}
                   />
                 </div>
@@ -111,8 +161,8 @@ export const UpdateDoctorModal = ({
                   <label>Camp Time</label>
                   <input
                     type="time"
-                    name="camp_time"
-                    value={formData.camp_time}
+                    name="campTime"
+                    value={formData.campTime}
                     onChange={handleChange}
                   />
                 </div>
@@ -121,8 +171,8 @@ export const UpdateDoctorModal = ({
                   <label>Camp Venue</label>
                   <input
                     type="text"
-                    name="camp_venue"
-                    value={formData.camp_venue}
+                    name="campVenue"
+                    value={formData.campVenue}
                     onChange={handleChange}
                   />
                 </div>
