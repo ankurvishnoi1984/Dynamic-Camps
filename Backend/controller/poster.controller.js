@@ -12,12 +12,12 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 exports.addPosterDoctor = async (req, res) => {
-  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId } = req.body;
+  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId,speciality } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
-  const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?);'
+  const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,doctor_qualification,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?,?);'
   try {
-    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId, deptId], (err, result) => {
+    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId,speciality, deptId], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/addDoctor: ${err.message}. SQL query: ${query}`);
         res.status(500).json({

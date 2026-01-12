@@ -23,13 +23,14 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
   const [campDate, setCampDate] = useState("");
   const [venue, setVenue] = useState("");
   const [campTime, setCampTime] = useState("");
+  const [speciality, setSpeciality] = useState("");
 
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-     setSelectedFile(file); 
+    setSelectedFile(file);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -74,6 +75,7 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
       formData.append("campTime", campTime);
       formData.append("campVenue", venue);
       formData.append("userId", userId);
+      formData.append("speciality",speciality)
       formData.append("deptId", DeptId)
       const doctorResponse = await axios.post(
         `${BASEURL}/poster/addPosterDoctor`,
@@ -85,6 +87,7 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
         setCampDate("");
         setCampTime("");
         setVenue("");
+        setSpeciality("");
 
         const docId = doctorResponse.data.docid;
         const posterReq = { docId, deptId: DeptId }
@@ -191,6 +194,15 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
                     setDoctorName(e.target.value)
                   }}
                 />
+
+                <input placeholder="Speciality/Qualification"
+                  type="text"
+                  value={speciality}
+                  onChange={(e) => {
+                    setSpeciality(e.target.value)
+                  }}
+                />
+
                 <input placeholder="Camp Date"
                   type="date"
                   value={campDate}
@@ -202,6 +214,7 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
                 <input placeholder="Camp Venue"
                   type="text"
                   value={venue}
+                  maxLength={16}
                   onChange={(e) => { setVenue(e.target.value) }}
                 />
 
