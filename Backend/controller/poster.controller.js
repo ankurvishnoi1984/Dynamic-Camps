@@ -12,12 +12,12 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 exports.addPosterDoctor = async (req, res) => {
-  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId,speciality } = req.body;
+  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId, speciality } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
   const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,doctor_qualification,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?,?);'
   try {
-    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId,speciality, deptId], (err, result) => {
+    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId, speciality, deptId], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/addDoctor: ${err.message}. SQL query: ${query}`);
         res.status(500).json({
@@ -44,43 +44,73 @@ exports.addPosterDoctor = async (req, res) => {
   }
 }
 exports.getAllPosterDoctorsByEmp = async (req, res) => {
-  const { userId, subCatId, deptId } = req.body
-  const query = `SELECT doctor_id,doctor_name,code,camp_venue,camp_date,camp_time,doctor_img,doctor_qualification,doctor_city,doctor_state 
-  FROM doctordata 
-  where user_id = ? and subcat_id = ? and dept_id =? and status = 'Y' 
-  ORDER BY doctordata.doctor_id DESC`
-  // const query = 'CALL GetDoctorDataWithUserId(?,?)'
-  try {
-    db.query(query, [userId, subCatId, deptId], (err, result) => {
-      if (err) {
-        logger.error(`Error in /controller/doctor/getDoctorDataWithUserId: ${err.message}. SQL query: ${query}`);
+  const { userId, subCatId, deptId, searchText } = req.body;
 
-        res.status(500).json({
+  let query = `
+    SELECT 
+      doctor_id,
+      doctor_name,
+      code,
+      camp_venue,
+      camp_date,
+      camp_time,
+      doctor_img,
+      doctor_qualification,
+      doctor_city,
+      doctor_state
+    FROM doctordata
+    WHERE user_id = ?
+      AND subcat_id = ?
+      AND dept_id = ?
+      AND status = 'Y'
+  `;
+
+  const params = [userId, subCatId, deptId];
+
+  // 🔍 Apply search only if text exists
+  if (searchText && searchText.trim() !== "") {
+    query += ` AND doctor_name LIKE ?`;
+    params.push(`%${searchText.trim()}%`);
+  }
+
+  query += ` ORDER BY doctor_id DESC`;
+
+  try {
+    db.query(query, params, (err, result) => {
+      if (err) {
+        logger.error(
+          `Error in /controller/doctor/getAllPosterDoctorsByEmp: ${err.message}. SQL query: ${query}`
+        );
+
+        return res.status(500).json({
           errorCode: "0",
-          errorDetail: err,
-          responseData: {},
           status: "ERROR",
           details: "An internal server error occurred",
-          getMessageInfo: "An internal server error occurred"
         });
       }
-      else {
 
-        const formattedResult = result.map((item) => ({
-          ...item,
-          camp_date: moment(item.camp_date).format('DD-MM-YYYY'), // Convert date format
-        }));
+      const formattedResult = result.map((item) => ({
+        ...item,
+        camp_date: moment(item.camp_date).format("DD-MM-YYYY"),
+      }));
 
-
-        res.status(200).json({ message: "Doctor List get Successfully", errorCode: 1, data: formattedResult })
-
-      }
+      res.status(200).json({
+        message: "Doctor List fetched successfully",
+        errorCode: 1,
+        data: formattedResult,
+      });
     });
   } catch (error) {
-    logger.error(`Error in /controller/doctor/getDoctorDataWithUserId: ${error.message}. SQL query: ${query}`);
-    res.send(error)
+    logger.error(
+      `Error in /controller/doctor/getAllPosterDoctorsByEmp: ${error.message}`
+    );
+    res.status(500).json({
+      errorCode: "0",
+      status: "ERROR",
+    });
   }
-}
+};
+
 
 exports.getPosterByDoctorId = async (req, res) => {
   const { docId, subCatId, deptId } = req.body;
@@ -234,18 +264,18 @@ exports.downloadPoster = (req, res) => {
 };
 
 
-exports.getCategory = async (req, res) => {
+exports.getCategoryByDept = async (req, res) => {
   const { deptId } = req.body;
 
   const query = `
-       SELECT catid,name from category 
+       SELECT * from category_mst 
        WHERE status = 'Y'
        AND dept_id = ?
     `;
   try {
     db.query(query, [deptId], (err, result) => {
       if (err) {
-        logger.error(`Error in /controller/posters/getCategory: ${err.message}`);
+        logger.error(`Error in /controller/posters/getCategoryByDept: ${err.message}`);
         return res.status(500).json({
           errorCode: "INTERNAL_SERVER_ERROR",
           errorDetail: err.message,
@@ -266,7 +296,44 @@ exports.getCategory = async (req, res) => {
     });
   } catch (error) {
     console.log("error brandlist", error)
-    logger.error(`Error in /controller/posters/getCategory: ${error.message}`);
+    logger.error(`Error in /controller/posters/getCategoryByDept: ${error.message}`);
+    res.send(error);
+  }
+}
+
+exports.getSubCategoryByDept = async (req, res) => {
+  const { deptId } = req.body;
+
+  const query = `
+       SELECT * from subcategory_mst 
+       WHERE status = 'Y'
+       AND dept_id = ?
+    `;
+  try {
+    db.query(query, [deptId], (err, result) => {
+      if (err) {
+        logger.error(`Error in /controller/posters/getSubCategoryByDept: ${err.message}`);
+        return res.status(500).json({
+          errorCode: "INTERNAL_SERVER_ERROR",
+          errorDetail: err.message,
+          responseData: {},
+          status: "ERROR",
+          details: "An internal server error occurred",
+          getMessageInfo: "An internal server error occurred"
+        });
+      }
+      if (result.length === 0) {
+        return res.status(200).json({ message: "Brands list not found", errorCode: 1 });
+      }
+      res.status(200).json({
+        message: "Brands listed successfully",
+        errorCode: 1,
+        data: result
+      });
+    });
+  } catch (error) {
+    console.log("error brandlist", error)
+    logger.error(`Error in /controller/posters/getSubCategoryByDept: ${error.message}`);
     res.send(error);
   }
 }
