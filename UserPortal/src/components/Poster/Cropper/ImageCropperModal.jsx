@@ -24,27 +24,36 @@ const ImageCropperModal = ({ imageSrc, onClose, onSave }) => {
     );
 
   };
-
   return ReactDOM.createPortal(
-    <div className="addusermodel">
-      <div className="">
-        <Cropper
-          ref={cropperRef}
-          src={imageSrc}
-          style={{ height: 400, width: "100%" }}
-          viewMode={1}
-          guides
-          background
-          autoCropArea={0.7}
-          cropBoxMovable
-          cropBoxResizable
-        />
+    <div className="cropper-overlay">
+      <div className="cropper-modal1">
+        {/* Header */}
+        <div className="cropper-header">
+          <h3>Crop Image</h3>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
 
-        <div className="cropper-actions">
-          <button onClick={onClose} className="secondary-btn">
+        {/* Cropper */}
+        <div className="cropper-body">
+          <Cropper
+            ref={cropperRef}
+            src={imageSrc}
+            viewMode={1}
+            guides={true}
+            background={false}
+            autoCropArea={0.8}
+            responsive={true}
+            checkOrientation={false}
+            style={{ height: 350, width: "100%" }}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="cropper-footer">
+          <button onClick={onClose} className="btn secondary">
             Cancel
           </button>
-          <button onClick={handleSave} className="primary-btn">
+          <button onClick={handleSave} className="btn primary">
             Crop & Save
           </button>
         </div>

@@ -11,8 +11,8 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 
-exports.addPosterDoctor = async (req, res) => {
-  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 1, deptId, speciality } = req.body;
+exports.addDoctor = async (req, res) => {
+  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 0, deptId, speciality } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
   const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,doctor_qualification,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?,?);'
@@ -43,8 +43,8 @@ exports.addPosterDoctor = async (req, res) => {
     res.send(error)
   }
 }
-exports.getAllPosterDoctorsByEmp = async (req, res) => {
-  const { userId, subCatId, deptId, searchText } = req.body;
+exports.getAllDoctorsByEmp = async (req, res) => {
+  const { userId, deptId, searchText } = req.body;
 
   let query = `
     SELECT 
@@ -60,12 +60,11 @@ exports.getAllPosterDoctorsByEmp = async (req, res) => {
       doctor_state
     FROM doctordata
     WHERE user_id = ?
-      AND subcat_id = ?
       AND dept_id = ?
       AND status = 'Y'
   `;
 
-  const params = [userId, subCatId, deptId];
+  const params = [userId, deptId];
 
   // 🔍 Apply search only if text exists
   if (searchText && searchText.trim() !== "") {
@@ -144,7 +143,15 @@ exports.getPosterByDoctorId = async (req, res) => {
           details: "An internal server error occurred",
         });
       }
-
+      if (result.length === 0) {
+        return res.status(200).json({
+          message: "Poster & Doctor data fetched successfully",
+          errorCode: 1,
+          result: [{
+            poster_name:"Backend/uploads/noPoster"
+          }]
+        });
+      }
       res.status(200).json({
         message: "Poster & Doctor data fetched successfully",
         errorCode: 1,
@@ -302,15 +309,16 @@ exports.getCategoryByDept = async (req, res) => {
 }
 
 exports.getSubCategoryByDept = async (req, res) => {
-  const { deptId } = req.body;
+  const { deptId, categoryId } = req.body;
 
   const query = `
        SELECT * from subcategory_mst 
        WHERE status = 'Y'
        AND dept_id = ?
+       AND category_id=?
     `;
   try {
-    db.query(query, [deptId], (err, result) => {
+    db.query(query, [deptId, categoryId], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/posters/getSubCategoryByDept: ${err.message}`);
         return res.status(500).json({
@@ -323,10 +331,10 @@ exports.getSubCategoryByDept = async (req, res) => {
         });
       }
       if (result.length === 0) {
-        return res.status(200).json({ message: "Brands list not found", errorCode: 1 });
+        return res.status(200).json({ message: "Subcategory list not found", errorCode: 1, data: [] });
       }
       res.status(200).json({
-        message: "Brands listed successfully",
+        message: "Subcategory listed successfully",
         errorCode: 1,
         data: result
       });
@@ -473,6 +481,134 @@ exports.AddPoster = async (req, res) => {
   }
 };
 
+exports.AddPosterV2 = async (req, res) => {
+  const { docId, lang = "en", deptId } = req.body;
+
+  try {
+    /**
+     * 1️⃣ Get doctor data
+     */
+    const [doctorRows] = await db.promise().query(
+      `SELECT 
+         doctor_name,
+         doctor_img,
+         doctor_qualification,
+         camp_date,
+         camp_time,
+         camp_venue
+       FROM doctordata
+       WHERE doctor_id = ?
+         AND dept_id = ?`,
+      [docId, deptId]
+    );
+
+    if (!doctorRows.length) {
+      return res.status(404).json({
+        errorCode: "0",
+        status: "ERROR",
+        message: "Doctor not found",
+      });
+    }
+
+    const doctor = doctorRows[0];
+
+    /**
+     * 2️⃣ Get ALL active poster templates
+     */
+    const [posterTemplates] = await db.promise().query(
+      `SELECT 
+         poster_id,
+         postername,
+         poster_path,
+         width,
+         height,
+         subcat_id
+       FROM poster_mst
+       WHERE language = ?
+         AND dept_id = ?
+         AND status = 'Y'
+       ORDER BY displayorder`,
+      [lang, deptId]
+    );
+
+    if (!posterTemplates.length) {
+      return res.status(404).json({
+        errorCode: "0",
+        status: "ERROR",
+        message: "No active poster templates found",
+      });
+    }
+
+    /**
+     * 3️⃣ Generate posters (LOOP)
+     */
+    const formattedDate = moment(doctor.camp_date)
+      .format("DD MMM YYYY")
+      .toUpperCase();
+
+    const generatedPosters = [];
+
+    for (const template of posterTemplates) {
+      try {
+        const posterPath = await addTextOnImage({
+          doctor,
+          formattedDate,
+          posterTemplate: template,
+          docId,
+          lang,
+          subCatId: template.subcat_id, // 👈 IMPORTANT
+        });
+
+        /**
+         * 4️⃣ Save poster entry
+         */
+        await db.promise().query(
+          `CALL AddPoster(?,?,?,?,?)`,
+          [
+            docId,
+            lang,
+            posterPath,
+            template.subcat_id,
+            deptId,
+          ]
+        );
+
+        generatedPosters.push({
+          poster_id: template.poster_id,
+          postername: template.postername,
+          subCatId: template.subcat_id,
+          posterPath,
+        });
+      } catch (posterErr) {
+        logger.error(
+          `Poster generation failed for poster_id=${template.poster_id}`,
+          posterErr
+        );
+        // continue loop
+      }
+    }
+
+    /**
+     * 5️⃣ Final response
+     */
+    return res.status(200).json({
+      errorCode: "1",
+      message: "Posters generated successfully",
+      totalGenerated: generatedPosters.length,
+      posters: generatedPosters,
+    });
+
+  } catch (err) {
+    logger.error("error in AddPoster", err);
+    return res.status(500).json({
+      errorCode: "0",
+      status: "ERROR",
+      message: "Internal server error",
+    });
+  }
+};
+
+
 
 async function addTextOnImage({
   doctor,
@@ -520,7 +656,8 @@ async function addTextOnImage({
       </svg>
     `;
 
-    const outputDir = subCatId === 3 ? "test" : "uploads/poster";
+    // const outputDir = subCatId === 3 ? "test" : "uploads/poster";
+    const outputDir = "uploads/poster";
     const outputPath = `${outputDir}/${docId}-${postername}-${lang}-${subCatId}.png`;
 
     await sharp(`${uploadsfile2}/${poster_path}`)

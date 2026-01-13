@@ -82,17 +82,12 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
         formData
       );
       if (Number(doctorResponse?.data?.errorCode) === 1) {
-        setDoctorName("");
-        setPreview(null);
-        setCampDate("");
-        setCampTime("");
-        setVenue("");
-        setSpeciality("");
+        
 
         const docId = doctorResponse.data.docid;
         const posterReq = { docId, deptId: DeptId }
         try {
-          const posterResponse = await axios.post(`${BASEURL}/poster/addPoster`, posterReq)
+          const posterResponse = await axios.post(`${BASEURL}/poster/addPosterV2`, posterReq)
           toast.success("Poster generated")
         } catch (error) {
           toast.success("Something went wrong while generating poster", error)
@@ -101,6 +96,12 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
         toast.success("Doctor added successfully");
         getDoctorList();
         onClose();
+        setDoctorName("");
+        setPreview(null);
+        setCampDate("");
+        setCampTime("");
+        setVenue("");
+        setSpeciality("");
       }
     } catch (error) {
       console.error("Error in adding doctor:", error);
@@ -190,6 +191,7 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
                 <input placeholder="Doctor Name"
                   type="text"
                   value={doctorName}
+                  maxLength={16}
                   onChange={(e) => {
                     setDoctorName(e.target.value)
                   }}
