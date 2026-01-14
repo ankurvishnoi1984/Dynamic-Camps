@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 export const UpdateDoctorModal = ({
   open,
   onClose,
+  getDoctorList,
   doctorData,
 }) => {
   const [formData, setFormData] = useState({
@@ -79,15 +80,15 @@ export const UpdateDoctorModal = ({
 
         const posterReq = { docId: doctorData.doctor_id, deptId: DeptId }
         try {
-          const posterResponse = await axios.post(`${BASEURL}/poster/addPoster`, posterReq)
+          const posterResponse = await axios.post(`${BASEURL}/poster/addPosterV2`, posterReq)
           toast.success("Poster generated")
         } catch (error) {
           toast.success("Something went wrong while generating poster", error)
         }
 
-        toast.success("Doctor added successfully");
-        getDoctorList();
         onClose();
+        getDoctorList();
+        toast.success("Doctor added successfully");
       }
     } catch (error) {
       console.error("Error in adding doctor:", error);
@@ -146,6 +147,8 @@ export const UpdateDoctorModal = ({
                     onChange={handleChange}
                   />
                 </div> */}
+
+                
 
                 <div className="form-field">
                   <label>Camp Date</label>

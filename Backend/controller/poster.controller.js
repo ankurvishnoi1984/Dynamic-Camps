@@ -148,7 +148,7 @@ exports.getPosterByDoctorId = async (req, res) => {
           message: "Poster & Doctor data fetched successfully",
           errorCode: 1,
           result: [{
-            poster_name:"Backend/uploads/noPoster"
+            poster_name: "Backend/uploads/noPoster"
           }]
         });
       }
@@ -370,7 +370,7 @@ exports.updatePosterDoctor = async (req, res) => {
   const query = 'CALL UpdateDoctor(?, ?, ?, ?, ?, ?, ?, ?)'
 
   try {
-    db.query(query, [userId, doctorId, doctorName, filename, campDate, campTime, campVenue, code], (err, result) => {
+    db.query(query, [userId, doctorId, doctorName, filename, formattedCampDate, campTime, campVenue, code], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/updateDoctor: ${err.message}. SQL query: ${query}`);
 
@@ -630,13 +630,27 @@ async function addTextOnImage({
 
     const {
       nx, ny, dx, dy, tx, ty,
-      fs, c, nta
+      fs, c, nta, max_chars, min_fs
     } = posterFields;
+
+
+    const nameFontSize = calculateFontSize(
+      doctor.doctor_name,
+      fs,
+      max_chars || 30,
+      min_fs || 20
+    );
 
     const svg = `
       <svg width="${width}" height="${height}">
         <style>
           .title {
+            fill: ${c};
+            font-size: ${nameFontSize}px;
+            font-weight: 500;
+            font-family: Arial, sans-serif;
+          }
+          .meta {
             fill: ${c};
             font-size: ${fs}px;
             font-weight: 500;
@@ -647,10 +661,10 @@ async function addTextOnImage({
         <text x="${nx}%" y="${ny}%" text-anchor="${nta}" class="title bold">
           ${doctor.doctor_name}
         </text>
-        <text x="${dx}%" y="${dy}%" class="title">
+        <text x="${dx}%" y="${dy}%" class="meta">
           ${formattedDate}
         </text>
-        <text x="${tx}%" y="${ty}%" class="title">
+        <text x="${tx}%" y="${ty}%" class="meta">
           ${doctor.camp_time}
         </text>
       </svg>
@@ -671,6 +685,20 @@ async function addTextOnImage({
     throw err;
   }
 }
+
+function calculateFontSize(text, baseSize, maxChars, minSize) {
+  if (!text) return baseSize;
+
+  if (text.length <= maxChars) {
+    return baseSize;
+  }
+
+  const scale = maxChars / text.length;
+  const calculatedSize = Math.floor(baseSize * scale);
+
+  return Math.max(calculatedSize, minSize);
+}
+
 
 
 async function getPosterData(postername) {

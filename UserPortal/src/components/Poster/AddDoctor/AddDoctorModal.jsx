@@ -191,7 +191,7 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
                 <input placeholder="Doctor Name"
                   type="text"
                   value={doctorName}
-                  maxLength={16}
+                  maxLength={30}
                   onChange={(e) => {
                     setDoctorName(e.target.value)
                   }}
