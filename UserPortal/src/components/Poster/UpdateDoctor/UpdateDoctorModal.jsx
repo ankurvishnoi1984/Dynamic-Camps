@@ -67,15 +67,7 @@ export const UpdateDoctorModal = ({
         formData
       );
       if (Number(doctorResponse?.data?.errorCode) === 1) {
-        setFormData({
-          doctorName: "",
-          campDate: "",
-          campTime: "",
-          campVenue: "",
-          doctorImg: "",
-          doctorId: "",
-          userId: ""
-        })
+
 
 
         const posterReq = { docId: doctorData.doctor_id, deptId: DeptId }
@@ -87,6 +79,15 @@ export const UpdateDoctorModal = ({
         }
 
         onClose();
+        setFormData({
+          doctorName: "",
+          campDate: "",
+          campTime: "",
+          campVenue: "",
+          doctorImg: "",
+          doctorId: "",
+          userId: ""
+        })
         getDoctorList();
         toast.success("Doctor added successfully");
       }

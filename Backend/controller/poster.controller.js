@@ -90,7 +90,7 @@ exports.getAllDoctorsByEmp = async (req, res) => {
 
       const formattedResult = result.map((item) => ({
         ...item,
-        camp_date: moment(item.camp_date).format("DD-MM-YYYY"),
+        camp_date: moment(item.camp_date).format("YYYY-MM-DD"),
       }));
 
       res.status(200).json({
