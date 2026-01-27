@@ -31,6 +31,8 @@ const Departments = () => {
   const [clientList, setClientList] = useState([]);
   const [openActionId, setOpenActionId] = useState(null);
   const [searchKeyword,setsearchKeyword] = useState("");
+const [isPosterRequired, setIsPosterRequired] = useState(false);
+const [isCampRequired, setIsCampRequired] = useState(false);
 
 
 
@@ -396,6 +398,41 @@ const Departments = () => {
                       />
                     </div>
                   </div>
+                  {/* Requirements Toggles */}
+{/* Settings Style Toggles */}
+<div className="mb-4">
+  <div className="list-group rounded-4 shadow-sm overflow-hidden">
+
+    {/* Poster Required */}
+    <div className="list-group-item d-flex justify-content-between align-items-center py-3">
+      <span className="fw-medium text-dark">Is Poster Required</span>
+      <label className="switch">
+        <input
+          type="checkbox"
+          checked={isPosterRequired}
+          onChange={(e) => setIsPosterRequired(e.target.checked)}
+        />
+        <span className="slider"></span>
+      </label>
+    </div>
+
+    {/* Campaign Required */}
+    <div className="list-group-item d-flex justify-content-between align-items-center py-3">
+      <span className="fw-medium text-dark">Is Campaign Required</span>
+      <label className="switch">
+        <input
+          type="checkbox"
+          checked={isCampRequired}
+          onChange={(e) => setIsCampRequired(e.target.checked)}
+        />
+        <span className="slider"></span>
+      </label>
+    </div>
+
+  </div>
+</div>
+
+
                 </div>
 
                 {/* Footer */}
