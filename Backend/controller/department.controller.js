@@ -87,6 +87,8 @@ exports.getDepartmentDetails = (req, res) => {
       d.dept_id,
       d.dept_name,
       d.website_url,
+      d.view_poster,
+      d.view_camp,
       d.coordinator_name AS dept_coordinator_name,
       d.coordinator_contact AS dept_coordinator_contact,
       d.created_at AS dept_created_at
@@ -182,7 +184,7 @@ exports.updateDepartment = (req, res) => {
 
   const params = logoFile
     ? [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId, viewPoster, viewCamp, deptId]
-    : [clientId, deptName, coName, coContact, websiteUrl, userId, viewPoster, viewCamp, , deptId];
+    : [clientId, deptName, coName, coContact, websiteUrl, userId, viewPoster, viewCamp , deptId];
 
   try {
     db.query(query, params, (err, result) => {

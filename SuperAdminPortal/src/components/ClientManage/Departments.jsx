@@ -84,6 +84,8 @@ const [isCampRequired, setIsCampRequired] = useState(false);
   }
 
   const handleSubmit = async (e) => {
+    setLoading(true)
+
     e.preventDefault();
     // Validation (optional)
     if (!clientId || !deptName || !deptLogo || !spokePersonName || !spokePersonContact) {
@@ -119,7 +121,8 @@ const [isCampRequired, setIsCampRequired] = useState(false);
       formData.append("coContact", spokePersonContact);
       formData.append("userId", userId); // assuming you have it from session/context
       formData.append("logo", deptLogo); // attach the image
-
+      formData.append("viewPoster",isPosterRequired?"Y":"N")
+      formData.append("viewCamp",isCampRequired?"Y":"N")
       // API call
       const response = await fetch(`${BASEURL2}/department/addNewDepartment`, {
         method: "POST",
@@ -131,7 +134,6 @@ const [isCampRequired, setIsCampRequired] = useState(false);
       if (data.errorCode === 1) {
         alert("Department created successfully!");
         setShowModal(false);
-        // Optionally refresh client list
         getDepartmentList();
       } else {
         alert(data.details || "Failed to create dept");
@@ -139,6 +141,8 @@ const [isCampRequired, setIsCampRequired] = useState(false);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Something went wrong while creating dept");
+    } finally{
+      setLoading(false);
     }
   };
 

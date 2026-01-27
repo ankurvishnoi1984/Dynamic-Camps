@@ -4,21 +4,26 @@ import axios from "axios";
 import { BASEURL2 } from "../constant/constant";
 import "./editDept.css"
 
-const EditDepartmentModal = ({ show, setShow, editData, onSuccess, userId,clientList }) => {
+const EditDepartmentModal = ({ show, setShow, editData, onSuccess, userId, clientList }) => {
     const [deptName, setDeptName] = useState("");
     const [clientId, setClientId] = useState("");
     const [coName, setCoName] = useState("");
     const [coContact, setCoContact] = useState("");
     const [websiteUrl, setWebsiteUrl] = useState("");
     const [logo, setLogo] = useState(null);
+    const [isPosterRequired, setIsPosterRequired] = useState(false);
+    const [isCampRequired, setIsCampRequired] = useState(false);
 
     useEffect(() => {
+
         if (editData) {
             setDeptName(editData.dept_name || "");
             setClientId(editData.client_id || "");
             setCoName(editData.dept_coordinator_name || "");
             setCoContact(editData.dept_coordinator_contact || "");
             setWebsiteUrl(editData.website_url || "");
+            setIsCampRequired(editData.view_camp==="Y")
+            setIsPosterRequired(editData.view_poster==="Y")
         }
     }, [editData]);
 
@@ -33,6 +38,8 @@ const EditDepartmentModal = ({ show, setShow, editData, onSuccess, userId,client
         formData.append("coContact", coContact);
         formData.append("websiteUrl", websiteUrl);
         formData.append("userId", userId);
+        formData.append("viewPoster",isPosterRequired?"Y":"N")
+        formData.append("viewCamp",isCampRequired?"Y":"N")
         if (logo) formData.append("logo", logo);
 
         try {
@@ -152,6 +159,31 @@ const EditDepartmentModal = ({ show, setShow, editData, onSuccess, userId,client
                                                 : "No file chosen"}
                                     </span>
                                 </div>
+                            </div>
+                            {/* Poster Required */}
+                            <div className="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span className="fw-medium text-dark">Is Poster Required</span>
+                                <label className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={isPosterRequired}
+                                        onChange={(e) => setIsPosterRequired(e.target.checked)}
+                                    />
+                                    <span className="slider"></span>
+                                </label>
+                            </div>
+
+                            {/* Campaign Required */}
+                            <div className="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span className="fw-medium text-dark">Is Campaign Required</span>
+                                <label className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={isCampRequired}
+                                        onChange={(e) => setIsCampRequired(e.target.checked)}
+                                    />
+                                    <span className="slider"></span>
+                                </label>
                             </div>
                         </div>
 
