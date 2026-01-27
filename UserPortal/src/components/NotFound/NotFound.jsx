@@ -356,7 +356,7 @@ const canExecute = (campDateStr) => {
   ) : (
     <div>
       <main id="main" className="main">
-        <h3>No Camps to show</h3>
+        <h3>No Data to show</h3>
       </main>
 
 

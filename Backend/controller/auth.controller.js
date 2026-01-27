@@ -4,20 +4,28 @@ const logger = require('../utils/logger')
 
 
 exports.loginWithEmpCode = async (req, res) => {
-  const { empcode, password,deptId=0 } = req.body;
-  let query = ""
-  let params = [empcode]
-  if (deptId===0){
-   query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=?';
-  }else{
-    query = 'select user_id, empcode, password, email, role, designation from user_mst where empcode=? and dept_id = ?';
-    params.push(deptId)
-  }
+  const { empcode, password } = req.body;
+
+  const userQuery = `
+    SELECT 
+      u.user_id,
+      u.empcode,
+      u.password,
+      u.email,
+      u.role,
+      u.designation,
+      u.dept_id,
+      d.view_poster,
+      d.view_camp
+    FROM user_mst u
+    LEFT JOIN department_mst d ON d.dept_id = u.dept_id
+    WHERE u.empcode = ?
+  `;
 
   try {
-    db.query(query, params, (err, result) => {
+    db.query(userQuery, [empcode], (err, result) => {
       if (err) {
-        logger.error(`Error in /controller/auth/login: ${err.message}`);
+        logger.error(`Error in loginWithEmpCode: ${err.message}`);
         return res.status(500).json({
           errorCode: "0",
           errorDetail: err.message,
@@ -26,7 +34,9 @@ exports.loginWithEmpCode = async (req, res) => {
           details: "An internal server error occurred",
           getMessageInfo: "An internal server error occurred"
         });
-      } else if (result.length === 0) {
+      }
+
+      if (!result.length) {
         return res.status(401).json({
           errorCode: "0",
           errorDetail: "Invalid User or Password",
@@ -35,52 +45,62 @@ exports.loginWithEmpCode = async (req, res) => {
           details: "UNAUTHORIZED",
           getMessageInfo: "Invalid User or Password"
         });
-      } else {
-        const user = result[0];
-        if (password == user.password) {
-          const loginTime = new Date();
-          const historyQuery = 'insert into user_login_history (user_id, login_datetime,dept_id) values (?, ?,?)';
-          db.query(historyQuery, [user.user_id, loginTime,deptId], (err, result) => {
-            if (err) {
-              logger.error(`Error in /controller/auth/login: ${err.message}`);
-              return res.status(500).json({
-                errorCode: "0",
-                errorDetail: err.message,
-                responseData: {},
-                status: "ERROR",
-                details: "An internal server error occurred",
-                getMessageInfo: "An internal server error occurred"
-              });
-            } else {
-              const historyId = result.insertId;
-              return res.json({
-                errorCode: "1",
-                errorDetail: "",
-                responseData: {
-                  message: "Login successful",
-                  empId: user.empcode,
-                  user_id: user.user_id,
-                  role: user.role,
-                  sessionID:historyId,
-                  designation:user.designation,
-                },
-                status: "SUCCESS",
-                details: "",
-                getMessageInfo: ""
-              });
-            }
-          });
-        } else {
-          return res.status(401).json({
-            errorCode: "UNAUTHORIZED",
-            errorDetail: "Invalid User or Password",
-            responseData: {},
-            status: "ERROR",
-            details: "Invalid User or Password",
-            getMessageInfo: "Invalid User or Password"
+      }
+
+      const user = result[0];
+
+      if (password !== user.password) {
+        return res.status(401).json({
+          errorCode: "0",
+          errorDetail: "Invalid User or Password",
+          responseData: {},
+          status: "ERROR",
+          details: "Invalid User or Password",
+          getMessageInfo: "Invalid User or Password"
+        });
+      }
+
+      const loginTime = new Date();
+      const historyQuery = `
+        INSERT INTO user_login_history (user_id, login_datetime, dept_id)
+        VALUES (?, ?, ?)
+      `;
+
+      db.query(
+        historyQuery,
+        [user.user_id, loginTime, user.dept_id],
+        (err, historyResult) => {
+          if (err) {
+            logger.error(`Error in loginWithEmpCode: ${err.message}`);
+            return res.status(500).json({
+              errorCode: "0",
+              errorDetail: err.message,
+              responseData: {},
+              status: "ERROR",
+              details: "An internal server error occurred",
+              getMessageInfo: "An internal server error occurred"
+            });
+          }
+
+          return res.json({
+            errorCode: "1",
+            errorDetail: "",
+            responseData: {
+              message: "Login successful",
+              empId: user.empcode,
+              user_id: user.user_id,
+              role: user.role,
+              designation: user.designation,
+              sessionID: historyResult.insertId,
+              view_poster: user.view_poster ?? 'N',
+              view_camp: user.view_camp ?? 'N'
+            },
+            status: "SUCCESS",
+            details: "",
+            getMessageInfo: ""
           });
         }
-      }
+      );
     });
   } catch (error) {
     logger.error(error.message);

@@ -34,34 +34,6 @@ const Departments = () => {
 
 
 
-  const handleStatusUpdate = (camp) => {
-    setSelectedCamp(camp);
-    setNewStatus(camp.is_active === "Y" ? "N" : "Y");
-    setShowConfirmModal(true);
-  }
-
-  const handleStatusConfirm = () => {
-    const payload = {
-      userId,
-      campId: selectedCamp.camp_id,
-      status: newStatus
-    }
-    const endpoint = `${BASEURL2}/monthlyCamps/manageCampStatus`;
-    axios
-      .post(endpoint, payload)
-      .then((res) => {
-        alert(res.data.message || "Status Updated successfully!");
-        setShowConfirmModal(false);
-        getMonthlyCampDetails(); // refresh list
-        setOpenActionId(null);
-      })
-      .catch((err) => {
-        console.error("Error saving camp:", err);
-        alert("Error while saving camp");
-      });
-  }
-
-
   const handleEditClient = (client) => {
     setEditData(client);
     setEditModal(true);

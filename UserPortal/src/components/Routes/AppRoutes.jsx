@@ -1,29 +1,36 @@
+import { useSelector } from "react-redux";
+import { publicRoutes, getPrivateRoutes } from "./Routes";
 import { Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import { publicRoutes, privateRoutes } from "./Routes";
 import AdminProtectedRoute from "../protectedroutes/protect";
+import { Toaster } from "react-hot-toast";
 
 const AppRoutes = () => {
+  
+  const { view_poster, view_camp, loading } = useSelector(
+    (state) => state.permissions
+  );
+
+  // if (loading) return null; // or <Loader />
+
+  const privateRoutes = getPrivateRoutes({ view_poster, view_camp });
+
   return (
     <>
       <Routes>
-        {/* Public Routes */}
-        {publicRoutes.map(({ path, element }, index) => (
-          <Route key={index} path={path} element={element} />
+        {publicRoutes.map((r, i) => (
+          <Route key={i} path={r.path} element={r.element} />
         ))}
 
-        {/* Private Protected Routes */}
-        {privateRoutes.map(({ path, element }, index) => (
+        {privateRoutes.map((r, i) => (
           <Route
-            key={index}
-            path={path}
-            element={<AdminProtectedRoute>{element}</AdminProtectedRoute>}
+            key={i}
+            path={r.path}
+            element={<AdminProtectedRoute>{r.element}</AdminProtectedRoute>}
           />
         ))}
       </Routes>
 
-      {/* Toast Notification */}
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" />
     </>
   );
 };

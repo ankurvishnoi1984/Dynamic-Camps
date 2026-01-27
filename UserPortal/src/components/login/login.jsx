@@ -3,12 +3,15 @@ import { DeptId, BASEURL2 } from "../constant/constant";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { fetchPermissions } from "../../redux/slices/permissionSlice";
 
 const Login = () => {
   const [empcode, setEmpcode] = useState("");
   const [password, setPassWord] = useState("");
   const [error, setError] = useState("");
   const [activeCamps, setActiveCamps] = useState([]);
+  const dispatch = useDispatch();
 
 
   const navigate = useNavigate();
@@ -17,9 +20,9 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post(`${BASEURL2}/auth/login`, {
-        empcode:empcode1,
+        empcode: empcode1,
         password,
-        deptId:DeptId
+        deptId: DeptId
       });
       if (Number(res.data.errorCode) === 1) {
         console.log(res);
@@ -28,15 +31,22 @@ const Login = () => {
         const sessionId = res?.data?.responseData?.sessionID;
         const role = res?.data?.responseData?.role;
         const designation = res?.data?.responseData?.designation;
+        const viewPoster = res?.data?.responseData?.view_poster;
+        const viewCamp = res?.data?.responseData?.view_camp;
         sessionStorage.setItem("IsUserLoggedIn", "true");
         sessionStorage.setItem("empId", empId);
         sessionStorage.setItem("userId", userId);
         sessionStorage.setItem("sessionId", sessionId);
         sessionStorage.setItem("role", role);
-        sessionStorage.setItem("designation",designation)
-        if (activeCamps.length === 0){
+        sessionStorage.setItem("designation", designation)
+        sessionStorage.setItem("viewPoster", viewPoster)
+        sessionStorage.setItem("viewCamp", viewCamp)
+        
+        dispatch(fetchPermissions(DeptId));
+
+        if (activeCamps.length === 0) {
           navigate("/notFound");
-        }else{
+        } else {
           navigate(`/camp/${activeCamps[0].camp_id}`);
         }
       } else {
@@ -48,15 +58,15 @@ const Login = () => {
   };
 
   const fetchActiveCamps = async () => {
-  try {
-    const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,{deptId:DeptId});
-    if (res.data.errorCode === 1) {
-      setActiveCamps(res.data.data);
+    try {
+      const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`, { deptId: DeptId });
+      if (res.data.errorCode === 1) {
+        setActiveCamps(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching active camps:", err);
     }
-  } catch (err) {
-    console.error("Error fetching active camps:", err);
-  }
-};
+  };
 
   useEffect(() => {
     fetchActiveCamps();
@@ -76,8 +86,8 @@ const Login = () => {
                   >
                     <div className="d-flex justify-content-center py-4">
                       <div className="logo1 d-flex align-items-center w-auto">
-                    <img src="/images/logo.svg" alt="Logo" />
-                
+                        <img src="/images/logo.svg" alt="Logo" />
+
                       </div>
                     </div>
 
@@ -97,7 +107,7 @@ const Login = () => {
                             onChange={(e) => {
                               setEmpcode(e.target.value);
                             }}
-                            
+
                             required
                           />
                           <div className="invalid-feedback">

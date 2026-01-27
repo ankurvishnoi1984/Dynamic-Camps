@@ -207,3 +207,60 @@ exports.updateDepartment = (req, res) => {
   }
 };
 
+exports.getDepartmentPermissions = (req, res) => {
+  const { dept_id } = req.body;
+
+  if (!dept_id) {
+    return res.status(400).json({
+      errorCode: "0",
+      errorDetail: "dept_id is required",
+      responseData: {},
+      status: "ERROR",
+      details: "BAD_REQUEST",
+      getMessageInfo: "dept_id is required"
+    });
+  }
+
+  const query = `
+    SELECT view_poster, view_camp
+    FROM department_mst
+    WHERE dept_id = ?
+  `;
+
+  db.query(query, [dept_id], (err, result) => {
+    if (err) {
+      logger.error(`Error in getDepartmentPermissions: ${err.message}`);
+      return res.status(500).json({
+        errorCode: "0",
+        errorDetail: err.message,
+        responseData: {},
+        status: "ERROR",
+        details: "INTERNAL_SERVER_ERROR",
+        getMessageInfo: "Internal server error"
+      });
+    }
+
+    if (!result.length) {
+      return res.status(404).json({
+        errorCode: "0",
+        errorDetail: "Department not found",
+        responseData: {},
+        status: "ERROR",
+        details: "NOT_FOUND",
+        getMessageInfo: "Department not found"
+      });
+    }
+
+    return res.json({
+      errorCode: "1",
+      errorDetail: "",
+      responseData: {
+        view_poster: result[0].view_poster,
+        view_camp: result[0].view_camp
+      },
+      status: "SUCCESS",
+      details: "",
+      getMessageInfo: ""
+    });
+  });
+};

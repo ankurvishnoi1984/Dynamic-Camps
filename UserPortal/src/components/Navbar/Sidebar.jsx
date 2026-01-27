@@ -2,75 +2,56 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom'
-import { BASEURL2,DeptId } from '../constant/constant';
+import { BASEURL2, DeptId } from '../constant/constant';
 
-const Sidebar = ({toggleSideBar}) => {
+const Sidebar = ({ toggleSideBar }) => {
 
-  const designation = sessionStorage.getItem('designation');
-  const role = sessionStorage.getItem('role');
   const [activeCamps, setActiveCamps] = useState([]);
+  const viewPoster = sessionStorage.getItem("viewPoster");
+  const viewCamp = sessionStorage.getItem("viewCamp");
 
   // Configuration for sidebar menu items
-const menuItems = [
-  { path: '/dashboard', icon: 'bi bi-grid', label: 'My Camps' },
- 
+  const menuItems = [
+    { path: '/dashboard', icon: 'bi bi-grid', label: 'My Camps' },
 
-];
+
+  ];
   const dynamicCampLinks = activeCamps.map(camp => ({
     path: `/camp/${camp.camp_id}`,
     icon: 'bi bi-calendar-event',
     label: camp.camp_name,
   }));
 
-const fetchActiveCamps = async () => {
-  try {
-    const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`,{deptId:DeptId});
-    console.log("res , ",res)
-    if (res.data.errorCode === 1) {
-      setActiveCamps(res.data.data);
+  const fetchActiveCamps = async () => {
+    try {
+      const res = await axios.post(`${BASEURL2}/monthlyCamps/getActiveCampsNavList`, { deptId: DeptId });
+      console.log("res , ", res)
+      if (res.data.errorCode === 1) {
+        setActiveCamps(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching active camps:", err);
     }
-  } catch (err) {
-    console.error("Error fetching active camps:", err);
-  }
-};
+  };
   useEffect(() => {
     fetchActiveCamps();
   }, []);
 
 
-const filteredMenuItems =
-    designation === "AREA BUSINESS MANAGER" && Number(role) === 4
-      ? menuItems.filter(
-          (item) =>
-            ![
-              "/empanormCampaign",
-              "/bccDistribution",
-              "/prescriptionUpload",
-            ].includes(item.path)
-        )
-      : menuItems;
+
 
   return (
     <div>
-        {/* ======= Sidebar ======= */}
-        <aside className="sidebar" style={{ left: toggleSideBar ? "0" : "" }}>
-            <ul className="sidebar-nav">
-
-              {/* {filteredMenuItems.map((item)=>(
-                <li key={item.path} className="nav-item">
-                <NavLink to={item.path} className={({isActive})=> isActive? "nav-link" :"nav-link collapsed"}>
-                  <i className={item.icon}></i>
-                  <span>{item.label}</span>
-                </NavLink>
-                </li>
-              ))} */}
-  <li className="nav-item">
-                <NavLink to={'/poster'} className={({isActive})=> isActive? "nav-link" :"nav-link collapsed"}>
-                  <i className="bi bi-image"></i>
-                  <span>Poster</span>
-                </NavLink>
-                </li>
-          {activeCamps.length > 0 && (
+      {/* ======= Sidebar ======= */}
+      <aside className="sidebar" style={{ left: toggleSideBar ? "0" : "" }}>
+        <ul className="sidebar-nav">
+          {viewPoster==="Y"&& (<li className="nav-item">
+            <NavLink to={'/poster'} className={({ isActive }) => isActive ? "nav-link" : "nav-link collapsed"}>
+              <i className="bi bi-image"></i>
+              <span>Poster</span>
+            </NavLink>
+          </li>)}
+          {activeCamps.length > 0 && viewCamp==="Y"&& (
             <>
               <li className="nav-heading mt-3">Active Camps</li>
               {dynamicCampLinks.map((camp) => (
@@ -84,9 +65,9 @@ const filteredMenuItems =
             </>
           )}
 
-            </ul>
-          </aside>
-          {/* End Sidebar */}
+        </ul>
+      </aside>
+      {/* End Sidebar */}
     </div>
   )
 }

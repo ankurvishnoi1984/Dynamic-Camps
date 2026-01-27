@@ -6,7 +6,6 @@ import PosterPage from "../Pages/PosterPage";
 import PrescriberPage from "../Pages/PrescriberPage";
 import IncentivePage from "../Pages/IncentivePage";
 import BccDistPage from "../Pages/BccDistPage";
-import JaiHoPage from "../Pages/JaiHoPage";
 import PrescriptionPage from "../Pages/PrescriptionPage";
 import EmpanormPage from "../Pages/EmpanormPage";
 import DynamicCampPage from "../Pages/DynamicCampPage";
@@ -15,21 +14,32 @@ import NotFoundPage from "../Pages/NotFoundPage";
 import PreviewPage from "../Pages/PreviewPage";
 
 export const publicRoutes = [{ path: "/", element: <Login /> }];
+const viewPoster = sessionStorage.getItem("viewPoster")
+const viewCamp = sessionStorage.getItem("viewCamp")
 
-export const privateRoutes = [
-  { path: "/dashboard", element: <DashboardPage /> },
-  { path: "/notFound", element: <NotFoundPage /> },
+const posterRoutes = [
+  { path: "/poster", element: <PosterPage /> },
+  { path: "/addDoctor/poster/:id", element: <PosterPage /> },
+  { path: "/poster/viewPoster/:id", element: <PreviewPage /> }
+];
+
+const campRoutes = [
+  { path: "/monthlycamp", element: <DynamicCampPage /> },
+  { path: "/camp/:campId", element: <MonthlyCampPage /> },
+  { path: "/campRequest", element: <RequestPage /> }
+];
+
+
+export const getPrivateRoutes =({ view_poster, view_camp })=> [
+ { path: "/dashboard", element: <DashboardPage /> },
   { path: "/empanormCampaign", element: <EmpanormPage /> },
   { path: "/bccDistribution", element: <BccDistPage /> },
-  { path: "/jaiHo", element: <JaiHoPage/> },
-  { path: "/campRequest", element: <RequestPage /> },
   { path: "/addDoctor", element: <DoctorPage /> },
-  { path: "/addDoctor/poster/:id", element: <PosterPage /> },
   { path: "/prescriber", element: <PrescriberPage /> },
   { path: "/prescriptionUpload", element: <PrescriptionPage /> },
-    { path: "/monthlycamp", element: <DynamicCampPage /> },
-  { path: "/incentive", element: <IncentivePage /> },
-   { path: "/camp/:campId", element: <MonthlyCampPage /> },
-     { path: "/poster", element: <PosterPage /> },
-     { path: "/poster/viewPoster/:id", element: <PreviewPage /> }
-];
+
+  ...(view_poster==="Y" ? posterRoutes : []),
+  ...(view_camp==="Y" ? campRoutes : []),
+
+  { path: "*", element: <NotFoundPage /> }]
+
