@@ -6,7 +6,7 @@ const { sendAdminCredentialsMail } = require("../services/mail.service");
 
 
 exports.addNewDepartment = async (req, res) => {
-  const { clientId, deptName, coName, coContact, userId, websiteUrl } = req.body;
+  const { clientId, deptName, coName, coContact, userId, websiteUrl, viewPoster = "N", viewCamp = "N" } = req.body;
 
   let logoFile = null;
   if (req.files && req.files.length > 0) {
@@ -22,9 +22,11 @@ exports.addNewDepartment = async (req, res) => {
       coordinator_contact,
       dept_logo,
       website_url,
+      view_poster,
+      view_camp,
       created_by
     )
-    VALUES (?,?,?,?,?,?,?)
+    VALUES (?,?,?,?,?,?,?,?,?)
   `;
 
   try {
@@ -32,7 +34,7 @@ exports.addNewDepartment = async (req, res) => {
     const deptResult = await new Promise((resolve, reject) => {
       db.query(
         insertDeptQuery,
-        [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId],
+        [clientId, deptName, coName, coContact, logoFile, websiteUrl, viewPoster, viewCamp, userId],
         (err, results) => (err ? reject(err) : resolve(results))
       );
     });
@@ -68,13 +70,13 @@ exports.addNewDepartment = async (req, res) => {
     return res.status(500).json({
       status: "ERROR",
       errorDetail: err.message,
-       errorCode: 0,
+      errorCode: 0,
     });
   }
 };
 
 exports.getDepartmentDetails = (req, res) => {
-  const { clientId,searchKeyword } = req.body;
+  const { clientId, searchKeyword } = req.body;
 
   // Optional filter: you can restrict by client if needed
   let query = `
@@ -99,10 +101,10 @@ exports.getDepartmentDetails = (req, res) => {
     query += ` AND d.client_id = ?`;
     params.push(clientId);
   }
-   if (searchKeyword && searchKeyword.trim() !== ""){
+  if (searchKeyword && searchKeyword.trim() !== "") {
     query += ` AND LOWER(d.dept_name) LIKE ?`;
     params.push(`%${searchKeyword.trim().toLowerCase()}%`);
-   }
+  }
 
   query += ` ORDER BY d.created_at DESC`;
 
@@ -136,7 +138,7 @@ exports.getDepartmentDetails = (req, res) => {
 
 // controller/departmentController.js
 exports.updateDepartment = (req, res) => {
-  const { deptId, clientId, deptName, coName, coContact, userId, websiteUrl } = req.body;
+  const { deptId, clientId, deptName, coName, coContact, userId, websiteUrl, viewPoster, viewCamp } = req.body;
 
   // Handle optional logo upload
   let logoFile = null;
@@ -158,6 +160,8 @@ exports.updateDepartment = (req, res) => {
           dept_logo = ?,
           website_url = ?,
           modified_by = ?,
+          view_poster=?,
+          view_camp=?,
           modified_date = NOW()
         WHERE dept_id = ?
       `
@@ -170,13 +174,15 @@ exports.updateDepartment = (req, res) => {
           coordinator_contact = ?,
           website_url = ?,
           modified_by = ?,
+          view_poster=?,
+          view_camp=?,
           modified_date = NOW()
         WHERE dept_id = ?
       `;
 
   const params = logoFile
-    ? [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId, deptId]
-    : [clientId, deptName, coName, coContact, websiteUrl, userId, deptId];
+    ? [clientId, deptName, coName, coContact, logoFile, websiteUrl, userId, viewPoster, viewCamp, deptId]
+    : [clientId, deptName, coName, coContact, websiteUrl, userId, viewPoster, viewCamp, , deptId];
 
   try {
     db.query(query, params, (err, result) => {
