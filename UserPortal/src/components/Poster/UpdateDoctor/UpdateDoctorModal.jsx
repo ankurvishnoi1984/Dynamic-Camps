@@ -101,7 +101,7 @@ export const UpdateDoctorModal = ({
   return ReactDOM.createPortal(
     <div className="addusermodel">
       <div className="modal fade show" style={{ display: "block" }}>
-        <div className="modal-dialog modal-xl modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
 
             {/* HEADER */}
@@ -115,7 +115,7 @@ export const UpdateDoctorModal = ({
 
               {/* Image Preview */}
               <div className="image-section">
-                <label className="section-label">Doctor Photo</label>
+                {/* <label className="section-label">Doctor Photo</label> */}
 
                 <div className="image-wrapper">
                   <img
@@ -171,7 +171,7 @@ export const UpdateDoctorModal = ({
                   />
                 </div>
 
-                <div className="form-field full-width">
+                <div className="form-field">
                   <label>Camp Venue</label>
                   <input
                     type="text"

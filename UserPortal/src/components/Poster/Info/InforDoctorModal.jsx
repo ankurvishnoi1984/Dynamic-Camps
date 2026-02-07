@@ -9,7 +9,7 @@ export const InfoDoctorModal = ({ open, onClose, infoData }) => {
     return ReactDOM.createPortal(
         <div className="addusermodel">
             <div className="modal fade show" style={{ display: "block" }}>
-                <div className="modal-dialog modal-xl modal-dialog-centered">
+                <div className="modal-dialog  modal-dialog-centered">
                     <div className="modal-content">
 
                         {/* HEADER */}
@@ -27,7 +27,7 @@ export const InfoDoctorModal = ({ open, onClose, infoData }) => {
 
                             {/* Doctor Image */}
                             <div className="image-section">
-                                <label className="section-label">Doctor Photo</label>
+                                {/* <label className="section-label">Doctor Photo</label> */}
 
                                 <div className="image-wrapper">
                                     <img
@@ -61,7 +61,7 @@ export const InfoDoctorModal = ({ open, onClose, infoData }) => {
                                     <span>{infoData.camp_time || "-"}</span>
                                 </div>
 
-                                <div className="form-field full-width">
+                                <div className="form-field ">
                                     <label>Camp Venue</label>
                                     <span>{infoData.camp_venue || "-"}</span>
                                 </div>
