@@ -7,8 +7,34 @@ import { BASEURL2, DeptId } from '../constant/constant';
 const Sidebar = ({ toggleSideBar }) => {
 
   const [activeCamps, setActiveCamps] = useState([]);
-  const viewPoster = sessionStorage.getItem("viewPoster");
-  const viewCamp = sessionStorage.getItem("viewCamp");
+  const [view_poster, setViewPoster] = useState("N")
+  const [view_camp, setViewCamp] = useState("N")
+
+
+  const getDeptPermissions = async () => {
+    // setLoading(true);
+    try {
+      let res;
+      res = await axios.post(
+        `${BASEURL2}/department/getDepartmentPermissions`,
+        { dept_id: DeptId }
+      );
+      if (Number(res?.data?.errorCode) === 1) {
+        console.log(res.data.responseData);
+        setViewPoster(res.data.responseData.view_poster)
+        setViewCamp(res.data.responseData.view_camp)
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      // setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+
+    getDeptPermissions();
+  })
 
   // Configuration for sidebar menu items
   const menuItems = [
@@ -45,13 +71,13 @@ const Sidebar = ({ toggleSideBar }) => {
       {/* ======= Sidebar ======= */}
       <aside className="sidebar" style={{ left: toggleSideBar ? "0" : "" }}>
         <ul className="sidebar-nav">
-          {viewPoster==="Y"&& (<li className="nav-item">
+          {view_poster==="Y"&& (<li className="nav-item">
             <NavLink to={'/poster'} className={({ isActive }) => isActive ? "nav-link" : "nav-link collapsed"}>
               <i className="bi bi-image"></i>
               <span>Poster</span>
             </NavLink>
           </li>)}
-          {activeCamps.length > 0 && viewCamp==="Y"&& (
+          {activeCamps.length > 0 && view_camp==="Y"&& (
             <>
               <li className="nav-heading mt-3">Active Camps</li>
               {dynamicCampLinks.map((camp) => (
