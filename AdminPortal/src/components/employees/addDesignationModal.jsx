@@ -47,10 +47,11 @@ const AddDesignationModal = ({ show, onClose, onSuccess }) => {
           dept_id: DEPTID // Just to be safe, force override
         })),
       });
-
+      alert("Designations added successfully")
       onSuccess && onSuccess();
       onClose();
     } catch (err) {
+      alert("Error inserting designations:", err);
       console.error("Error inserting designations:", err);
     }
   };

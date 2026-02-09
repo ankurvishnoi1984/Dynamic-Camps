@@ -715,7 +715,7 @@ function Employee() {
         onClose={handleModalClose}
         deptId={deptId}
         onSuccess={() => {
-          //
+          fetchDesignationList();
         }} />
       }
 

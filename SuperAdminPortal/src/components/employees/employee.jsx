@@ -725,7 +725,7 @@ useEffect(() => {
         onClose={handleModalClose}
         deptId={deptId}
         onSuccess={() => {
-          //
+          fetchDesignationList();
         }} />
       }
 
