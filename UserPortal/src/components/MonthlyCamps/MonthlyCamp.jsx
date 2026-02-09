@@ -723,7 +723,7 @@ const MonthlyCamp = () => {
                                   cursor: "pointer",
                                   border: "1px solid #ccc",
                                 }}
-                                onClick={() => setPreviewImg(field.value)}
+                                onClick={() => setPreviewImg(`${BASEURL}/uploads/${field.value}`)}
                               />
                             ) : (
                               <p className="text-muted small">No image available</p>
