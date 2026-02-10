@@ -7,8 +7,10 @@ import ImageCropperModal from "../Cropper/ImageCropperModal";
 import { DeptId, BASEURL, BASEURL2 } from "../../constant/constant"
 import toast from "react-hot-toast";
 import axios from "axios";
+import Select from "react-select";
 
-export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
+
+export const AddDoctorModal = ({ open, onClose, onSuccess }) => {
   const cropperRef = useRef(null);
 
   const [imageSrc, setImageSrc] = useState(null);
@@ -19,11 +21,28 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
   const userId = sessionStorage.getItem("userId");
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [doctorName, setDoctorName] = useState("")
   const [campDate, setCampDate] = useState("");
   const [venue, setVenue] = useState("");
   const [campTime, setCampTime] = useState("");
   const [speciality, setSpeciality] = useState("");
+  const [doctorList, setDoctorList] = useState([]);
+  const empId = sessionStorage.getItem("empId");
+  const [doctorId,setDoctorId]=useState("")
+  const [doctorName,setDoctorName]=useState("");
+
+
+  const getDoctorList = async () => {
+    try {
+      const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId, deptId: DeptId });
+      setDoctorList(res?.data?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getDoctorList();
+  }, [])
 
 
   const handleImageChange = (e) => {
@@ -41,28 +60,26 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
 
     e.target.value = null; // 🔥 reset input
   };
+  const doctorOptions = doctorList.map((d) => ({
+  value: d.doctor_id,
+  label: d.doctor_name,
+}));
 
 
-  const handleCropSave = () => {
-    const cropper = cropperRef.current?.cropper;
-    if (!cropper) return;
-
-    const canvas = cropper.getCroppedCanvas({
-      imageSmoothingQuality: "high",
-    });
-
-    const croppedImage = canvas.toDataURL("image/jpeg", 0.9);
-    setPreview(croppedImage);
-    setImageSrc(null);
-  };
 
   const handelAddDoctorData = async (event) => {
     event.preventDefault();
     // Validate required fields
-    if (!doctorName || !preview || !campDate || !venue || !campTime) {
+    if (!doctorId|| !preview || !campDate || !venue || !campTime) {
       toast.error("Missing Required Field");
       return;
     }
+    // const selectedDoctor = doctorList.find(
+    //   (d) => d.doctor_id === Number(selectedDoctorId)
+    // );
+
+    // const doctorName = selectedDoctor?.doctor_name;
+    // const speciality = selectedDoctor?.speciality;
 
 
 
@@ -75,14 +92,14 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
       formData.append("campTime", campTime);
       formData.append("campVenue", venue);
       formData.append("userId", userId);
-      formData.append("speciality",speciality)
+      formData.append("speciality", speciality)
       formData.append("deptId", DeptId)
       const doctorResponse = await axios.post(
         `${BASEURL}/poster/addPosterDoctor`,
         formData
       );
       if (Number(doctorResponse?.data?.errorCode) === 1) {
-        
+
 
         const docId = doctorResponse.data.docid;
         const posterReq = { docId, deptId: DeptId }
@@ -94,9 +111,8 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
         }
 
         toast.success("Doctor added successfully");
-        getDoctorList();
+        onSuccess();
         onClose();
-        setDoctorName("");
         setPreview(null);
         setCampDate("");
         setCampTime("");
@@ -109,7 +125,21 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
     }
   };
 
+  const handelDoctorChange = (selectedOption) => {
+  const docId = selectedOption ? selectedOption.value : "";
 
+  if (docId) {
+    setDoctorId(docId);
+
+    const doctor = doctorList.find((e) => e.doctor_id == docId);
+
+    setSpeciality(doctor.speciality);
+    setDoctorName(doctor.doctor_name)
+  } else {
+    setDoctorName("");
+    setSpeciality("");
+  }
+};
 
 
   if (!open) return null;
@@ -188,22 +218,28 @@ export const AddDoctorModal = ({ open, onClose, getDoctorList }) => {
 
               {/* Form */}
               <div className="form-grid">
-                <input placeholder="Doctor Name"
-                  type="text"
-                  value={doctorName}
-                  maxLength={30}
-                  onChange={(e) => {
-                    setDoctorName(e.target.value)
-                  }}
+
+                {/* <select className="form-control"
+                  value={selectedDoctorId}
+                  onChange={(e) => setSelectedDoctorId(e.target.value)}
+                >
+                  <option value="">Select Doctor</option>
+                  {doctorList.map((doctor) => (
+                    <option key={doctor.doctor_id} value={doctor.doctor_id}>
+                      {doctor.doctor_name}
+                    </option>
+                  ))}
+                </select> */}
+
+                <Select
+                  options={doctorOptions}
+                  value={doctorOptions.find((opt) => opt.value === doctorId) || null}
+                  onChange={handelDoctorChange}
+                  placeholder="Doctor Name*"
+                  // styles={customStyles}
+                  menuPosition="fixed"
                 />
 
-                <input placeholder="Speciality/Qualification"
-                  type="text"
-                  value={speciality}
-                  onChange={(e) => {
-                    setSpeciality(e.target.value)
-                  }}
-                />
 
                 <input placeholder="Camp Date"
                   type="date"

@@ -122,7 +122,7 @@ export const Poster = () => {
       {/* ✅ MODAL MUST BE HERE */}
       <AddDoctorModal
         open={openModal}
-        getDoctorList={getDoctorsList}
+        onSuccess={getDoctorsList}
         onClose={() => setOpenModal(false)}
       />
       <InfoDoctorModal
