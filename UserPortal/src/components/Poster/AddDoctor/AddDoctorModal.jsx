@@ -74,15 +74,6 @@ export const AddDoctorModal = ({ open, onClose, onSuccess }) => {
       toast.error("Missing Required Field");
       return;
     }
-    // const selectedDoctor = doctorList.find(
-    //   (d) => d.doctor_id === Number(selectedDoctorId)
-    // );
-
-    // const doctorName = selectedDoctor?.doctor_name;
-    // const speciality = selectedDoctor?.speciality;
-
-
-
     try {
       const formData = new FormData();
 
@@ -94,6 +85,7 @@ export const AddDoctorModal = ({ open, onClose, onSuccess }) => {
       formData.append("userId", userId);
       formData.append("speciality", speciality)
       formData.append("deptId", DeptId)
+      formData.append("fkId",doctorId)
       const doctorResponse = await axios.post(
         `${BASEURL}/poster/addPosterDoctor`,
         formData

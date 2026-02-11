@@ -47,7 +47,7 @@ export const InfoDoctorModal = ({ open, onClose, infoData }) => {
                                 </div>
 
                                 <div className="form-field">
-                                    <label>Qualification</label>
+                                    <label>Speciality</label>
                                     <span>{infoData.doctor_qualification || "-"}</span>
                                 </div>
 

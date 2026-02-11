@@ -2,15 +2,17 @@ import "cropperjs/dist/cropper.css";
 // import "./AddDoctorModal.css";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { BASEURL, DeptId } from "../../constant/constant";
+import { BASEURL, BASEURL2, DeptId } from "../../constant/constant";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Select from "react-select";
+
 
 export const UpdateDoctorModal = ({
   open,
   onClose,
-  getDoctorList,
-  doctorData,
+  onSuccess,
+  infoData,
 }) => {
   const [formData, setFormData] = useState({
     doctorName: "",
@@ -19,22 +21,42 @@ export const UpdateDoctorModal = ({
     campVenue: "",
     doctorImg: "",
     doctorId: "",
+    fkId: "",
+    speciality:""
   });
+  const [doctorList, setDoctorList] = useState([])
+  const empId = sessionStorage.getItem("empId")
+
 
   useEffect(() => {
-    if (doctorData) {
+    if (infoData) {
       setFormData({
-        doctorName: doctorData.doctor_name || "",
-        campDate: doctorData.camp_date || "",
-        campTime: doctorData.camp_time || "",
-        campVenue: doctorData.camp_venue || "",
-        doctorImg: doctorData.doctor_img || "",
-        doctorId: doctorData.doctor_id,
+        doctorName: infoData.doctor_name || "",
+        campDate: infoData.camp_date || "",
+        campTime: infoData.camp_time || "",
+        campVenue: infoData.camp_venue || "",
+        doctorImg: infoData.doctor_img || "",
+        doctorId: infoData.doctor_id,
+        fkId: infoData.fk_id,
+        speciality:infoData.doctor_qualification,
       });
     }
-  }, [doctorData]);
+  }, [infoData]);
 
-  if (!open || !doctorData) return null;
+  const getDoctorList = async () => {
+    try {
+      const res = await axios.post(`${BASEURL2}/doc/getDoctorList`, { empcode: empId, deptId: DeptId });
+      setDoctorList(res?.data?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getDoctorList();
+  }, [])
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,6 +74,7 @@ export const UpdateDoctorModal = ({
     try {
       const payload = new FormData();
       payload.append("doctorName", formData.doctorName);
+      payload.append("speciality",formData.speciality)
       payload.append("campDate", formData.campDate);
       payload.append("campTime", formData.campTime);
       payload.append("campVenue", formData.campVenue);
@@ -59,7 +82,7 @@ export const UpdateDoctorModal = ({
       payload.append("doctorId", formData.doctorId);
       payload.append("userId", sessionStorage.getItem("userId"));
       payload.append("deptId", DeptId);
-
+      payload.append("fkId", formData.fkId)
 
 
       const doctorResponse = await axios.post(
@@ -70,14 +93,14 @@ export const UpdateDoctorModal = ({
 
 
 
-        const posterReq = { docId: doctorData.doctor_id, deptId: DeptId }
+        const posterReq = { docId: infoData.doctor_id, deptId: DeptId }
         try {
           const posterResponse = await axios.post(`${BASEURL}/poster/addPosterV2`, posterReq)
           toast.success("Poster generated")
         } catch (error) {
           toast.success("Something went wrong while generating poster", error)
         }
-
+        onSuccess();
         onClose();
         setFormData({
           doctorName: "",
@@ -86,7 +109,9 @@ export const UpdateDoctorModal = ({
           campVenue: "",
           doctorImg: "",
           doctorId: "",
-          userId: ""
+          userId: "",
+          fkId: "",
+          speciality:""
         })
         getDoctorList();
         toast.success("Doctor added successfully");
@@ -96,6 +121,25 @@ export const UpdateDoctorModal = ({
       toast.error("Error In Adding Doctor");
     }
   };
+
+  const doctorOptions = doctorList.map((d) => ({
+    value: d.doctor_id,
+    label: d.doctor_name,
+  }));
+  const handelDoctorChange = (selectedOption) => {
+    const docId = selectedOption ? selectedOption.value : "";
+
+    if (docId) {
+      // console.log("docId",docId)
+      // setFormData({ ...formData, fkId: docId })
+      const doctor = doctorList.find((e) => e.doctor_id == docId);
+      setFormData({...formData,doctorName:doctor.doctor_name,fkId:docId})
+    } else {
+
+    }
+  };
+
+  if (!open ) return null;
 
 
   return ReactDOM.createPortal(
@@ -129,7 +173,7 @@ export const UpdateDoctorModal = ({
               {/* FORM */}
               <div className="form-grid">
 
-                <div className="form-field">
+                {/* <div className="form-field">
                   <label>Doctor Name</label>
                   <input
                     type="text"
@@ -137,19 +181,23 @@ export const UpdateDoctorModal = ({
                     value={formData.doctorName}
                     onChange={handleChange}
                   />
-                </div>
-
-                {/* <div className="form-field">
-                  <label>Qualification</label>
-                  <input
-                    type="text"
-                    name="doctor_qualification"
-                    value={formData.doctor_qualification}
-                    onChange={handleChange}
-                  />
                 </div> */}
 
-                
+                <div>
+                  <label>Doctor Name</label>
+
+                  <Select
+                    options={doctorOptions}
+                    value={doctorOptions.find((opt) => opt.value === formData.fkId) || null}
+                    onChange={handelDoctorChange}
+                    placeholder="Doctor Name*"
+                    // styles={customStyles}
+                    menuPosition="fixed"
+                  />
+                </div>
+
+
+
 
                 <div className="form-field">
                   <label>Camp Date</label>

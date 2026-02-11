@@ -132,9 +132,10 @@ export const Poster = () => {
         onClose={() => setInfoModal(false)}
       />
       <UpdateDoctorModal
-        doctorData={infoData}
+        infoData={infoData}
         open={updateModal}
-        getDoctorList={getDoctorsList}
+        onSuccess={getDoctorsList}
+        doctorList = {doctorsList}
         onClose={() => setUpdateModal(false)}
       />
     </>

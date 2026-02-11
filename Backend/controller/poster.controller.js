@@ -12,12 +12,12 @@ const uploadsfile2 = path.join(__dirname, '../uploads/poster');
 
 
 exports.addDoctor = async (req, res) => {
-  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 0, deptId, speciality } = req.body;
+  const { userId, doctorName, code = 0, campDate, campVenue, campTime, subCatId = 0, deptId, speciality,fkId } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
   const filename = req.file && req.file.filename ? req.file.filename : null;
-  const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,doctor_qualification,dept_id) VALUES (?,?,?,?,?,?,?,?,?,?,?);'
+  const query = 'INSERT INTO doctordata (doctor_name, doctor_img, camp_date, camp_time, code, camp_venue,subcat_id, user_id, created_by,doctor_qualification,dept_id,fk_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);'
   try {
-    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId, speciality, deptId], (err, result) => {
+    db.query(query, [doctorName, filename, formattedCampDate, campTime, code, campVenue, subCatId, userId, userId, speciality, deptId,fkId], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/addDoctor: ${err.message}. SQL query: ${query}`);
         res.status(500).json({
@@ -57,7 +57,8 @@ exports.getAllDoctorsByEmp = async (req, res) => {
       doctor_img,
       doctor_qualification,
       doctor_city,
-      doctor_state
+      doctor_state,
+      fk_id 
     FROM doctordata
     WHERE user_id = ?
       AND dept_id = ?
@@ -347,7 +348,7 @@ exports.getSubCategoryByDept = async (req, res) => {
 }
 
 exports.updatePosterDoctor = async (req, res) => {
-  const { userId, doctorId, doctorName, campDate, campVenue, code = 0, campTime, doctorImg } = req.body;
+  const { userId, doctorId, doctorName, campDate, campVenue, code = 0, campTime, doctorImg,fkId,speciality } = req.body;
   const formattedCampDate = moment(campDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
 
 
@@ -367,10 +368,10 @@ exports.updatePosterDoctor = async (req, res) => {
       });
     }
   }
-  const query = 'CALL UpdateDoctor(?, ?, ?, ?, ?, ?, ?, ?)'
+  const query = 'CALL UpdateDoctor(?, ?, ?, ?, ?, ?, ?, ?,?,?)'
 
   try {
-    db.query(query, [userId, doctorId, doctorName, filename, formattedCampDate, campTime, campVenue, code], (err, result) => {
+    db.query(query, [userId, doctorId, doctorName,fkId,speciality, filename, formattedCampDate, campTime, campVenue, code], (err, result) => {
       if (err) {
         logger.error(`Error in /controller/doctor/updateDoctor: ${err.message}. SQL query: ${query}`);
 
